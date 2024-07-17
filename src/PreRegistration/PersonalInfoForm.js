@@ -23,6 +23,10 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         guardian_number: patientData.guardian_number
     });
 
+    const [contactError, setContactError] = useState('');
+    const [emailError, setEmailError] = useState('');
+
+
     const [showGuardianForm, setShowGuardianForm] = useState(false);
 
     useEffect(() => {
@@ -43,10 +47,45 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setPatientInfo(prevInfo => ({
-            ...prevInfo,
-            [name]: value
-        }));
+
+        // Allow only numbers in the contact field
+        if (name === 'patient_contact') {
+            // Regex for validating cellphone numbers
+            const cellphoneRegex = /^[0-9]{11}$/;
+
+
+                if (cellphoneRegex.test(value)) {
+                    setContactError('');
+                } else {
+                    setContactError('Please enter a valid 11-digit cellphone number.');
+                }
+
+                setPatientInfo(prevInfo => ({
+                    ...prevInfo,
+                    [name]: value
+                }));
+
+        } else if (name === 'patient_email') {
+            // Regex for validating email addresses
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (emailRegex.test(value)) {
+                setEmailError('');
+            } else {
+                setEmailError('Please enter a valid email address.');
+            }
+
+            setPatientInfo(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+
+        } else {
+            setPatientInfo(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+        }
     };
 
     const handleDateChange = (date) => {
@@ -112,11 +151,15 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
             <div className='contactEmail row'>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Email Address</Form.Label>
-                    <Form.Control type="email" name="patient_email" placeholder="Enter email" value={patientInfo.patient_email} onChange={handleChange} required />
+                    <Form.Control type="email" name="patient_email" placeholder="Enter email" value={patientInfo.patient_email} onChange={handleChange} isInvalid={!!emailError}  required />
+                    <Form.Control.Feedback type="invalid">
+                        {emailError}
+                    </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Contact Number<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_contact" placeholder="Enter contact number" value={patientInfo.patient_contact} onChange={handleChange} required />
+                    <Form.Control type="text" name="patient_contact" placeholder="09xxxxxxxxx" value={patientInfo.patient_contact} onChange={handleChange} isInvalid={!!contactError} required />
+                    <Form.Control.Feedback type="invalid">{contactError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
 

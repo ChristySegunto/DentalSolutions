@@ -260,6 +260,29 @@ const Addpatient = () => {
 
     const handleSubmit = async () => {
         if (currentStep === 5) {
+            const { data: existingUsers, error: userQueryError } = await supabase
+                .from('user')
+                .select('username')
+                .eq('username', accountInfoData.username)
+                .single();
+
+            if (userQueryError) {
+                console.error('Error checking existing username:', userQueryError.message);
+                // Handle error scenarios
+                setModalMessage("Error occurred while checking username. Please try again later.");
+                setModalHeader("Error");
+                setShowModal(true);
+                return;
+            }
+
+            if (existingUsers) {
+                // Username already exists, show modal
+                setModalMessage("Username already exists. Please choose a different username.");
+                setModalHeader("Username Exists");
+                setShowModal(true);
+                return;
+            }
+
             const userData = {
                 role: 'patient',
                 username: accountInfoData.username,

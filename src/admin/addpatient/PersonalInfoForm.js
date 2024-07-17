@@ -152,8 +152,8 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                     </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
-                    <Form.Label className="form-label-custom">Contact Number (Ex. 09xxxxxxxxx)<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_contact" placeholder="Enter contact number" value={patientInfo.patient_contact} onChange={handleChange} isInvalid={!!contactError} required />
+                    <Form.Label className="form-label-custom">Contact Number<span className="required">*</span></Form.Label>
+                    <Form.Control type="text" name="patient_contact" placeholder="09xxxxxxxxx" value={patientInfo.patient_contact} onChange={handleChange} isInvalid={!!contactError} required />
                     <Form.Control.Feedback type="invalid">{contactError}</Form.Control.Feedback>
                 </Form.Group>
             </div>

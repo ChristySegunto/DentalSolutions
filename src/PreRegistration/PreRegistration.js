@@ -273,154 +273,171 @@ const Prereg = () => {
                 setModalHeader("Password Not Matched");
                 setShowModal(true);
             } else {
-                const userData = {
-                    role: 'patient',
-                    username: accountInfoData.username,
-                    password: accountInfoData.password,
-                    email: patientData.patient_email
-                }
+                const { data: existingUsers, error: userQueryError } = await supabase
+                    .from('user')
+                    .select('username')
+                    .eq('username', accountInfoData.username)
+                    .single();
 
-                const patientDataToInsert = {
-                    patient_fname: patientData.patient_fname,
-                    patient_mname: patientData.patient_mname,
-                    patient_lname: patientData.patient_lname,
-                    patient_age: patientData.patient_age,
-                    patient_gender: patientData.patient_gender,
-                    patient_birthdate: patientData.patient_birthdate,
-                    patient_address: patientData.patient_address,
-                    patient_email: patientData.patient_email,
-                    patient_contact: patientData.patient_contact,
-                    verification_status: 'not verified',
-                    patient_branch: selectedBranch,
-                    consent_checked: consentChecked,
-                    guardian_name: patientData.guardian_name,
-                    guardian_relationship: patientData.guardian_relationship,
-                    guardian_email: patientData.guardian_email,
-                    guardian_number: patientData.guardian_number
-                }
-
-                const dentalAndMedDataToInsert = {
-                    patient_prevdentist: dentalAndMedData.patient_prevdentist,
-                    patient_lastdentalvisit: dentalAndMedData.patient_lastdentalvisit,
-                    patient_physicianname: dentalAndMedData.patient_physicianname,
-                    patient_physicianspecialty: dentalAndMedData.patient_physicianspecialty,
-                    patient_physicianaddress: dentalAndMedData.patient_physicianaddress,
-                    patient_physiciannumber: dentalAndMedData.patient_physiciannumber,
-                    isInGoodHealth: dentalAndMedData.isInGoodHealth,
-                    isInMedTreatment: dentalAndMedData.isInMedTreatment,
-                    everHadIllness: dentalAndMedData.everHadIllness,
-                    everBeenHospitalized: dentalAndMedData.everBeenHospitalized,
-                    isTakingMedication: dentalAndMedData.isTakingMedication,
-                    isUsingTobacco: dentalAndMedData.isUsingTobacco,
-                    isUsingDrugs: dentalAndMedData.isUsingDrugs,
-                    allergicToLocalAnesthetic: dentalAndMedData.allergicToLocalAnesthetic,
-                    allergicToPenicillin: dentalAndMedData.allergicToPenicillin,
-                    allergicToLatex: dentalAndMedData.allergicToLatex,
-                    allergicToSulfaDrugs: dentalAndMedData.allergicToSulfaDrugs,
-                    allergicToAspirin: dentalAndMedData.allergicToAspirin,
-                    allergicToCodeine: dentalAndMedData.allergicToCodeine,
-                    allergicToNovocain: dentalAndMedData.allergicToNovocain,
-                    illnessHeartDisease: dentalAndMedData.illnessHeartDisease,
-                    illnessAnemia: dentalAndMedData.illnessAnemia,
-                    illnessAcidReflux: dentalAndMedData.illnessAcidReflux,
-                    illnessHeartFailure: dentalAndMedData.illnessHeartFailure,
-                    illnessLeukemia: dentalAndMedData.illnessLeukemia,
-                    illnessStomachUlcer: dentalAndMedData.illnessStomachUlcer,
-                    illnessAngina: dentalAndMedData.illnessAngina,
-                    illnessHivAids: dentalAndMedData.illnessHivAids,
-                    illnessAutoimmune: dentalAndMedData.illnessAutoimmune,
-                    illnessMitralValve: dentalAndMedData.illnessMitralValve,
-                    illnessFainting: dentalAndMedData.illnessFainting,
-                    illnessThyroid: dentalAndMedData.illnessThyroid,
-                    illnessRheumatic: dentalAndMedData.illnessRheumatic,
-                    illnessLung: dentalAndMedData.illnessLung,
-                    illnessFibromyalgia: dentalAndMedData.illnessFibromyalgia,
-                    illnessCongenitalHeart: dentalAndMedData.illnessCongenitalHeart,
-                    illnessAsthma: dentalAndMedData.illnessAsthma,
-                    illnessArthritis: dentalAndMedData.illnessArthritis,
-                    illnessArtificialHeart: dentalAndMedData.illnessArtificialHeart,
-                    illnessEmphysema: dentalAndMedData.illnessEmphysema,
-                    illnessOsteoporosis: dentalAndMedData.illnessOsteoporosis,
-                    illnessHeartSurgery: dentalAndMedData.illnessHeartSurgery,
-                    illnessTuberculosis: dentalAndMedData.illnessTuberculosis,
-                    illnessPsychiatric: dentalAndMedData.illnessPsychiatric,
-                    illnessPacemaker: dentalAndMedData.illnessPacemaker,
-                    illnessCancer: dentalAndMedData.illnessCancer,
-                    illnessEpilepsy: dentalAndMedData.illnessEpilepsy,
-                    illnessHighblood: dentalAndMedData.illnessHighblood,
-                    illnessRadiation: dentalAndMedData.illnessRadiation,
-                    illnessCerebralPalsy: dentalAndMedData.illnessCerebralPalsy,
-                    illnessStroke: dentalAndMedData.illnessStroke,
-                    illnessChemotherapy: dentalAndMedData.illnessChemotherapy,
-                    illnessDiabetes: dentalAndMedData.illnessDiabetes,
-                    illnessKidney: dentalAndMedData.illnessKidney,
-                    illnessBleedingProblem: dentalAndMedData.illnessBleedingProblem,
-                    illnessLiver: dentalAndMedData.illnessLiver,
-                    illnessHemophilia: dentalAndMedData.illnessHemophilia,
-                    illnessHepatitisAb: dentalAndMedData.illnessHepatitisAb,
-                    illnessHepatitisC: dentalAndMedData.illnessHepatitisC,
-                    isPregnant: dentalAndMedData.isPregnant,
-                    isNursing: dentalAndMedData.isNursing,
-                    isTakingPills: dentalAndMedData.isTakingPills
-                }
-
-                try {
-                    const { data: userInsertData, error: userInsertError } = await supabase
-                        .from('user')
-                        .insert([userData])
-                        .select()
-                        .single();
-                        
-
-                    if (userInsertError) {
-                        throw userInsertError;
-                    }
-
-                    console.log("User data inserted:", userInsertData);
-
-                    const user_id = userInsertData.user_id;
-
-                    const { data: patientInsertData, error: patientInsertError } = await supabase
-                        .from('patient')
-                        .insert([{ ...patientDataToInsert, user_id }])
-                        .select()
-                        .single();
-
-                        if (patientInsertError) {
-                            throw patientInsertError;
-                        }
-
-                    console.log("Patient data inserted:", patientInsertData);
-
-                    const patient_id = patientInsertData.patient_id;
-
-                    const { data: dentalAndMedInsertData, error: dentalAndMedInsertError } = await supabase
-                        .from('patient_DentalAndMed')
-                        .insert([{ ...dentalAndMedDataToInsert, patient_id }])
-                        .select()
-                        .single();
-
-                        if (dentalAndMedInsertError) {
-                            throw dentalAndMedInsertError;
-                        }
-
-                        console.log("Dental and Medical data inserted:", dentalAndMedInsertData);
-
-                } catch (error) {
-                    console.error('Error inserting data:', error.message);
-                    // Handle error scenarios
-                    setModalMessage("Error occurred while submitting the form. Please try again later.");
-                    setModalHeader("Error");
+                if (existingUsers) {
+                    // Username already exists, show modal
+                    setModalMessage("Username already exists. Please choose a different username.");
+                    setModalHeader("Username Exists");
                     setShowModal(true);
+                    return;
+                } else {
+                    const userData = {
+                        role: 'patient',
+                        username: accountInfoData.username,
+                        password: accountInfoData.password,
+                        email: patientData.patient_email
+                    }
+    
+                    const patientDataToInsert = {
+                        patient_fname: patientData.patient_fname,
+                        patient_mname: patientData.patient_mname,
+                        patient_lname: patientData.patient_lname,
+                        patient_age: patientData.patient_age,
+                        patient_gender: patientData.patient_gender,
+                        patient_birthdate: patientData.patient_birthdate,
+                        patient_address: patientData.patient_address,
+                        patient_email: patientData.patient_email,
+                        patient_contact: patientData.patient_contact,
+                        verification_status: 'not verified',
+                        patient_pendingstatus: 'pending',
+                        patient_branch: selectedBranch,
+                        consent_checked: consentChecked,
+                        guardian_name: patientData.guardian_name,
+                        guardian_relationship: patientData.guardian_relationship,
+                        guardian_email: patientData.guardian_email,
+                        guardian_number: patientData.guardian_number
+                    }
+    
+                    const dentalAndMedDataToInsert = {
+                        patient_prevdentist: dentalAndMedData.patient_prevdentist,
+                        patient_lastdentalvisit: dentalAndMedData.patient_lastdentalvisit,
+                        patient_physicianname: dentalAndMedData.patient_physicianname,
+                        patient_physicianspecialty: dentalAndMedData.patient_physicianspecialty,
+                        patient_physicianaddress: dentalAndMedData.patient_physicianaddress,
+                        patient_physiciannumber: dentalAndMedData.patient_physiciannumber,
+                        isInGoodHealth: dentalAndMedData.isInGoodHealth,
+                        isInMedTreatment: dentalAndMedData.isInMedTreatment,
+                        everHadIllness: dentalAndMedData.everHadIllness,
+                        everBeenHospitalized: dentalAndMedData.everBeenHospitalized,
+                        isTakingMedication: dentalAndMedData.isTakingMedication,
+                        isUsingTobacco: dentalAndMedData.isUsingTobacco,
+                        isUsingDrugs: dentalAndMedData.isUsingDrugs,
+                        allergicToLocalAnesthetic: dentalAndMedData.allergicToLocalAnesthetic,
+                        allergicToPenicillin: dentalAndMedData.allergicToPenicillin,
+                        allergicToLatex: dentalAndMedData.allergicToLatex,
+                        allergicToSulfaDrugs: dentalAndMedData.allergicToSulfaDrugs,
+                        allergicToAspirin: dentalAndMedData.allergicToAspirin,
+                        allergicToCodeine: dentalAndMedData.allergicToCodeine,
+                        allergicToNovocain: dentalAndMedData.allergicToNovocain,
+                        illnessHeartDisease: dentalAndMedData.illnessHeartDisease,
+                        illnessAnemia: dentalAndMedData.illnessAnemia,
+                        illnessAcidReflux: dentalAndMedData.illnessAcidReflux,
+                        illnessHeartFailure: dentalAndMedData.illnessHeartFailure,
+                        illnessLeukemia: dentalAndMedData.illnessLeukemia,
+                        illnessStomachUlcer: dentalAndMedData.illnessStomachUlcer,
+                        illnessAngina: dentalAndMedData.illnessAngina,
+                        illnessHivAids: dentalAndMedData.illnessHivAids,
+                        illnessAutoimmune: dentalAndMedData.illnessAutoimmune,
+                        illnessMitralValve: dentalAndMedData.illnessMitralValve,
+                        illnessFainting: dentalAndMedData.illnessFainting,
+                        illnessThyroid: dentalAndMedData.illnessThyroid,
+                        illnessRheumatic: dentalAndMedData.illnessRheumatic,
+                        illnessLung: dentalAndMedData.illnessLung,
+                        illnessFibromyalgia: dentalAndMedData.illnessFibromyalgia,
+                        illnessCongenitalHeart: dentalAndMedData.illnessCongenitalHeart,
+                        illnessAsthma: dentalAndMedData.illnessAsthma,
+                        illnessArthritis: dentalAndMedData.illnessArthritis,
+                        illnessArtificialHeart: dentalAndMedData.illnessArtificialHeart,
+                        illnessEmphysema: dentalAndMedData.illnessEmphysema,
+                        illnessOsteoporosis: dentalAndMedData.illnessOsteoporosis,
+                        illnessHeartSurgery: dentalAndMedData.illnessHeartSurgery,
+                        illnessTuberculosis: dentalAndMedData.illnessTuberculosis,
+                        illnessPsychiatric: dentalAndMedData.illnessPsychiatric,
+                        illnessPacemaker: dentalAndMedData.illnessPacemaker,
+                        illnessCancer: dentalAndMedData.illnessCancer,
+                        illnessEpilepsy: dentalAndMedData.illnessEpilepsy,
+                        illnessHighblood: dentalAndMedData.illnessHighblood,
+                        illnessRadiation: dentalAndMedData.illnessRadiation,
+                        illnessCerebralPalsy: dentalAndMedData.illnessCerebralPalsy,
+                        illnessStroke: dentalAndMedData.illnessStroke,
+                        illnessChemotherapy: dentalAndMedData.illnessChemotherapy,
+                        illnessDiabetes: dentalAndMedData.illnessDiabetes,
+                        illnessKidney: dentalAndMedData.illnessKidney,
+                        illnessBleedingProblem: dentalAndMedData.illnessBleedingProblem,
+                        illnessLiver: dentalAndMedData.illnessLiver,
+                        illnessHemophilia: dentalAndMedData.illnessHemophilia,
+                        illnessHepatitisAb: dentalAndMedData.illnessHepatitisAb,
+                        illnessHepatitisC: dentalAndMedData.illnessHepatitisC,
+                        isPregnant: dentalAndMedData.isPregnant,
+                        isNursing: dentalAndMedData.isNursing,
+                        isTakingPills: dentalAndMedData.isTakingPills
+                    }
+    
+                    try {
+                        const { data: userInsertData, error: userInsertError } = await supabase
+                            .from('user')
+                            .insert([userData])
+                            .select()
+                            .single();
+                            
+    
+                        if (userInsertError) {
+                            throw userInsertError;
+                        }
+    
+                        console.log("User data inserted:", userInsertData);
+    
+                        const user_id = userInsertData.user_id;
+    
+                        const { data: patientInsertData, error: patientInsertError } = await supabase
+                            .from('patient')
+                            .insert([{ ...patientDataToInsert, user_id }])
+                            .select()
+                            .single();
+    
+                            if (patientInsertError) {
+                                throw patientInsertError;
+                            }
+    
+                        console.log("Patient data inserted:", patientInsertData);
+    
+                        const patient_id = patientInsertData.patient_id;
+    
+                        const { data: dentalAndMedInsertData, error: dentalAndMedInsertError } = await supabase
+                            .from('patient_DentalAndMed')
+                            .insert([{ ...dentalAndMedDataToInsert, patient_id }])
+                            .select()
+                            .single();
+    
+                            if (dentalAndMedInsertError) {
+                                throw dentalAndMedInsertError;
+                            }
+    
+                            console.log("Dental and Medical data inserted:", dentalAndMedInsertData);
+    
+                    } catch (error) {
+                        console.error('Error inserting data:', error.message);
+                        // Handle error scenarios
+                        setModalMessage("Error occurred while submitting the form. Please try again later.");
+                        setModalHeader("Error");
+                        setShowModal(true);
+                    }
+    
+    
+                    setCurrentStep(prevStep => prevStep + 1);
+                    setShowModal(false); // Close modal on successful submission
+                    console.log("Submitting form data:");
+                    console.log("Personal Info:", patientData);
+                    console.log("Dental and Med Info:", dentalAndMedData);
+                    console.log("Account Info:", accountInfoData);
                 }
 
-
-                setCurrentStep(prevStep => prevStep + 1);
-                setShowModal(false); // Close modal on successful submission
-                console.log("Submitting form data:");
-                console.log("Personal Info:", patientData);
-                console.log("Dental and Med Info:", dentalAndMedData);
-                console.log("Account Info:", accountInfoData);
+                
             }
         }
     };
