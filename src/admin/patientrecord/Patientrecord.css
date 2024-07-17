@@ -1,0 +1,643 @@
+.patientrecord-content{
+    margin-top: 30px;
+    width: 100%;
+    margin-right: 20px;
+}
+
+.patientrecord-tabs{
+    display: flex;
+    flex-direction: row;
+    margin-right: 20px;
+}
+
+.tabs-custom{
+    border: 0;
+}
+
+.tabs-custom .nav-link{
+    border: 0;
+    color: #989898;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.tabs-custom .nav-link:hover{
+    color: #005590;
+}
+
+.tabs-custom .nav-link.active{
+    background-color: #F1F9FF;
+    color: #005590;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border-bottom: 2px solid #005590;
+}
+
+
+.edit-transfer{
+    width: 100%;
+    height: 5%;
+    display: flex;
+    justify-content: end;
+}
+
+.editbtn{
+    border-radius: 8px;
+    background-color: #BFF0C1;
+    width: 20vh;
+    color: #458948;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-right: 10px;
+}
+
+.editbtn:hover{
+    background-color: #85ee88;
+    color: #458948;
+}
+
+.transferbtn{
+    border-radius: 8px;
+    background-color: #D0E8F9;
+    width: 20vh;
+    color: #025590;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-right: 10px;
+}
+
+.transferbtn:hover{
+    background-color: #85c5f3;
+    color: #025590;
+}
+
+.patientrecord-header{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    margin-bottom: 10px;
+}
+
+.patientrecord-content h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0; 
+}
+
+.backbtn{
+    background-color: #F1F9FF;
+    color: #005590;
+}
+
+.nav{
+    width: 95%;
+}
+
+.custom-nav{
+    border: 0;
+    margin-bottom: 20px;
+}
+
+.patientrecord-custombtn{
+    border: 0 !important;
+    background-color: none;
+    color: #005590 !important;
+}
+
+.patientrecord-custombtn.active{
+    border: 0;
+    background-color: #F1F9FF !important;
+    border-bottom: 2px solid #005590 !important; /* Adjust color as needed */
+}
+
+
+.personalinfo-container{
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    margin-left: 3px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    box-shadow: 0px 0px 50px 0px rgba(124, 88, 88, 0.06);
+}
+
+.personalinfo-col{
+    margin-left: 20px;
+}
+
+.name-branch{
+    display: flex;
+    align-items: center;
+    justify-content: space-between !important;
+}
+
+
+.branch-label p{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    margin: 0;
+    background-color: #F6F6F6;
+    padding: 5px;
+    width: 200px;
+    border-radius: 5px;
+    color: #025590;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.fullname h4{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin: 0;
+}
+
+.bold{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.agegenderbday p{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin: 0;
+}
+
+.numemailadd p{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin: 0;
+}
+
+.dentalhistoryinfo{
+    background-color: #fff;
+    border-radius: 10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+
+.dentalhistoryinfo h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border-bottom: 1px solid #E6F1F8;
+    margin-bottom: 20px;
+    
+}
+
+.form-control{
+    border-radius: 10px;
+    background: #F6F6F6 !important;
+    border: 0;
+}
+
+.medhistoryinfo{
+    background-color: #fff;
+    border-radius: 10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-bottom: 100px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+.medhistoryinfo h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border-bottom: 1px solid #E6F1F8;
+    margin-bottom: 20px;
+}
+
+.green-radio {
+    background-color: green;
+    border: 1px solid #ccc; /* Example border style */
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.red-radio {
+    background-color: red;
+    border: 1px solid #ccc; /* Example border style */
+    width: 20px !important;
+    height: 20px !important;
+}
+
+
+
+.healthstatusline{
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.radio{
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc; /* Border style for radio buttons */
+    margin-right: 10px; /* Adjust spacing between radio button and text */
+    border-radius: 50%;
+}
+
+.healthstatusline p{
+    display: flex;
+    align-items: center;
+    color: #005590;
+    font-family: Poppins;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 0;
+    margin-right: 20px !important;
+}
+
+.question{
+    display: flex;
+    align-items: center;
+}
+
+.form-label-custom{
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.yes-no{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.checkbox{
+    min-width: 20px;
+    min-height: 20px;
+    border: 1px solid #ccc; /* Border style for radio buttons */
+    margin-right: 10px; /* Adjust spacing between radio button and text */
+    border-radius: 5px;
+}
+
+.green-checkbox {
+    background-color: green;
+    border: 1px solid #ccc; /* Example border style */
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.form-input-custom::placeholder{
+    color: #737373;
+    font-family: Poppins;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.adminname{
+    margin-left: 10px;
+}
+
+.form-branch-custom{
+    background-color: #F6F6F6;
+    border: 0;
+    color: #4e4e4e;
+}
+
+
+.form-name-custom{
+    background-color: #F6F6F6 !important;
+    border: 0;
+}
+
+.form-name-custom::placeholder{
+    color: #4e4e4e !important;
+}
+
+
+.treatmentsection h3{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.export-addtreatment{
+    height: 40px;
+    display: flex;
+    justify-content: end;
+}
+
+.addtreatmentbtn{
+    border-radius: 8px;
+    background-color: #BFF0C1;
+    width: 20vh;
+    color: #458948;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-right: 10px;
+}
+
+.addtreatmentbtn:hover{
+    background-color: #85ee88;
+    color: #458948;
+}
+
+
+.exportbtn.dropdown-toggle{
+    border-radius: 8px;
+    background-color: #D0E8F9;
+    width: 20vh;
+    color: #025590;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-right: 10px;
+}
+
+.exportbtn:hover{
+    background-color: #85c5f3;
+    color: #025590;
+}
+
+.custom-table{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.treatment-header{
+    display: flex;
+    align-items: center;
+}
+
+.custom-table-head tr{
+    border: 0 !important;
+}
+.custom-table-head th{
+    border: 0 !important;
+    background-color: #F1F9FF;
+    color: #005590;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.dentalchart-container{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 50px;
+    padding-left: 50px;
+    background-color: #fff;
+    width: 98%;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.dentalchartsection h3{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.top-left{
+    display: flex;
+    flex-direction: row;
+    border: 1px solid;
+}
+
+.tooth-18{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tooth-18:hover{
+    background-color: #E3E3E3;
+}
+
+
+
+.tooth-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+
+.top-right{
+    display: flex;
+    flex-direction: row;
+    border: 1px solid;
+}
+
+.addprocedurebtn{
+    border-radius: 8px;
+    background-color: #BFF0C1;
+    width: 20vh;
+    color: #458948;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-right: 10px;
+}
+
+.addprocedurebtn:hover{
+    background-color: #85ee88;
+    color: #458948;
+}
+
+.ortho-table table{
+    border: 0;
+    border-collapse: separate;
+    border-spacing:0px 10px;
+}
+
+
+.ortho-table td{
+    background-color: #fff;
+    color: #005590;
+    font-size: 13px;
+    border: 0;
+}
+
+
+
+.ortho-table .ortho-table-tr{
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+    height: 50px;
+}
+
+
+.ortho-table-tr td:first-child,
+th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.ortho-table-tr td:last-child,
+th:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.custom-actions{
+    background-color: transparent;
+    color: #D5D5D5;
+    border: 0;
+}
+
+.custom-actions:hover{
+    background-color: transparent;
+    color: #8e8e8e;
+    border: 0;
+}
+
+
+
+.avatar-col {
+    display: flex;
+    align-items: center;
+}
+
+.avatar-col img{
+    width: 100%;
+}
+
+
+.custom-modal-cancelbtn{
+    background-color: transparent;
+    color: #005590;
+    border: 1px solid #005590;
+}
+
+.custom-modal-cancelbtn:hover{
+    background-color: #005590;
+    color: #fff;
+}
+
+.custom-modal-title, .custom-modal-body{
+    color: #005590;
+}
+
+.custom-modal-deletebtn{
+    border-color: #005590;
+    background-color: #005590;
+}
+
+.custom-modal-deletebtn:hover{
+    background-color: #013860;
+}
+
+.custom-footer-center{
+    display: flex;
+    justify-content: center;
+}
+
+.no-records-message {
+    margin-top: 30px; /* Adjust the margin as needed */
+    margin-bottom: 30px; /* Adjust the margin as needed */
+    font-style: italic; /* Example of additional styling */
+    color: #999; /* Example of additional styling */
+}
+
+.no-records-message-container{
+    border-radius: 10px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+
+.ortho-status {   
+    font-size: 18px;
+    width: 15vh;
+    height: 35px;
+}
+
+.on-going {
+    border-radius: 10px;
+    /* background-color: #D0E8F9;
+    color: #025590; */
+    background-color: rgba(230, 92, 79, 0.4);
+    color: #FF4E4E;
+    
+    align-items: center;
+    margin-left: 10px;
+    display: flex; 
+    justify-content: center;
+}
+
+.completed {
+    border-radius: 20px;
+    background-color: #BFF0C1;
+    color: #458948;
+    align-items: center;
+    margin-left: 10px;
+    display: flex; 
+    justify-content: center; 
+}

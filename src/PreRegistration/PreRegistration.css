@@ -1,0 +1,402 @@
+.preregisterform {
+    height: 100vh;
+    background-color: #F1F9FF;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    overflow: auto;
+}
+
+.step-container {
+    width: 80%;
+    min-width: 600px;
+    margin: auto;
+}
+
+.step {
+    display: flex;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 20px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #005590;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.step-title {
+    color: #ACAAAA;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.step-circle {
+    background-color: #ACAAAA;
+    color: white;
+    border-color: #ACAAAA;
+}
+
+.step-item.active .step-circle {
+    background-color: #005590;
+    color: white;
+    border-color: #005590;
+}
+
+.step-item.active .step-contenttitle {
+    color: #005590;
+}
+
+.step-contenttitle {
+    color: #ACAAAA;
+}
+
+.step-content {
+    display: flex;
+    justify-content: center;
+}
+
+.step1 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+}
+
+.chooseBranch-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 20px;
+    padding-left: 50px;
+    border-radius: 10px;
+    width: 100%;
+    height: 10vh;
+    margin-bottom: 20px;
+}
+
+.custom-label {
+    color: #005590;
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin: 0; /* Remove default margin */
+}
+
+.custom-dropdown-toggle {
+    background-color: #005590 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.375rem 0.75rem !important;
+    transition: background-color 0.3s !important;
+    margin-right: 50px;
+    width: 200px;
+}
+
+.custom-dropdown-toggle:hover,
+.custom-dropdown-toggle:focus,
+.custom-dropdown-toggle:active {
+    background-color: #003f6d !important;
+    color: white !important;
+}
+
+.consentForm{
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.consentForm h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+.consentForm h3{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.consentForm p{
+    color: #005590;
+    margin-left: 50px;
+}
+
+.divider{
+    border-bottom: 1px solid #E6F1F8;
+    margin-bottom: 20px;
+}
+
+.patientconsent{
+    display: flex;
+    align-items: center;
+}
+
+.consentcheckbox{
+    width: 60px;
+    height: 60px;
+    transition: background-color 0.3s, border-color 0.3s; /* Transition effects */
+}
+
+.consentcheckbox:checked {
+    background-color: #005590; /* Checked background color */
+    border-color: #005590; /* Checked border color */
+}
+
+.patientconstenttext{
+    margin-bottom: 0;
+}
+.btn1{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.nextbtn{
+    background-color: #003f6d !important;
+    border: 0 !important;
+    width: 15%;
+    display: block; /* Ensure it respects margin:auto */
+}
+
+.prevbtn{
+    border: 0 important;
+    width: 15%;
+    display: block; /* Ensure it respects margin:auto */
+}
+
+.btns{
+    display: flex;
+    justify-content: space-between;
+}
+
+
+/* PERSONAL INFORMATION FORM SECTION */
+.step2 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.personalinfo-form {
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.personalinfo-form h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.react-datepicker-wrapper{
+    width: 100%;
+}
+
+.header-guardian{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.form-label-custom{
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+}
+
+
+.required {
+    color: red;
+    margin-left: 5px; /* Adjust margin as needed for spacing */
+}
+
+
+/* FOR DENTAL AND MED FORM SECTION */
+.step3 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.dentalhistoryform{
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.dentalhistoryform h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+
+.medhistoryform{
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.medhistoryform h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.custom-radio-spacing .form-check {
+    margin-right: 20px; /* Adjust the value as needed */
+    
+}
+
+.form-check-input:checked {
+    background-color: #005590 !important;
+    border-color: #005590 !important; 
+}
+
+.form-check-label{
+    color: #005590 !important;
+}
+
+.womanForm{
+    overflow: hidden;
+}
+
+.step4 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.accountinfo{
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.account{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.accountinfo h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.step5 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
+.scanface {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 100px;
+}
+
+.scanface h2{
+    color: #005590;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+
+
+.scanface p{
+    color: #005590;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.loginpagebtn{
+    background-color: #005590;
+    color: #fff;
+    height: auto;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 0;
+    border-radius: 8px;
+}

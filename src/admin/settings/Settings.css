@@ -1,0 +1,127 @@
+
+
+.settings-box{
+    margin-top: 10px;
+    width: 100%;
+}
+
+.settings-box h1{
+    margin-top: 20px;
+    width: 100%;
+    color: #005590;
+}
+
+.card{
+    width: 90%;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+    border-radius: 15px;
+    border: 0;
+}
+
+
+
+.card-header{
+    background-color: #005590;
+    color: #FFF;
+    font-family: 'Poppins';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.card-body h3{
+    color: #005590;
+}
+
+.fullname{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.role{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-top: -20px;
+}
+
+.branch{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 23px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+
+
+.email-container{
+    display: flex;
+    align-items: center;
+    
+}
+
+.custom-formcontrol{
+    width: 50%;
+    margin-right: 20px;
+}
+
+.email-change-link{
+    color: #005590;
+}
+
+.custom-modaltitle{
+    font-weight: 600;
+    font-size: 25px;
+    color: #005590;
+    font-family: 'Poppins';
+}
+
+.custom-modalbody{
+    color: #005590;
+    text-align: center;
+    font-size: 18px;
+}
+
+.custom-lblemail {
+    font-size: 16px;
+}
+
+.custom-modalbutton{
+    background-color: #005590;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-modalfooter{
+    border-top: none;
+}
+
+.custom-modalheader{
+    border-bottom: none;
+}
+
+.custom-modalfooter button{
+    background-color: #005590;
+    border: 0;
+}
+
+.password-container{
+    display: flex;
+    align-items: center;
+    
+}
+
+.password-change-link{
+    color: #005590;
+}

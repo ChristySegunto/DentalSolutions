@@ -1,0 +1,380 @@
+
+.dashboard {
+    margin-top: 50px; 
+    width: 98%;
+}
+
+
+.dashboard-container {
+    justify-content: flex-start;
+    flex-direction: row;
+    background-color: #F1F9FF;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px;
+    margin-top: 10px;
+    height: fit-content;
+}
+
+
+.header-container {
+    display: flex;
+    top: 0;
+    flex: 1;
+    width: 70%;
+    padding: 0 10px;
+    text-align: center;
+}
+
+.header-container h1 {
+    font-weight: 700;
+    color: #005590;
+    margin-right: 20px;
+}
+
+.header-container h3 {
+    font-size: 2.0em;
+    font-weight: 500;
+    color: #005590;
+    
+}
+
+
+.currentdate {
+    margin-right: 50px;
+    flex: 1; 
+    display: flex;
+    justify-content: flex-end;
+
+}
+.currentdate h3 {
+    font-size: 2.0em;
+    font-weight: 500;
+    color: #005590;
+}
+
+
+.dropdownbranch {
+    background-color: #005590 !important;
+    font-size: 16px;
+    color: white !important;
+    border-radius: 10px;
+    cursor: pointer;
+    min-width: 150px;
+    max-width: 300px;
+    transition: 0.3s ease;
+    border: none;
+    margin-left: 10px;
+}
+
+.dropdownbranch:hover,
+.dropdownbranch:active,
+.dropdownbranch:focus {
+    background-color: #012244;
+    color: white;
+}
+
+.dropdownbutton-menu {
+    background-color: #ffffff;
+    border: 1px solid #005590 !important;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dropdownbutton-item:hover {
+    background-color:  #00468b5b !important;
+}
+
+
+.profile-container {
+    display: flex;
+    width: 100%;
+    margin-right: -25px;
+    
+}
+
+.myprofile-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 100%;
+    height: 90%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;    
+}
+
+.myprofilecard-header {
+    background-color: #005590;
+    border-radius: 15px;
+    font-family: 'Poppins';
+    width: 100%;
+    font-size: 18px;
+    font-weight: 400;
+    padding: 10px;
+    
+}
+
+.myprofile-link {
+    display: flex;
+    justify-content: space-between;
+    text-decoration: none;
+    color: #FFF;
+    
+}
+
+.profile-card-body {
+    padding: 10px;
+    width: 300px;
+    height: 80%;
+    
+}
+
+.myprofile-fulln {
+    color: #005590;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+.myprofile-role {
+    color: #005590;
+    font-size: 20px;
+    font-weight: 400;
+    margin-top: -10px;
+}
+
+.myprofile-branch {
+    color: #005590;
+    font-size: 23px;
+    font-weight: 600;
+    margin-top: -5px;
+    margin-bottom: 0px;
+}
+
+.content-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    
+
+}
+.summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0px;
+    margin-top: -60px;
+    
+}
+.summary-cards-row {
+    padding-left: 0px;
+    align-items: flex-end;
+    width: 100%;
+}
+.cards {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 95%;
+    height: 95%;
+    text-align: left;
+    margin: 5px;
+    padding-left: 20px;
+}
+
+
+
+.cards h2, .cards h3 {
+    font-size: 1.05em;
+    font-weight: 600;
+    color: #005590;
+}
+
+.cards h1 {
+    margin-top: 5px;
+    font-size: 2.5em;
+    font-weight: 600;
+    color: #005590;
+}
+
+.cards h4 {
+    font-size: 1.0em;
+    margin-top: 5px;
+    color: #005590;
+}
+
+.treatment-report {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 100%;
+    justify-content: center;
+
+}
+
+.daily-treatment-report, .monthly-treatment-report {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 96%;
+    height: 250px;
+    padding: 10px;
+    margin-top: 5px;
+    
+}
+
+.daily-treatment-report h1, .monthly-treatment-report h1 {
+    font-size: 1.05em;
+    font-weight: 600;
+    padding: 10px;
+    color: #005590;
+}
+
+.cases-status-report {
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
+    
+    
+}
+
+.ortho-cases, .patient-status {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 96%;
+    height: 96%;
+    padding: 15px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.ortho-cases h1, .patient-status h1 {
+    font-size: 1.05em;
+    font-weight: 600;
+    color: #005590;
+    padding: 10px;
+}
+
+.ortho-cases-counter h3 {
+    font-size: 1.05em;
+    font-weight: 400;
+    color: #005590;
+}
+
+
+.ortho-cases-counter {
+    padding-left: 20px;
+    padding-top: 7px;
+
+}
+
+.ortho-cases-counter .newcases {
+   border-left: 5px solid #68C66C;
+   font-size: 2.0em;
+    font-weight: 500;
+    padding-left: 10px;
+    color: #005590;
+    
+}
+
+.ortho-cases-counter .unfinishedcases {
+    border-left: 5px solid #FF4E4E;
+    font-size: 2.0em;
+    font-weight: 500;
+    padding-left: 10px;
+    color: #005590;
+}
+
+.ortho-cases-counter .finishedcases {
+    border-left: 5px solid #0C7FD1;
+    font-size: 2.0em;
+    font-weight: 500;
+    padding-left: 10px;
+    color: #005590;
+}
+
+.ortho-cases-counter .totalcases {
+    border-left: 5px solid #7B43F3;
+    font-size: 2.0em;
+    font-weight: 500;
+    padding-left: 10px;
+    color: #005590;
+}
+
+.recent-patients {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 98%;
+    height: auto;
+    padding: 15px;
+    margin: 10px;
+    margin-left: 0px;
+}
+.recent-patients h1 {
+    font-size: 1.05em;
+    font-weight: 600;
+    margin: 10px;
+    color: #005590;
+}
+.recent-patients-table {
+    width: 98%;
+    border-collapse: collapse;
+    color: #005590;
+    margin-left: 5px;
+}
+
+.recent-patients-table thead th {
+    color: #005590;
+}
+
+.recent-patients-table tbody tr td {
+    color: #005590;
+}
+
+
+@media (max-width: 768px) {
+    .currentdate {
+        margin-left: 10px;
+        width: 100%;
+        font-size: 12px; 
+    }
+
+    .currentdate  {
+        font-size: 12px; 
+
+    }
+    .cards {
+        width: 100%;
+        height: 95%;
+        padding-left: 10px;
+        margin-top: 10px;
+    }
+
+
+    .cards h2 {
+        font-size: 15px;
+      
+    }
+    .cards h3 {
+        font-size: 13px;
+    }
+    .cards h1 {
+        font-size: 20px;
+    }
+    
+    .cards h4 {
+        font-size: 15px;
+    }
+
+}

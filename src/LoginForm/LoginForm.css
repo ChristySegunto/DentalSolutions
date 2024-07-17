@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+.login{
+    background-color: #F1F9FF;
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../img/waves.png'); /* Path to waves image */
+    background-size: cover; /* Ensures the image covers the entire container */
+    background-position: 50% calc(100% + 300px); /* Positions the image 50% horizontally and 200px from the top */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /* Keeps the background image fixed on scroll */
+    height: 100vh; /* Sets the height to 80% of the viewport height */
+    width: 100vw; /* Ensures the width fills the viewport */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.box-container {
+    width: 70%;
+    min-width: 340px;
+    max-width: 500px;
+    height: 573px;
+    background-color: #ffffff; /* Set the background color */
+    border-radius: 15px;
+    box-shadow: 0px 4px 50px 0px rgba(0, 0, 0, 0.09);
+    margin: auto; /* Center horizontally */
+
+}
+
+.box{
+    border-radius: 15px;
+}
+
+.title{
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: center; /* Center children horizontally */
+    align-items: center; /* Center children vertically */
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.dentalsolutions{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 45px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    background-color: white;
+    margin-bottom: -17px;
+}
+
+
+.clinic{
+    color: #005590; 
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 3px;
+    background-color: white;
+}
+
+
+.loginform{
+    background-color: white; /* Change to your desired background color */
+    padding: 40px;
+    border-radius: 20px;
+}
+.form-group {
+    padding-top: 20px;
+    background-color: white; /* Change to your desired background color */
+}
+
+.form-label {
+    background-color: white; /* Change to your desired background color */
+    font-size: larger;
+    color: #005590;
+}
+
+.form-control{
+    border-radius: 10px;
+    border: 0.5px solid 91A6B5;
+}
+.loginbtnposition{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.loginbtn{
+    background-color: #005590 !important;
+    width: 50% !important;
+    height: auto !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    border-radius: 10px !important;
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
+    border: 0px !important;
+}
+
+.loginbtn:hover{
+    background-color: #327baf;
+}
+
+.prereg{
+    background-color: white;
+    color: #005590;
+    text-decoration: underline;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+
+}
+
+
+@media screen and (max-width: 654px) {
+    .dentalsolutions{
+        font-size: 30px;
+        margin-bottom: -10px;
+    }
+
+    .clinic{
+        font-size: 20px;
+    }
+
+    .loginbtn{
+        background-color: #005590;
+        width: 150px;
+        height: 40px;
+    }
+}

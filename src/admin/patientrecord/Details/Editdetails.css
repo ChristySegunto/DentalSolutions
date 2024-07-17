@@ -1,0 +1,115 @@
+.editdetails-content{
+    margin-top: 30px;
+    width: 100%;
+}
+
+.editdetails-header{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    margin-bottom: 10px;
+}
+
+.editdetails-header h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0; 
+}
+
+.personalinfo-box {
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+    width: 98%;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+.personalinfo-box h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.genderform{
+    background-color: #F6F6F6 !important;
+    border: 0;
+}
+
+
+.editguardiantitle{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+}
+
+.dentalhistory-box {
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+    width: 98%;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+.dentalhistory-box h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.medhistory-box {
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+    width: 98%;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+.medhistory-box h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.savechangesbtn{
+    background-color: #005590;
+    border: 0;
+}
+
+.savechangesbtn:hover{
+    background-color: #004678;
+}

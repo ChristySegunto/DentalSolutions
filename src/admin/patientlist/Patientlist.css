@@ -1,0 +1,456 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+.patientlist-box{
+
+    margin-top: 30px;
+    margin-bottom: 20px;
+    width: 98%;
+}
+
+.patientlist-header {
+    display: flex;
+    margin-top: 20px;
+    flex-direction: row;
+    width: 98%;
+}
+
+.patientlist-header h1{
+    font-size: 40px;
+    font-weight: 600;
+    color: #005590;
+    margin: 0;
+    margin-right: 50px;
+
+}
+
+.dropdownbranch {
+    background-color: #005590 !important;
+    font-size: 16px;
+    color: white !important;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border: none;
+    padding: 10px 20px; 
+    width: 100%; 
+    margin: 0;
+}
+
+
+.dropdownbranchmain:hover, 
+.dropdownbranch:hover, 
+.dropdownbranch:active, 
+.dropdownbranch:focus {
+    background-color: #012d58;
+    color: white;
+}
+
+.dropdownbranch-menu {
+    background-color: #ffffff !important; 
+    border: 1px solid #005590 !important; 
+    border-radius: 10px; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.dropdownbranch-item{
+    width: 100%;
+}
+
+.dropdownbtn-item:hover {
+    background-color: #00468b5b !important; 
+}
+
+.patientlist-container {
+    width: 98%;
+    height: 85%;
+    background-color: #ffffff; 
+    border-radius: 15px;
+    box-shadow: 0px 4px 50px 0px rgba(0, 0, 0, 0.09);
+    margin-top: 20px;
+}
+
+
+
+.navbar-patientlist-tabs {
+    border: 0 !important;
+    background-color: none;
+    color: #005590 !important;
+    font-size: 18px;
+    padding: 30px;
+    padding-right: 0;
+
+    display: flex;
+    flex-direction: row;
+}
+    
+
+.navbar-patientlist-tabs .nav-link-custom {
+    color: #989898; 
+    padding: 10px 15px; 
+    border: none; 
+    background-color: transparent; 
+    transition: all 0.3s ease; 
+    
+  }
+  
+  .navbar-patientlist-tabs .nav-link-custom.active,
+  .navbar-patientlist-tabs .nav-link-custom:hover {
+    color: #005590; 
+    border-bottom: 2px solid #005590; 
+  }
+
+.title-buttons {
+    display: flex;         
+    justify-content: flex-end; 
+    flex-wrap: wrap; 
+    gap: 15px; 
+    top: -10px;
+    margin-top: 5px;
+}
+
+.addpatientbutton {
+    border-radius: 8px;
+    background-color: #BFF0C1;
+    color: #458948;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5px;
+    margin-right: 5px;
+    border:none;
+    text-decoration:none;
+    width: 25vh;  
+    height: 50px;  
+    
+}
+
+.addpatientbutton:hover {
+    background-color: #85ee88;
+    color: #458948;
+}
+
+.exportbutton {
+    border-radius: 8px;
+    background-color: #D0E8F9 !important;
+    width: 25vh;  
+    height: 50px; 
+    color: #025590 !important;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-right: 10px;
+    border: none;
+}
+
+
+.exportbutton:hover {
+    background-color: #85c5f3 !important;
+    color: #025590 !important;
+}
+
+.searchbutton {
+    background-color: transparent;
+    font-size: 16px;
+    color: #005590;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border: 1px solid #005590;
+    padding: 7px 15px; 
+}
+.searchbutton:hover, .searchbutton:focus {
+    background-color: #005590;
+    color: #ffffff;
+}
+
+.search-input {
+    width: 30%;
+    margin-left: 35px;
+    padding-left: 20px;
+  }
+
+
+.allpatients-container, .transferees-container, .pending-container {
+    margin-top: 20px; 
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 97%; 
+}
+
+.all-patients-table, .transferees-table, .pending-table{
+    margin-top: 30px;
+    margin-left: 20px;
+    width: 97%; 
+}
+.all-patients-table .actionsth, .transferees-table .actionsth, .pending-table .actionsth {
+    padding-left: 50px;
+    
+}
+.all-patients-table thead th, .transferees-table thead th, .pending-table thead th {
+    font-weight: 500;
+    color: #005590;
+}
+
+.all-patients-table tbody tr td, .transferees-table tbody tr td, .pending-table tbody tr td {
+    color: #005590;
+}
+
+.all-patients-table .allpatients-actionbuttons {
+    background: none;
+    border: none;  
+    color: #949494;  
+
+}
+
+.allpatients-actionbuttons:hover {
+    color: #005590;
+}
+
+.allpatients-actionbuttons .icon {
+    font-size: 1.2em;
+    margin-right: 5px; 
+    
+}
+.acceptbtn, .reviewbtn {
+    background: none;
+    border: none; 
+    color: #43A547;
+    margin-left: 30px;
+    text-decoration: none;
+}
+
+.acceptbtn:hover, .reviewbtn:hover {
+    background: none;
+    border: none; 
+    text-decoration: underline; 
+    color: #5cb85c; 
+}
+
+.acceptbtn:active, .reviewbtn:active {
+    opacity: 0.8; 
+}
+
+.declinebtn {
+    background: none;
+    border: none; 
+    color: #FF4E4E;
+    margin-left: 30px;
+    text-decoration: none;
+    padding-bottom: 0px;
+}
+
+.decline:hover {
+    background: none;
+    border: none; 
+    text-decoration: underline; 
+    color: #be2e2e; 
+}
+
+.decline:focus, .decline:active {
+    opacity: 0.8;
+
+}
+
+.pagination-container {
+    margin-top: 15px;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    background-color: transparent;
+    justify-content: flex-end;
+}
+  
+  .pagination-container .page-link {
+    color: #005590; 
+    border: none; 
+    cursor: pointer; 
+    border-radius: 40px;
+  }
+  
+  .pagination-container .page-item.active .page-link {
+    background-color: #005590; 
+    border-color: #005590; 
+    color: #ffffff;
+  }
+  
+  .pagination-container .page-link:hover {
+    text-decoration: none; 
+    background-color: #e9e9e9;
+    border-radius: 40px;
+  }
+
+  .custom-modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.2); 
+}
+.deletemodal .modal-content, .reasonmodal .modal-content, .successmodal .modal-content, 
+.acceptmodal .modal-content, .declinereasonmodal .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.plmodal-header  {
+    border-bottom: none !important;
+    align-items: center;
+    position: relative;
+
+}
+
+.plmodal-title {
+    font-weight: 600;
+    font-size: 25px;
+    text-align: center;
+    color: #005590;
+    margin-left: 120px;
+    
+}
+
+.reasonmodal-title {
+    font-weight: 600 !important;
+    font-size: 25px;
+    text-align: center;
+    color: #005590;
+    margin-left: 50px;
+    margin-top: 10px;
+}
+
+.declinereasonmodal-title {
+    font-weight: 600 !important;
+    font-size: 25px;
+    text-align: center;
+    color: #005590;
+    margin-left: 30px;
+    margin-top: 10px;
+}
+
+.plmodal-body {
+    color: #005590;
+    text-align: center;
+    margin-top: -10px;
+    font-size: 18px;
+}
+.reasonmodal-body {
+    color: #005590;
+    text-align: center;
+    font-size: 15px;
+}
+
+.plmodal-footer {
+    border-top: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.deletebtn-modal, .acceptbtn-modal, .declinebtn-modal {
+    background-color: #005590;
+    font-size: 16px;
+    color: #ffffff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border: 1px solid #005590;
+    padding: 7px 15px; 
+}
+
+.closebtn-modal {
+    background-color: transparent;
+    font-size: 16px;
+    color: #005590;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border: 1px solid #005590;
+    padding: 7px 15px; 
+    
+}
+
+
+@media (max-width: 768px) {
+    .patientlist-box{
+        margin-top: 20px;
+        margin-bottom: 20px;
+        width: 80%;
+    }
+
+    .patientlist-header h1 {
+        font-size: 1.5em;
+    }
+    .dropdownbranch {
+        font-size: 12px;
+        width: 80%; 
+
+    
+    }
+    .navbar-patientlist-tabs {
+        font-size: 16px;
+        padding: 15px;
+        display: flex;
+        flex-direction: row;
+    }
+    .title-buttons {
+        display: flex;         
+        gap: 10px; 
+        top: -10px;
+        flex-direction: row;
+        justify-content: end;
+        margin-top: 5px;
+    }
+    
+    .addpatientbutton {
+        width: 150px;  
+        height: 50px; 
+        font-size: 16px;  
+    }
+    
+    .exportbutton {
+        width: 150px;  
+        height: 50px; 
+        font-size: 16px; 
+    }
+    
+    .allpatients-container, .transferees-container, .pending-container {
+        margin-top: 20px; 
+        margin-left: 10px;
+        margin-right: 20px;
+        overflow-x: auto;
+        
+    }
+    .all-patients-table, .transferees-table, .pending-table{
+        margin-top: 30px;
+        font-size: 12px; 
+        margin-left: 10px;
+        margin-right: 20px; 
+    }
+
+    .patientlist-container {
+        height: 85%;
+        background-color: #ffffff; 
+        border-radius: 15px;
+        box-shadow: 0px 4px 50px 0px rgba(0, 0, 0, 0.09);
+        margin-top: 20px;
+    }
+
+    .allpatients-actionbuttons .icon {
+        font-size: 1em;
+        margin-right: 5px; 
+    }
+
+    .acceptbtn, .reviewbtn {
+        font-size: 12px; 
+    
+    }
+    .declinebtn {
+        font-size: 12px; 
+    }
+}

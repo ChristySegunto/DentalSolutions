@@ -1,0 +1,31 @@
+
+.viewprocedure-box{
+    margin-top: 30px;
+    width: 100%;
+    margin-right: 10px;
+}
+
+.toothbtn.disabled{
+    background-color: transparent;
+    color: #6c757d;
+}
+
+.patientrecord-header h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0; 
+}
+
+.customize-viewproceduretitle{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0; 
+}

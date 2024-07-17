@@ -1,0 +1,62 @@
+.reviewpatient-content{
+    margin-top: 30px;
+    width: 100%;
+}
+
+.reviewpatient-header{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    margin-bottom: 10px;
+}
+
+.reviewpatient-content h1{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0; 
+}
+
+.reviewpatient-content h3{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0; 
+}
+
+
+.backbtn{
+    background-color: #F1F9FF;
+    color: #005590;
+}
+
+.patientlist-nav{
+    border: 0;
+    margin-bottom: 20px;
+}
+
+.scanfacebtn{
+    border-radius: 8px;
+    background-color: #BFF0C1;
+    width: 20vh;
+    color: #458948;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-left: auto;
+    margin-right: 50px;
+}
+
+.scanfacebtn:hover{
+    background-color: #85ee88;
+    color: #458948;
+}

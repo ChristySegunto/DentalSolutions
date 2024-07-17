@@ -1,0 +1,139 @@
+.verifypatientform {
+    margin-top: 30px;
+    background-color: #F1F9FF;
+    width: 90%;
+   
+}
+.verifypatient-header H3{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.scan-container {
+    min-width: 600px;
+    margin: auto;
+}
+
+.scanface-form{
+    background-color: #fff;
+    border-radius: 10px;
+    padding-top: 30px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 30px;
+    box-shadow: 0px 0px 0px 0px rgba(0, 0.06, 0, 0.06);
+}
+
+
+.scanface-form h4{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px; /* Adjust margin for spacing */
+    border-bottom: 1px solid #E6F1F8; /* Add a solid border with desired color */
+    padding-bottom: 10px;
+}
+
+.scanface-form h5{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+
+.image-container {
+    width: 100%;
+    text-align: center;
+}
+
+.image-box {
+    width: 100%;
+    max-width: 400px; /* Adjust width as needed */
+    margin: 0 auto; /* Center the image-box */
+    border: 1px solid #ccc;
+    overflow: hidden; /* Ensure the video feed doesn't overflow */
+    position: relative; /* Ensure the video is positioned correctly */
+}
+
+.camera-feed {
+    width: 100%;
+    height: auto;
+}
+
+
+/* Adjustments for .scan-container and .scanbtn */
+.scan-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 10vh; /* Example: Adjusted to viewport height */
+    width: 80%; /* Adjusted width to percentage */
+    background: #c5e7ff;
+    border-radius: 10px;
+    margin-top: 2vh; /* Adjusted to relative unit */
+    padding: 1vh 2vw; /* Adjusted padding to relative units */
+}
+
+.scanbtn-div{
+    border-radius: 10px;
+    margin: 2vh 2vw; /* Adjusted margins to relative units */
+    border: none;
+    display: flex;
+    justify-content: center;
+
+    
+}
+
+.viewbtn{
+    background-color: #eae2e2;
+    color: #003c67;
+}
+
+
+.resetbtn {
+    background-color: #eae2e2;
+    color: #003c67;
+}
+
+
+.scanbtn:hover {
+    background-color: #032a46;
+}
+
+.resetbtn:hover {
+    background-color: #003c67;
+}
+
+
+.scanbtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   
+}
+
+.loader {
+    border: 10px solid #f3f3f3;
+    border-top: 10px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
