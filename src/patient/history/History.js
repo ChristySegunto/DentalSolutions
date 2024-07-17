@@ -345,7 +345,7 @@ const History = () => {
         <>
             <div className="patientrecord-patient-content container-fluid">
                 <div className="record-header mb-2">
-                    <h2>History Page</h2>
+                    <h2>HISTORY</h2>
                 </div>
 
                 <div className="personalinfo-patient-container row">

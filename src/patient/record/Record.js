@@ -326,7 +326,7 @@ const Record = () => {
         <>
         <div className="patientrecord-patient-content container-fluid">
             <div className="record-header mb-2">
-                <h2>Patient Record</h2>
+                <h2>PATIENT RECORD</h2>
             </div>
 
             <div className="personalinfo-patient-container row">
