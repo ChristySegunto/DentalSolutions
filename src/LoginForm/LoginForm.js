@@ -8,9 +8,12 @@ import { useAuth } from '../settings/AuthContext.js';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
+import { Modal } from 'react-bootstrap';
+
 
 //Firebase
 import supabase from './../settings/supabase';
+import { ModalBody } from "react-bootstrap";
 
 
 const LoginForm = () => {
@@ -21,7 +24,12 @@ const LoginForm = () => {
     const maxAttempts = 5; // Maximum allowed login attempts
     const { login } = useAuth();
     const navigate = useNavigate();
+    const [showModal, setShowModal] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalBody, setModalBody] = useState('');
+    const [verificationStatus, setVerificationStatus] = useState('');
 
+    const handleClose = () => setShowModal(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,15 +68,42 @@ const LoginForm = () => {
             login(userData);
 
             if (role === 'patient') {
-                navigate('/home');
+                const { data: patientData, error: patientError } = await supabase
+                    .from('patient')
+                    .select('*')
+                    .eq('user_id', userData.user_id)
+
+                    if (patientError) {
+                        throw patientError;
+                    }
+
+                if (patientData[0].verification_status === 'not verified') {
+                    setShowModal(true);
+                    setModalTitle('Account not verified');
+                    setModalBody('Please verify your account first before logging in.');
+                    return;
+
+                } else if (patientData[0].verification_status === 'verified'){
+                    setShowModal(true);
+                    setModalTitle('Login successful');
+                    setModalBody('You have successfully logged in.');
+
+                    setTimeout(() => {
+                        navigate('/home');
+                    }, 3000);
+
+                }
             } else if (role === 'dentist' || role === 'assistant') {
-                navigate('/dashboard');
-            } else {
-                navigate('/login'); // Or any default route
+                setShowModal(true);
+                setModalTitle('Login successful');
+                setModalBody('You have successfully logged in.');
+
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 3000);
+
             }
-
-
-            alert("Logged in successfully");
+            
 
         } catch (error){
             console.error("Supabase error: ", error);
@@ -151,6 +186,20 @@ const LoginForm = () => {
                     </Form>
 
                 </div>
+
+                <Modal show={showModal} onHide={handleClose} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{modalTitle}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {modalBody}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         </div>
         </>
