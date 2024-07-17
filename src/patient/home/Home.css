@@ -14,8 +14,9 @@
     justify-content: center; /* Center contents horizontally */
     align-items: center;
 }
+
 .homepage-header {
-    width: 1070px; 
+    width: 100%; 
     height: 220px;
     object-position: 100% 60%;
     object-fit: none;
@@ -26,8 +27,8 @@
 
 .aboutus-container {
     background-color: #005590;
-    width: 1070px; 
-    height: 300px;
+    width: 100%; 
+    height: auto;
     border-radius: 25px; 
     margin-top: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -35,11 +36,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
 }
 .aboutus-text {
     text-align: center;
-    padding-left: 30px;
-    padding-right: 20px;
+    padding-right: 40px;
+    padding-left: 50px;
 }
 
 .aboutus-text h1 {
@@ -55,16 +57,17 @@
     font-weight: 300;
     color: #ffffff;
 }
+
 .img {
     flex: 1; 
     display: flex;
     justify-content: flex-end;
-    padding-right: 20px;
+    padding: 20px;
 }
 
 .aboutus-img {
-    width: 430px; 
-    height: 250px;
+    width: 100%; 
+    height: auto;
     object-fit: cover;
     border-radius: 25px; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -73,7 +76,7 @@
     padding-right: 0px;
 }
 .carousel-title {
-    width: 1100px;
+    width: 100%;
     padding-top: 15px;
     padding-left: 10px;
 }
@@ -84,14 +87,14 @@
     text-align: center;
 }
 .carousel-item {
-    width: 500px; 
+    width: 100%; 
     height: 250px;
     object-fit: cover;
     border-radius: 25px;
 }
 
 .services-carousel {
-    width: 500px; 
+    width: 100%; 
     height: 250px;
     border-radius: 25px; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -99,7 +102,7 @@
 }
 
 .services-img {
-    width: 500px; 
+    width: 100%; 
     height: 250px;
     object-fit: cover;
     border-radius: 25px;
@@ -110,14 +113,14 @@
     text-align: center;
 }
 .faqs-carousel {
-    width: 500px; 
+    width: 100%; 
     height: 250px;
     border-radius: 25px; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .faqs-img  {
-    width: 500px; 
+    width: 100%; 
     height: 250px;
     object-fit: cover;
     border-radius: 25px;
@@ -137,6 +140,14 @@
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
+.faqs-carousel-label h4{
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
 .service-carousel-label p, .faqs-carousel-label p {
     font-weight: 600;
     color: #ffffff;
@@ -145,7 +156,7 @@
 }
 
 /* Tablet Styles */
-@media screen and (max-width: 768px) {
+/* @media screen and (max-width: 768px) {
     .homepage-header, .aboutus-container {
         width: 90%;
         height: auto;
@@ -203,10 +214,10 @@
     .faqs-carousel-label p {
         font-size: 1em;
     }
-}
+} */
 
 /* Mobile Styles */
-@media screen and (max-width: 480px) {
+/* @media screen and (max-width: 480px) {
     .homepage-header {
         width: 90%;
         height: auto;
@@ -265,5 +276,40 @@
     .service-carousel-label p,
     .faqs-carousel-label p {
         font-size: 0.8em;
+    }
+} */
+
+.h3-responsive {
+    font-size: 1.75rem; /* Default size */
+}
+
+.p-responsive {
+    font-size: 1rem; /* Default size */
+}
+
+@media (max-width: 768px) {
+    .h3-responsive {
+        font-size: 1.5rem;
+    }
+    .p-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .h3-responsive {
+        font-size: 1rem;
+    }
+    .p-responsive {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .h3-responsive {
+        font-size: 0.5rem;
+    }
+    .p-responsive {
+        font-size: 0.75rem;
     }
 }

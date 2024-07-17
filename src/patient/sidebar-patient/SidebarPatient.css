@@ -8,13 +8,7 @@
     margin: 20px;
     
 }
-.custom-sidebar {
-    background-image: linear-gradient(180deg, #005590 6%, #409EE0 88.5%) !important;
-    font-family: 'Poppins', sans-serif;
-    color: #fff !important; /* Add !important to override other styles */
-    border-radius: 20px;
-	width: 300px;
-}
+
 
 .custom-header a{
     padding: 10px;
@@ -70,4 +64,15 @@
     height: .5px;
     width: 100%;
     background-color: #ffffff50; /* Adjust color and transparency as needed */
+}
+
+
+
+.custom-sidebar {
+    width: 300px; /* Default width */
+    background-image: linear-gradient(180deg, #005590 6%, #409EE0 88.5%) !important;
+    font-family: 'Poppins', sans-serif;
+    color: #fff !important; /* Add !important to override other styles */
+    border-radius: 20px;
+    transition: width 0.3s ease-in-out;
 }

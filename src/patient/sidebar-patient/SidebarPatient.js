@@ -10,7 +10,6 @@ import {
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../settings/AuthContext';
 
-
 import './SidebarPatient.css';
 
 const SidebarPatient = () => {
@@ -40,7 +39,6 @@ const SidebarPatient = () => {
                 </CDBSidebarHeader>
             </div>
             
-    
             <CDBSidebarContent className="sidebar-content">
                 <CDBSidebarMenu>
                 <NavLink exact to="/home" activeClassName="activeClicked">
@@ -52,8 +50,6 @@ const SidebarPatient = () => {
                 <NavLink exact to="/history" activeClassName="activeClicked">
                     <CDBSidebarMenuItem icon="history">History</CDBSidebarMenuItem>
                 </NavLink>
-
-
                 </CDBSidebarMenu>
             </CDBSidebarContent>
     
@@ -73,7 +69,6 @@ const SidebarPatient = () => {
             </CDBSidebar>
         </div>
     );
-  };
-  
+};
 
 export default SidebarPatient;
