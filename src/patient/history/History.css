@@ -1,0 +1,66 @@
+
+.history-box{
+    margin-top: 20px;
+}
+
+.patienthistory-content{
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+
+.historytabs-custom{
+    border: 0;
+}
+
+.historytabs-custom .nav-link{
+    border: 0;
+    color: #989898;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.historytabs-custom .nav-link:hover{
+    color: #005590;
+}
+
+.historytabs-custom .nav-link.active{
+    background-color: transparent;
+    color: #005590;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border-bottom: 2px solid #005590;
+}
+
+
+
+
+.custom-treatmenttable-head th{
+    background-color: transparent;
+    color: #005590;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.custom-treatmenttable-contents{
+    color: #005590 !important;
+}
+
+.custom-detailsmodal{
+    width: '100vw';
+    max-width: '800px';
+}
+
+.proceduredetails-custom{
+    color: #005590;
+}

@@ -16,7 +16,6 @@ import LoginForm from './LoginForm/LoginForm.js'
 import PreRegistration from './PreRegistration/PreRegistration.js'
 import Dashboard from './admin/dashboard/dashboard.js'
 import DashboardAllBranch from './admin/DashboardAllBranch/DashboardAllBranch.js'
-// import Home from './patient/home/Home.js'
 
 import Sidebar from './admin/components/Sidebar.js';
 import Patientlist from './admin/patientlist/Patientlist.js';
@@ -24,20 +23,22 @@ import PatientlistAllbranch from './admin/patientlist/PatientlistAllbranch';
 import Addpatient from './admin/addpatient/Addpatient.js';
 import Verifypatient from './admin/verifypatient/Verifypatient.js';
 import Settings from './admin/settings/Settings.js';
-// import SidebarPatient from './patient/sidebar-patient/SidebarPatient.js';
-// import Record from './patient/record/Record.js';
-// import History from './patient/history/History.js';
 import Patientrecord from './admin/patientrecord/Patientrecord.js';
 import Editdetails from './admin/patientrecord/Details/Editdetails.js';
 import Addprocedure from './admin/patientrecord/Orthodontics/Addprocedure.js';
 import Editprocedure from './admin/patientrecord/Orthodontics/Editprocedure.js';
 import Viewprocedure from './admin/patientrecord/Orthodontics/Viewprocedure.js';
-// import Editcheckbox from './admin/patientrecord/Details/Editcheckbox.js';
 import Addtreatment from './admin/patientrecord/Treatments/Addtreatment.js';
 import Viewtreatment from './admin/patientrecord/Treatments/Viewtreatment.js';
 import Edittreatment from './admin/patientrecord/Treatments/Edittreatment.js';
 import ReviewPatient from './admin/patientlist/ReviewPatient.js';
-// import Patientsettings from './patient/settings/patientsettings.js';
+
+//PATIENT SIDE
+import Home from './patient/home/Home.js'
+import Patientsettings from './patient/settings/patientsettings.js';
+import SidebarPatient from './patient/sidebar-patient/SidebarPatient.js';
+import Record from './patient/record/Record.js';
+import History from './patient/history/History.js';
 
 const router =createBrowserRouter(
   	createRoutesFromElements(
@@ -257,7 +258,7 @@ const router =createBrowserRouter(
 				}
 			/>
 
-			{/* <Route
+			<Route
 				path="home"
 				element={
 				<ProtectedRoute role="patient">
@@ -303,7 +304,7 @@ const router =createBrowserRouter(
 						</div>
 					</ProtectedRoute>
 				}
-			/>  */}
+			/> 
 
 		</Route>
     

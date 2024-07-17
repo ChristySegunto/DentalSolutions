@@ -1,0 +1,59 @@
+
+.record-box{
+    margin-top: 20px;
+}
+
+.patientrecord-patient-content{
+    margin-top: 30px;
+    width: 100%;
+    margin-right: 20px;
+}
+
+.record-header h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.personalinfo-patient-container{
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    margin-left: 3px;
+    margin-right: 5px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+.dentalhistoryinfo-patient{
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+}
+
+.dentalhistoryinfo-patient h2{
+    color: #005590;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.patient-divider{
+    height: 1px;
+    background-color: #e8e8e8;
+}

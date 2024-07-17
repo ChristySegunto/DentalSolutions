@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+.home-box{
+    margin-top: 20px;
+    padding-left: 0;
+    align-items: center;
+}
+.homepage-header-container {
+    display: flex;
+    justify-content: center; /* Center contents horizontally */
+    align-items: center;
+}
+.homepage-header {
+    width: 1070px; 
+    height: 220px;
+    object-position: 100% 60%;
+    object-fit: none;
+    position: relative; 
+    border-radius: 25px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aboutus-container {
+    background-color: #005590;
+    width: 1070px; 
+    height: 300px;
+    border-radius: 25px; 
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.aboutus-text {
+    text-align: center;
+    padding-left: 30px;
+    padding-right: 20px;
+}
+
+.aboutus-text h1 {
+    font-size: 2.0em;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.aboutus-text h3 {
+    font-size: 15px;
+    text-align: justify;
+    line-height: 1.5;
+    font-weight: 300;
+    color: #ffffff;
+}
+.img {
+    flex: 1; 
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 20px;
+}
+
+.aboutus-img {
+    width: 430px; 
+    height: 250px;
+    object-fit: cover;
+    border-radius: 25px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.carousels {
+    padding-right: 0px;
+}
+.carousel-title {
+    width: 1100px;
+    padding-top: 15px;
+    padding-left: 10px;
+}
+.carousel-title h1 {
+    font-size: 2.5em;
+    font-weight: 600;
+    color: #005590;
+    text-align: center;
+}
+.carousel-item {
+    width: 500px; 
+    height: 250px;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.services-carousel {
+    width: 500px; 
+    height: 250px;
+    border-radius: 25px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    
+}
+
+.services-img {
+    width: 500px; 
+    height: 250px;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.service-carousel-label {
+    line-height: 1.5;
+    text-align: center;
+}
+.faqs-carousel {
+    width: 500px; 
+    height: 250px;
+    border-radius: 25px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.faqs-img  {
+    width: 500px; 
+    height: 250px;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.faqs-carousel-label{
+    line-height: 1.5;
+    text-align: center;
+}
+
+
+.service-carousel-label h3, .faqs-carousel-label h3 {
+    font-size: 2.0em;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.service-carousel-label p, .faqs-carousel-label p {
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.2;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Tablet Styles */
+@media screen and (max-width: 768px) {
+    .homepage-header, .aboutus-container {
+        width: 90%;
+        height: auto;
+    }
+
+    .homepage-header {
+        height: 180px;
+    }
+
+    .aboutus-container {
+        height: auto;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .aboutus-img {
+        width: 90%;
+        height: auto;
+        margin-top: 20px;
+    }
+    
+    .aboutus-text {
+        padding-left: 0px;
+        padding-right: 0px;
+
+    }
+
+    .aboutus-text h1 {
+        font-size: 1.5em; 
+    }
+
+    .aboutus-text h3 {
+        font-size: 14px; 
+    }
+
+    .carousel-title {
+        width: 90%;
+        padding-left: 0;
+    }
+
+    .carousel-item,
+    .services-carousel,
+    .faqs-carousel {
+        width: auto;
+        height: auto;
+        border-radius: 25px;
+    }
+
+    .service-carousel-label h3,
+    .faqs-carousel-label h3 {
+        font-size: 1.5em;
+    }
+
+    .service-carousel-label p,
+    .faqs-carousel-label p {
+        font-size: 1em;
+    }
+}
+
+/* Mobile Styles */
+@media screen and (max-width: 480px) {
+    .homepage-header {
+        width: 90%;
+        height: auto;
+    }
+
+    .homepage-header {
+        height: 150px;
+    }
+
+    .aboutus-container {
+        height: auto;
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .aboutus-text {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .aboutus-text h1 {
+        font-size: 1.5em; 
+    }
+
+    .aboutus-text h3 {
+        font-size: 14px; 
+    }
+
+    .aboutus-img {
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+    }
+
+    .carousel-title {
+        width: 100%;
+        padding-left: 0;
+    }
+
+    .carousel-title h1 {
+        font-size: 2em;
+    }
+
+    .carousel-item,
+    .services-carousel,
+    .faqs-carousel {
+        width: 100%;
+        height: auto;
+    }
+
+    .service-carousel-label h3,
+    .faqs-carousel-label h3 {
+        font-size: 1.2em;
+    }
+
+    .service-carousel-label p,
+    .faqs-carousel-label p {
+        font-size: 0.8em;
+    }
+}
