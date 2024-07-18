@@ -1,20 +1,68 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import supabase from './../../settings/supabase';
+import './Scanfaceforpending.css';
 import * as faceapi from 'face-api.js';
 
-const Scanface = ({ patient_username, onCapturedImagesChange }) => {
+const Scanfaceforpending = () => {
+    const { patient_id } = useParams();
     const [numImages, setNumImages] = useState(5);
     const [capturedImages, setCapturedImages] = useState(0);
+    const [patient_username, setUsername] = useState('');
+
     const [borderColor, setBorderColor] = useState('red');
     const [buttonEnabled, setButtonEnabled] = useState(false);
     const [faceInOvalStartTime, setFaceInOvalStartTime] = useState(null); // Track face entry time
+
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const overlayCanvasRef = useRef(null);
 
+    const [submitDisabled, setSubmitDisabled] = useState(true);  // Update initial state
+    const navigate = useNavigate(); 
+    const [showModal, setShowModal] = useState(false);
+    const [modalHeader, setModalHeader] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
+
     useEffect(() => {
-        onCapturedImagesChange(capturedImages);
-    }, [capturedImages, onCapturedImagesChange]);
+        const fetchPatientName = async () => {
+            try {
+                const { data } = await supabase
+                    .from('patient')
+                    .select('user_id')
+                    .eq('patient_id', patient_id)
+                    .single();
+
+                if (data) {
+                    const userId = data.user_id;
+                    const { data: userData } = await supabase
+                        .from('user')
+                        .select('username')
+                        .eq('user_id', userId)
+                        .single();
+
+                    if (userData) {
+                        setUsername(userData.username);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching patient name:', error);
+                alert('Error fetching patient name. Please try again later.');
+            }
+        };
+
+        fetchPatientName();
+    }, [patient_id]);
+
+    useEffect(() => {
+        console.log("capturedImages changed:", capturedImages);
+        if (capturedImages >= 1) {  // Change this condition to 1
+            setSubmitDisabled(false);
+        } else {
+            setSubmitDisabled(true);
+        }
+    }, [capturedImages]);
 
     // Load face-api models
     const loadModels = async () => {
@@ -37,7 +85,9 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
         drawOverlay();
     }, [borderColor]);
 
+    // Function to start video capture
     const startVideo = () => {
+        
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
                 if (videoRef.current) {
@@ -49,6 +99,11 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                 alert('Failed to access camera. Please check if camera permissions are granted.');
             });
     };
+
+    // Call startVideo when component mounts
+    useEffect(() => {
+        startVideo();
+    }, []);
 
     const handleCaptureImage = async () => {
         if (!videoRef.current || capturedImages >= numImages) return;
@@ -84,6 +139,28 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                 console.error('Error setting up the request:', error.message);
                 alert('Error setting up the request. Please try again later.');
             }
+        }
+    };
+
+    const handleGoToPatientRecord = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('patient')
+                .update({ verification_status: 'verified', patient_pendingstatus: null })
+                .eq('patient_id', patient_id) // Assuming 'id' is the correct column for patient ID
+                .single();
+
+            if (error) {
+                throw error;
+            }
+            
+            navigate(`/patientrecord/${patient_id}`);
+            
+        } catch (error) {
+            console.error('Error updating patient verification status:', error.message);
+            setModalMessage("Error occurred while updating patient verification status. Please try again later.");
+            setModalHeader("Error");
+            setShowModal(true);
         }
     };
 
@@ -163,13 +240,17 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
 
     return (
         <>
-            <div className="scanface-custom">
+            <div className="scanfacecontainer">
                 <h2>SCAN FACE</h2>
-                <div className="video-container" style={{ position: 'relative' }}>
-                    <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
-                    <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480"></canvas>
-                    <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
+                <div className='divider'></div>
+                <div className='videobox d-flex justify-content-center'>
+                    <div className="video-container" style={{ position: 'relative' }}>
+                        <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
+                        <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480"></canvas>
+                        <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
+                    </div>
                 </div>
+                
                 <div className="form-group">
                     <label>Patient Name:</label>
                     <input
@@ -185,14 +266,22 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                         disabled={!buttonEnabled}
                         className="capture-button btn"
                         style={{ backgroundColor: buttonEnabled ? '#005590' : '#7a8185', color: '#fff' }}
-
                     >
                         Capture Image ({capturedImages}/{numImages})
                     </button>
                 </div>
                 
+                <div className='d-flex justify-content-center'>
+                    <button
+                        className='d-flex justify-content-center m-4 submitbtn btn'
+                        style={{ backgroundColor: submitDisabled ? '#005590' : '#7a8185', color: '#fff' }}
+                        onClick={handleGoToPatientRecord}
+                        disabled={submitDisabled}  // Bind the disabled state here
+                    >
+                        Submit
+                    </button>
+                </div>
             </div>
-
 
             <style jsx>{`
                 .overlay-canvas {
@@ -202,11 +291,10 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                 }
                 .capture-button {
                     margin-top: 10px;
-                    // background-color: ${buttonEnabled ? '#005590' : '#7a8185'};
                 }
             `}</style>
         </>
     );
 };
 
-export default Scanface;
+export default Scanfaceforpending;

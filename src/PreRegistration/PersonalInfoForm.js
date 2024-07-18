@@ -89,9 +89,11 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
     };
 
     const handleDateChange = (date) => {
+        const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+
         setPatientInfo(prevInfo => ({
             ...prevInfo,
-            patient_birthdate: date
+            patient_birthdate: utcDate
         }));
     };
 

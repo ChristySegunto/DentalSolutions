@@ -1,3 +1,4 @@
+#VIEWS.PY
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,32 +9,22 @@ import cv2
 import numpy as np
 import torch
 from facenet_pytorch import InceptionResnetV1, MTCNN
-from torchvision import transforms
-from facenet_pytorch import InceptionResnetV1
-from mtcnn.mtcnn import MTCNN
-import cv2
-import io
 from PIL import Image
 import base64
 import json
 from io import BytesIO
+from django.conf import settings  # Ensure your Django settings are imported
 
 
 # Initialize FaceNet model
 model = InceptionResnetV1(pretrained='vggface2').eval()
 
-# Load your known face embeddings and labels (this is just an example)
-known_face_embeddings = [...]  # List of numpy arrays
-known_face_labels = [...]
-
-# Initialize FaceNet model
-resnet = InceptionResnetV1(pretrained='vggface2').eval()
+# # Load your known face embeddings and labels (this is just an example)
+# known_face_embeddings = []  # List of numpy arrays
+# known_face_labels = []
 
 # Initialize MTCNN for face detection
 mtcnn = MTCNN()
-
-# Initialize MTCNN for face detection
-detector = MTCNN()
 
 @csrf_exempt
 def capture_images(request):
@@ -45,27 +36,32 @@ def capture_images(request):
             # Save the image to the media directory
             path = default_storage.save(os.path.join('images', patient_username, 'raw', image.name), ContentFile(image.read()))
 
-            # Read the saved image
-            image_path = os.path.join('media', path)
-            img = cv2.imread(image_path)
-            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            # # Read the saved image
+            # image_path = os.path.join('media', path)
+            img = Image.open(path)
+
+            # Ensure the image is in RGB format
+            img_rgb = img.convert('RGB')
+
+            # Convert image to numpy array
+            img_np = np.array(img_rgb)
 
             # Detect faces
-            boxes, probs = mtcnn.detect(img_rgb)
+            boxes, probs = mtcnn.detect(img_np)
             if boxes is not None:
                 for box in boxes:
                     # Extract face
                     x1, y1, x2, y2 = map(int, box)
-                    face = img_rgb[y1:y2, x1:x2]
+                    face = img_np[y1:y2, x1:x2]
                     face = cv2.resize(face, (160, 160))
 
                     # Convert to tensor and get embedding
                     face_tensor = np.moveaxis(face, -1, 0) / 255.0  # Normalize to [0, 1]
                     face_tensor = torch.tensor(face_tensor, dtype=torch.float32)
-                    embedding = resnet(face_tensor.unsqueeze(0)).detach().numpy().flatten()
+                    embedding = model(face_tensor.unsqueeze(0)).detach().numpy().flatten()
 
                     # Save embedding
-                    embedding_path = os.path.join('media', 'images', patient_username, 'embeddings', f'{image.name}.npy')
+                    embedding_path = os.path.join('images', patient_username, 'embeddings', f'{image.name}.npy')
                     os.makedirs(os.path.dirname(embedding_path), exist_ok=True)
                     np.save(embedding_path, embedding)
 
@@ -94,25 +90,56 @@ def get_face_embedding(image):
 @csrf_exempt
 def compare_face(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        image_data = data['image']
-        image_data = image_data.split(',')[1]  # Remove the data URL prefix
-        image_bytes = base64.b64decode(image_data)
-        image = Image.open(BytesIO(image_bytes))
+        try:
+            data = json.loads(request.body)
+            image_data = data['image']
+            image_data = image_data.split(',')[1]  # Remove the data URL prefix
+            image_bytes = base64.b64decode(image_data)
+            image = Image.open(BytesIO(image_bytes))
 
-        # Get the face embedding of the received image
-        unknown_face_embedding = get_face_embedding(image)
+            # Get the face embedding of the received image
+            unknown_face_embedding = get_face_embedding(image)
 
-        # Compare with known embeddings
-        match = False
-        for known_embedding in known_face_embeddings:
-            distance = np.linalg.norm(known_embedding - unknown_face_embedding)
-            if distance < 1.0:  # You can adjust the threshold as needed
-                match = True
-                break
+            # Path to the directory containing patient folders
+            base_embeddings_dir = os.path.join(settings.MEDIA_ROOT, 'images')
 
-        return JsonResponse({'match': match})
+            # Initialize variables to track match
+            match = False
+            matched_patient = None
+
+            # Iterate through each patient folder
+            for patient_folder in os.listdir(base_embeddings_dir):
+                patient_folder_path = os.path.join(base_embeddings_dir, patient_folder, 'embeddings')
+                
+                if not os.path.isdir(patient_folder_path):
+                    continue
+                
+                # Load known face embeddings from files
+                for root, _, files in os.walk(patient_folder_path):
+                    for file in files:
+                        if file.endswith('.npy'):
+                            embedding_path = os.path.join(root, file)
+                            known_embedding = np.load(embedding_path)
+
+                            # Compare the embeddings
+                            distance = np.linalg.norm(known_embedding - unknown_face_embedding)
+                            if distance < 1.0:  # You can adjust the threshold as needed
+                                match = True
+                                matched_patient = patient_folder
+                                break
+                    if match:
+                        break
+                if match:
+                    break
+
+            # Return the result
+            response_data = {'match': match}
+            if match:
+                response_data['patient_username'] = matched_patient
+
+            return JsonResponse(response_data)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-

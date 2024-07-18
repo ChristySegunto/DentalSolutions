@@ -32,6 +32,7 @@ import Addtreatment from './admin/patientrecord/Treatments/Addtreatment.js';
 import Viewtreatment from './admin/patientrecord/Treatments/Viewtreatment.js';
 import Edittreatment from './admin/patientrecord/Treatments/Edittreatment.js';
 import ReviewPatient from './admin/patientlist/ReviewPatient.js';
+import Scanfaceforpending from './admin/patientlist/Scanfaceforpending.js';
 
 //PATIENT SIDE
 import Home from './patient/home/Home.js'
@@ -144,6 +145,18 @@ const router =createBrowserRouter(
 						<div className="dashboard-container">
 							<Sidebar />
 							<ReviewPatient />
+						</div>
+					</ProtectedRoute>
+				}
+			/>
+
+			<Route
+				path='/scanfaceforpending/:patient_id'
+				element={
+					<ProtectedRoute role="dentist|assistant">
+						<div className="dashboard-container">
+							<Sidebar />
+							<Scanfaceforpending />
 						</div>
 					</ProtectedRoute>
 				}

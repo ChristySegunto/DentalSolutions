@@ -94,10 +94,7 @@
     
 }
 
-.viewbtn{
-    background-color: #eae2e2;
-    color: #003c67;
-}
+
 
 
 .resetbtn {
@@ -140,4 +137,34 @@
 
 .canvas-container{
     position: absolute;
+}
+
+.addpatientbtn{
+    background-color: #005590;
+    color: #fff;
+    border-color: #005590;
+    margin-right: 10px;
+}
+
+.addpatientbtn:hover{
+    background-color: #003c67;
+}
+
+.tryagainbtn{
+    background-color: #fff;
+    color: #005590;
+    border-color: #005590;
+}
+
+.viewbtn{
+    background-color: #005590;
+    color: #fff;
+    border-color: #005590;
+    margin-right: 10px;
+}
+
+.resetbtn{
+    background-color: #fff;
+    color: #005590;
+    border-color: #005590;
 }

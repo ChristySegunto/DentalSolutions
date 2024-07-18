@@ -6,7 +6,7 @@ import PersonalInfoForm from './PersonalInfoForm'
 import DentalAndMedForm from './DentalAndMedForm';
 import AccountInfoForm from './AccountInfoForm';
 import Scanface from './Scanface';
-import supabase from './supabase.js';
+import supabase from './../../settings/supabase.js';
 import { useNavigate } from 'react-router-dom'; // Import useHistory hook
 
 
@@ -20,6 +20,9 @@ const Addpatient = () => {
     const [modalMessage, setModalMessage] = useState("");
     const [modalHeader, setModalHeader] = useState("");
     const navigate = useNavigate();
+    const [patientId, setPatientId] = useState(null);
+    const [username, setUsername] = useState('');
+    const [capturedImages, setCapturedImages] = useState(0);
 
 
     const handleGoToLoginPage = () => {
@@ -227,19 +230,19 @@ const Addpatient = () => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
-        } else if (currentStep === 4) {
-            if (!validateAccountInfoData(accountInfoData)) {
-                setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
-                setModalHeader("Complete Required Information");
-                setShowModal(true);
-            } else if (!validatePassword(accountInfoData)) {
-                setModalMessage("Password and confirm password do not match. Please try again.");
-                setModalHeader("Password Not Matched");
-                setShowModal(true);
-            } else {
-                setCurrentStep((prevStep) => prevStep + 1);
-                setShowModal(false);
-            }
+        // } else if (currentStep === 4) {
+        //     if (!validateAccountInfoData(accountInfoData)) {
+        //         setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
+        //         setModalHeader("Complete Required Information");
+        //         setShowModal(true);
+        //     } else if (!validatePassword(accountInfoData)) {
+        //         setModalMessage("Password and confirm password do not match. Please try again.");
+        //         setModalHeader("Password Not Matched");
+        //         setShowModal(true);
+        //     } else {
+        //         setCurrentStep((prevStep) => prevStep + 1);
+        //         setShowModal(false);
+        //     }
         }
     };
 
@@ -259,21 +262,25 @@ const Addpatient = () => {
     };
 
     const handleSubmit = async () => {
-        if (currentStep === 5) {
+        if (!validateAccountInfoData(accountInfoData)) {
+            setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
+            setModalHeader("Complete Required Information");
+            setShowModal(true);
+            return;
+        } else if (!validatePassword(accountInfoData)) {
+            setModalMessage("Password and confirm password do not match. Please try again.");
+            setModalHeader("Password Not Matched");
+            setShowModal(true);
+            return;
+        }
+
+        if (currentStep === 4) {
             const { data: existingUsers, error: userQueryError } = await supabase
                 .from('user')
                 .select('username')
                 .eq('username', accountInfoData.username)
                 .single();
 
-            if (userQueryError) {
-                console.error('Error checking existing username:', userQueryError.message);
-                // Handle error scenarios
-                setModalMessage("Error occurred while checking username. Please try again later.");
-                setModalHeader("Error");
-                setShowModal(true);
-                return;
-            }
 
             if (existingUsers) {
                 // Username already exists, show modal
@@ -371,9 +378,10 @@ const Addpatient = () => {
             }
 
             try {
+
                 const { data: userInsertData, error: userInsertError } = await supabase
                     .from('user')
-                    .insert([userData])
+                    .upsert([userData])
                     .select()
                     .single();
                     
@@ -383,6 +391,7 @@ const Addpatient = () => {
                 }
 
                 console.log("User data inserted:", userInsertData);
+                setUsername(userInsertData.username);
 
                 const user_id = userInsertData.user_id;
 
@@ -398,11 +407,13 @@ const Addpatient = () => {
 
                 console.log("Patient data inserted:", patientInsertData);
 
-                const patient_id = patientInsertData.patient_id;
+                
+                // Set patient ID after successful insertion
+                setPatientId(patientInsertData.patient_id);
 
                 const { data: dentalAndMedInsertData, error: dentalAndMedInsertError } = await supabase
                     .from('patient_DentalAndMed')
-                    .insert([{ ...dentalAndMedDataToInsert, patient_id }])
+                    .insert([{ ...dentalAndMedDataToInsert, patientId }])
                     .select()
                     .single();
 
@@ -429,6 +440,34 @@ const Addpatient = () => {
             console.log("Account Info:", accountInfoData);
         }
         
+    };
+
+    const handleCapturedImagesChange = (count) => {
+        setCapturedImages(count);
+    };
+
+    // Handle navigation to patient record page
+    const handleGoToPatientRecord = async () => {
+        if (patientId) {
+            const { data, error} = await supabase
+                .from('patient')
+                .update({ verification_status: 'verified' })
+                .eq('patient_id', patientId)
+
+                if (error) {
+                    console.error("Error updating verification status:", error);
+                    setModalMessage("Error updating verification status. Please try again later.");
+                    setModalHeader("Error");
+                    setShowModal(true);
+                } else {
+                    navigate(`/patientrecord/${patientId}`);
+                }
+
+        } else {
+            setModalMessage("Error navigating to patient record. Please try again later.");
+            setModalHeader("Error");
+            setShowModal(true);
+        }
     };
 
 
@@ -558,7 +597,7 @@ const Addpatient = () => {
 
                             <div className='btns'>
                                 <button className="btn btn-secondary mr-2" onClick={handlePrev}>Previous</button>
-                                <button className="nextbtn btn btn-primary" onClick={handleNext}>Next</button>
+                                <button className="nextbtn btn btn-primary" onClick={handleSubmit}>Next</button>
                             </div>
                             
                         </div>
@@ -567,11 +606,10 @@ const Addpatient = () => {
                     {currentStep === 5 && (
                         <div className='step5-addp'>
                             
-                            <Scanface />
+                            <Scanface patient_username={username} onCapturedImagesChange={handleCapturedImagesChange}/>
                             <div className='btns'>
                                 <button className="btn btn-secondary mr-2" onClick={handlePrev}>Previous</button>
-                                <button className="btn btn-success" onClick={handleSubmit}>Submit</button>
-                                {/* <button className="loginpagebtn" onClick={handleGoToLoginPage}>Go to Patient Record Page</button> */}
+                                <button className="btn btn-success" onClick={handleGoToPatientRecord} disabled={capturedImages !== 5}>Submit</button>
                             </div>
 
                         </div>

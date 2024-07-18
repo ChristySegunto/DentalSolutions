@@ -301,7 +301,9 @@ const ReviewPatient = () => {
       }
       const getPlaceholder = (value) => value ? value : "N/A";
 
-
+    const goToScanface = () => {
+        navigate(`/scanfaceforpending/${patient_id}`);
+    };
 
     return (
 
@@ -314,7 +316,7 @@ const ReviewPatient = () => {
                 <FaArrowLeft className="me-2" /> 
                 </Button>
                 <h3>Review</h3>
-                <button class="scanfacebtn btn" type="button" > Scan Face </button>
+                <button class="scanfacebtn btn" type="button" onClick={goToScanface}> Scan Face </button>
                 </div>
                 <div className="personalinfo-container">
                     <div className="name-branch row">

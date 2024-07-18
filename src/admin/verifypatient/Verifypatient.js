@@ -1,14 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import './Verifypatient.css';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, ModalTitle, ModalBody } from 'react-bootstrap';
 import * as faceapi from 'face-api.js';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import supabase from '../../settings/supabase';
 
 const Verifypatient = () => {
     const [isScanning, setIsScanning] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [scanResult, setScanResult] = useState('');
     const [borderColor, setBorderColor] = useState('red'); // Default border color
+    const [patientUsername, setPatientUsername] = useState('Unknown');
+    const navigate = useNavigate();
+
+    const [ModalTitle, setModalTitle] = useState('');
+    const [ModalBody, setModalBody] = useState('');
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -43,22 +50,54 @@ const Verifypatient = () => {
     };
 
     const handleReset = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const stream = videoRef.current.srcObject;
-            const tracks = stream.getTracks();
+        // if (videoRef.current && videoRef.current.srcObject) {
+        //     const stream = videoRef.current.srcObject;
+        //     const tracks = stream.getTracks();
 
-            tracks.forEach(track => track.stop());
-            videoRef.current.srcObject = null;
-        }
+        //     tracks.forEach(track => track.stop());
+        //     videoRef.current.srcObject = null;
+        // }
         setIsScanning(false);
         setShowModal(false);
         setBorderColor('red'); // Reset border color
     };
 
-    const handleViewRecord = () => {
-        alert('Viewing patient record...');
-        console.log('Viewing patient record...');
+    const handleViewRecord = async () => {
+        try {
+            // Query Supabase to check if patient exists
+            const { data, error } = await supabase
+                .from('user')  // Replace with your actual table name
+                .select('*')
+                .eq('username', patientUsername)  // Replace with actual column name
+                .single();  // Use `.single()` to return a single record
+
+            if (error) {
+                throw error;
+            }
+
+            if (data) {
+                const { data: patientData, error: patientError } = await supabase
+                    .from('patient')
+                    .select('*')
+                    .eq('user_id', data.user_id)
+
+                if (patientError) {
+                    throw patientError;
+                }
+
+                if (patientData) {
+                    navigate(`/patientrecord/${patientData[0].patient_id}`); // Redirect to patient record page
+                }
+            } else {
+                alert('No patient record found.');
+            }
+        } catch (error) {
+            console.error('Error fetching patient record:', error);
+            alert('Error fetching patient record.');
+        }
+
         setShowModal(false);
+
     };
 
     const handleModalClose = () => {
@@ -107,20 +146,30 @@ const Verifypatient = () => {
             const imageData = canvas.toDataURL('image/jpeg');
 
             try {
-                const response = await axios.post('http://localhost:8000/api/compare-face', { image: imageData });
+                const response = await axios.post('http://localhost:8000/api/compare-face/', { image: imageData });
                 if (response.data.match) {
-                    setScanResult('Patient Exist. Do you want to view the record?');
+                    setPatientUsername(response.data.patient_username || 'Unknown'); // Set patient username from response
+                    setModalTitle('Patient Exist');
+                    setModalBody('Do you want to view the record of ' + response.data.patient_username + '?');
+                    setShowModal(true);
                 } else {
-                    setScanResult('No matching patient found.');
+                    setModalTitle('No Record Found');
+                    setModalBody('No records found. Do you want to try again or add patient?');
+                    setShowModal(true);
                 }
                 setShowModal(true);
             } catch (error) {
                 console.error('Error checking record:', error);
-                setScanResult('Error checking patient record.');
+                setModalTitle('Error checking patient record.');
+                setModalBody('An error occurred while checking the patient record. Please try again.');
                 setShowModal(true);
             }
         }
     };
+
+    const handleGoToAddPatient = () => {
+        navigate('/addpatient');
+    }
 
     return (
         <>
@@ -147,16 +196,24 @@ const Verifypatient = () => {
                     </div>
 
                     <Modal show={showModal} onHide={handleModalClose} centered backdrop="static">
-                        <Modal.Header closeButton className="d-block text-center">
-                            <Modal.Title>Patient Exist</Modal.Title>
+                        <Modal.Header closeButton>
+                            <Modal.Title>{ModalTitle}</Modal.Title>
                         </Modal.Header>
                         <Modal.Body className="text-center">
-                            <p>{scanResult}</p>
-                            {scanResult === 'Patient Exist. Do you want to view the record?' && (
+                            <p>{ModalBody}</p>
+                            {ModalTitle === 'Patient Exist' && (
                                 <>
                                     <Button className="viewbtn" onClick={handleViewRecord}>View Record</Button>
                                     <Button className="resetbtn" onClick={handleReset}>Reset</Button>
                                 </>
+                            )}
+
+                            {ModalTitle === 'No Record Found' && (
+                                <>
+                                <Button className="addpatientbtn" onClick={handleGoToAddPatient}>Add Patient</Button>
+                                <Button className="tryagainbtn" onClick={handleReset}>Try Again</Button>
+                                </>
+                                
                             )}
                         </Modal.Body>
                     </Modal>
