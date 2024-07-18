@@ -25,6 +25,9 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
 
     const [contactError, setContactError] = useState('');
     const [emailError, setEmailError] = useState('');
+    const [fnameError, setFNameError] = useState('');
+    const [mnameError, setMNameError] = useState('');
+    const [lnameError, setLNameError] = useState('');
 
 
     const [showGuardianForm, setShowGuardianForm] = useState(false);
@@ -48,8 +51,47 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Allow only numbers in the contact field
-        if (name === 'patient_contact') {
+        if (name === 'patient_fname') {
+            const lettersRegex = /^[A-Za-z\s]*$/;
+
+            if (lettersRegex.test(value)) {
+                setFNameError('');
+            } else {
+                setFNameError('Please enter a valid first name.');
+            }
+
+            setPatientInfo(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+
+        } else if (name === 'patient_mname') {
+            const lettersRegex = /^[A-Za-z\s]*$/;
+
+            if (lettersRegex.test(value)) {
+                setMNameError('');
+            } else {
+                setMNameError('Please enter a valid middle name.');
+            }
+
+            setPatientInfo(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+        } else if (name === 'patient_lname') {
+            const lettersRegex = /^[A-Za-z\s]*$/;
+
+            if (lettersRegex.test(value)) {
+                setLNameError('');
+            } else {
+                setLNameError('Please enter a valid last name.');
+            }
+
+            setPatientInfo(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+        } else if (name === 'patient_contact') { // Allow only numbers in the contact field
             // Regex for validating cellphone numbers
             const cellphoneRegex = /^[0-9]{11}$/;
 
@@ -102,15 +144,18 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
             <div className='fullName row'>
                 <Form.Group className="col-lg-4 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">First Name<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_fname" placeholder="Enter first name" value={patientInfo.patient_fname} onChange={handleChange} required />
+                    <Form.Control type="text" name="patient_fname" placeholder="Enter first name" isInvalid={!!fnameError} value={patientInfo.patient_fname} onChange={handleChange} required />
+                    <Form.Control.Feedback type="invalid">{fnameError}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-4 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Middle Name</Form.Label>
-                    <Form.Control type="text" name="patient_mname" placeholder="Enter middle name" value={patientInfo.patient_mname} onChange={handleChange} />
+                    <Form.Control type="text" name="patient_mname" placeholder="Enter middle name" isInvalid={!!mnameError} value={patientInfo.patient_mname} onChange={handleChange} />
+                    <Form.Control.Feedback type="invalid">{mnameError}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-4 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Last Name<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_lname" placeholder="Enter last name" value={patientInfo.patient_lname} onChange={handleChange} required />
+                    <Form.Control type="text" name="patient_lname" placeholder="Enter last name" isInvalid={!!lnameError} value={patientInfo.patient_lname} onChange={handleChange} required />
+                    <Form.Control.Feedback type="invalid">{lnameError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
             <div className='ageGenderBday row'>

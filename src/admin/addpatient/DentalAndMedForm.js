@@ -73,6 +73,11 @@ const DentalAndMedForm = ({ patient_gender, dentalAndMedData = {}, onUpdateDenta
         isTakingPills: dentalAndMedData.isTakingPills || false
     });
 
+    const [prevdentistError, setPrevdentistError] = useState('');
+    const [physicianNameError, setPhysicianNameError] = useState('');
+    const [physicianSpecialtyError, setPhysicianSpecialtyError] = useState('');
+
+
     useEffect(() => {
         if(patient_gender == 'Female'){
             setShowWomanForm(true);
@@ -89,10 +94,55 @@ const DentalAndMedForm = ({ patient_gender, dentalAndMedData = {}, onUpdateDenta
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevInfo => ({
-            ...prevInfo,
-            [name]: value
-        }));
+
+        if(name === 'patient_prevdentist'){
+            const lettersRegex = /^[A-Za-z\s]*$/;
+
+            if (lettersRegex.test(value)) {
+                setPrevdentistError('');
+            } else {
+                setPrevdentistError('Please enter a valid name.');
+            }
+
+            setFormData(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+
+        } else if(name === 'patient_physicianname'){
+            const lettersRegex = /^[A-Za-z\s]*$/;
+
+            if (lettersRegex.test(value)) {
+                setPhysicianNameError('');
+            } else {
+                setPhysicianNameError('Please enter a valid name.');
+            }
+
+            setFormData(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+        } else if(name === 'patient_physicianspecialty'){
+            const lettersRegex = /^[A-Za-z\s]*$/;
+
+            if (lettersRegex.test(value)) {
+                setPhysicianSpecialtyError('');
+            } else {
+                setPhysicianSpecialtyError('Please enter a valid name.');
+            }
+
+            setFormData(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+
+        } else {
+            setFormData(prevInfo => ({
+                ...prevInfo,
+                [name]: value
+            }));
+        }
+        
     };
 
 
@@ -260,7 +310,8 @@ const DentalAndMedForm = ({ patient_gender, dentalAndMedData = {}, onUpdateDenta
             <div className='dentistdetail row'>
                 <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Previous Dentist</Form.Label>
-                    <Form.Control type="text" placeholder="Enter previous dentist" name="patient_prevdentist" value={formData.patient_prevdentist} onChange={handleChange}/>
+                    <Form.Control type="text" placeholder="Enter previous dentist" isInvalid={!!prevdentistError} name="patient_prevdentist" value={formData.patient_prevdentist} onChange={handleChange}/>
+                    <Form.Control.Feedback type="invalid">{prevdentistError}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Last Dental Visit</Form.Label>
@@ -274,11 +325,14 @@ const DentalAndMedForm = ({ patient_gender, dentalAndMedData = {}, onUpdateDenta
             <div className='physiciandetail row'>
                 <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Name of Physician</Form.Label>
-                    <Form.Control type="text" placeholder="Enter name of physician" name="patient_physicianname" value={formData.patient_physicianname} onChange={handleChange}/>
+                    <Form.Control type="text" placeholder="Enter name of physician" isInvalid={!!physicianNameError} name="patient_physicianname" value={formData.patient_physicianname} onChange={handleChange}/>
+                    <Form.Control.Feedback type="invalid">{physicianNameError}</Form.Control.Feedback>
+
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Specialty, if applicable</Form.Label>
-                    <Form.Control type="text" placeholder="Enter specialty" name="patient_physicianspecialty" value={formData.patient_physicianspecialty} onChange={handleChange}/>
+                    <Form.Control type="text" placeholder="Enter specialty" isInvalid={!!physicianSpecialtyError} name="patient_physicianspecialty" value={formData.patient_physicianspecialty} onChange={handleChange}/>
+                    <Form.Control.Feedback type="invalid">{physicianSpecialtyError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
             <div className='physiciandetail row mb-3'>
