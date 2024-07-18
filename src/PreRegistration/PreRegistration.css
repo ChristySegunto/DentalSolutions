@@ -400,3 +400,23 @@
     border: 0;
     border-radius: 8px;
 }
+
+.closebtn{
+    background-color: #005590 !important;
+    color: #fff;
+    height: auto;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 0 !important;
+    border-radius: 8px;
+}
+
+.custom-modalheader{
+    color: #005590 !important;
+}
+
+.custom-modalmessage{
+    color: #005590 !important;
+}

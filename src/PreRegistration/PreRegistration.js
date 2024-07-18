@@ -429,12 +429,19 @@ const Prereg = () => {
                     }
     
     
-                    setCurrentStep(prevStep => prevStep + 1);
-                    setShowModal(false); // Close modal on successful submission
+                    // setCurrentStep(prevStep => prevStep + 1);
+                    setShowModal(true); // Close modal on successful submission
+                    setModalMessage("Please go to you selected branch for verification. Redirecting to login page...");
+                    setModalHeader("Successful Pre-registration");
                     console.log("Submitting form data:");
                     console.log("Personal Info:", patientData);
                     console.log("Dental and Med Info:", dentalAndMedData);
                     console.log("Account Info:", accountInfoData);
+                    
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 3000);
+                    
                 }
 
                 
@@ -468,11 +475,6 @@ const Prereg = () => {
                         <div className="step-circle">4</div>
                         <div className="step-title">STEP 4</div>
                         <div className="step-contenttitle">Account Information</div>
-                    </div>
-                    <div className={`step-item ${currentStep === 5 ? 'active' : ''}`}>
-                        <div className="step-circle">5</div>
-                        <div className="step-title">STEP 5</div>
-                        <div className="step-contenttitle">Scan Face</div>
                     </div>
                 </div>
 
@@ -567,30 +569,17 @@ const Prereg = () => {
                         </div>
                     )}
 
-                    {currentStep === 5 && (
-                        <div className='step5'>
-                            <div className="scanface">
-                                <h2>ACCOUNT CREATED</h2>
-                                <p>You may go to your chosen branch to get verified.</p>
-                            </div>
-
-                            <div className='btn center'>
-                                <button className="loginpagebtn" onClick={handleGoToLoginPage}>Go to Login Page</button>
-                            </div>
-
-                        </div>
-                    )}
 
                 </div>
             </div>
 
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>{modalHeader}</Modal.Title>
+                    <Modal.Title className='custom-modalheader'>{modalHeader}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>{modalMessage}</Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                <Modal.Body className='text-center custom-modalmessage'>{modalMessage}</Modal.Body>
+                <Modal.Footer className='d-flex justify-content-center'>
+                    <Button className="closebtn" onClick={() => setShowModal(false)}>
                         Close
                     </Button>
                 </Modal.Footer>
