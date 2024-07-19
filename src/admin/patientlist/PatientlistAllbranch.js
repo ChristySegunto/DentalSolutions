@@ -178,72 +178,114 @@ const PatientlistAllbranch = () => {
         const doc = new jsPDF();
         let tableData = [];
         let title = '';
-
+    
         switch (activeTab) {
             case 'allPatients':
-              tableData = filteredAllPatients; 
-              title = 'All Patients - All BRANCH';
-              break;
+                tableData = filteredAllPatients; 
+                title = 'All Patients - All BRANCH';
+                break;
             default:
-              tableData = [];
-              title = 'Patients';
-          }
-
-          if (tableData.length === 0) {
-            console.error("No data to export.");
-            return;
-          }
-
-          doc.autoTable({
-            head: [['Name', 'Age', 'Gender', 'Contact', 'Email', 'Branch']],
-            body: tableData.map(patient => [
-              `${patient.patient_fname} ${patient.patient_lname}`,
-              patient.patient_age,
-              patient.patient_gender,
-              patient.patient_contact,
-              patient.patient_email,
-              patient.patient_branch,
-            ])
-          });
-        
-          doc.save(`${title}.pdf`);
-        };
-
-        const exportToExcel = () => {
-            let tableData = [];
-            let sheetName = '';
-
-            switch (activeTab) {
-            case 'allPatients':
-            tableData = filteredAllPatients; 
-            sheetName = 'All Patients - All BRANCH';
-            break;
-            default:
-            tableData = [];
-            sheetName = 'Patients';
+                tableData = [];
+                title = 'Patients';
         }
+    
         if (tableData.length === 0) {
             console.error("No data to export.");
             return;
-          }
+        }
+    
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        
+        // Set font size, style, and color for the company name in the header
+        doc.setFontSize(16); // Larger font size for the company name
+        doc.setFont("helvetica", "bold"); // Set font to Helvetica and style to bold
+        doc.setTextColor(51, 153, 255); // Blue color for the company name
+        
+        // Calculate positioning for centering the company name
+        const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const pageWidth = doc.internal.pageSize.width;
+        const startX = (pageWidth - companyNameWidth) / 2;
+        
+        // Add the company name in the header
+        doc.text(companyName, startX, 10); // Adjust the Y coordinate (10) and alignment as needed
+    
+        // Reset font settings for the table
+        doc.setFontSize(12); // Reset font size for the table content
+        doc.setFont("helvetica", "normal"); // Reset font style to normal
+        doc.setTextColor(0); // Reset text color to black
+    
+        // Generate the table
+        doc.autoTable({
+            head: [['Name', 'Age', 'Gender', 'Contact', 'Email', 'Branch']],
+            body: tableData.map(patient => [
+                `${patient.patient_fname} ${patient.patient_lname}`,
+                patient.patient_age,
+                patient.patient_gender,
+                patient.patient_contact,
+                patient.patient_email,
+                patient.patient_branch,
+            ]),
+            startY: 20 // Adjust startY to leave space after the company name
+        });
+    
+        // Save the PDF with the specified title
+        doc.save(`${title}.pdf`);
+    };
+    
 
-              const worksheet = XLSX.utils.json_to_sheet(tableData.map(patient => ({
-                'Name': `${patient.patient_fname} ${patient.patient_lname}`,
-                'Age': patient.patient_age,
-                'Gender': patient.patient_gender,
-                'Contact': patient.patient_contact,
-                'Email': patient.patient_email,
-                'Branch':patient.patient_branch,
-              })));
-            
-              const workbook = XLSX.utils.book_new();
-              XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-            
-              const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-              const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-              saveAs(data, `${sheetName}.xlsx`);
-            };
-
+    const exportToExcel = () => {
+        let tableData = [];
+        let sheetName = '';
+    
+        switch (activeTab) {
+            case 'allPatients':
+                tableData = filteredAllPatients;
+                sheetName = 'All Patients - All BRANCH';
+                break;
+            default:
+                console.error("Invalid active tab.");
+                return;
+        }
+    
+        if (tableData.length === 0) {
+            console.error("No data to export.");
+            return;
+        }
+    
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet([]);
+    
+        // Add company name to cell A1
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        const companyNameCell = { v: companyName, t: 's' }; // 's' means string type
+        const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 }); // A1 cell position
+        worksheet[companyNameCellRef] = companyNameCell;
+    
+        // Shift data down starting from A3
+        const dataRows = tableData.map(patient => ({
+            'Name': `${patient.patient_fname} ${patient.patient_lname}`,
+            'Age': patient.patient_age,
+            'Gender': patient.patient_gender,
+            'Contact Number': patient.patient_contact,
+            'Email': patient.patient_email,
+            'Branch': patient.patient_branch,
+        }));
+        XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A3", skipHeader: false });
+    
+        // Create workbook and append worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    
+        // Convert workbook to Excel buffer
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+        // Convert Excel buffer to Blob
+        const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    
+        // Save Blob as Excel file
+        saveAs(data, `${sheetName}.xlsx`);
+    };
+    
     return (
             <div className="patientlist-allbranch-box container-fluid">
             <Col>

@@ -680,42 +680,107 @@ const handleAccept = async () => {
     };
 
 
-      const exportToPDF = () => {
+    const exportToPDF = () => {
         const tableData = getFilteredData(activeTab);
         const title = getExportTitle(activeTab);
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
     
         if (tableData.length === 0) {
             console.error("No data to export.");
             return;
         }
     
-
         const doc = new jsPDF();
+        
+        // Set font size, style, and color for the company name
+        doc.setFontSize(16); // Larger font size for the company name
+        doc.setFont("helvetica", "bold"); // Set font to Helvetica and style to bold
+        doc.setTextColor(51, 153, 255); // Blue color for the company name
+        
+        // Add the company name with enhanced styling
+        const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const pageWidth = doc.internal.pageSize.width;
+        const startX = (pageWidth - companyNameWidth) / 2;
+        doc.text(companyName, startX, 20); // Adjust the Y coordinate (20) and alignment as needed
+    
+        // Reset font settings for the table
+        doc.setFontSize(12); // Reset font size for the table content
+        doc.setFont("helvetica", "normal"); // Reset font style to normal
+        doc.setTextColor(0); // Reset text color to black
+    
+        // Move cursor down for the table
         doc.autoTable({
             head: getPDFTableHeaders(activeTab),
-            body: tableData.map(patient => getPDFTableRow(patient, activeTab))
+            body: tableData.map(patient => getPDFTableRow(patient, activeTab)),
+            startY: 30 // Adjust startY to leave space after the company name
         });
     
         doc.save(`${title}.pdf`);
     };
     
+    
     const exportToExcel = () => {
         const tableData = getFilteredData(activeTab);
         const sheetName = getExportTitle(activeTab);
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
     
         if (tableData.length === 0) {
             console.error("No data to export.");
             return;
         }
     
-        const worksheet = XLSX.utils.json_to_sheet(tableData.map(patient => getExcelDataRow(patient, activeTab)));
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet([]);
     
+        // Add company name to cell A1 with styling
+        const companyNameCell = { v: companyName, t: 's', s: { font: { bold: true, sz: 16 }, alignment: { horizontal: 'center' } } };
+        const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 });
+        worksheet[companyNameCellRef] = companyNameCell;
+    
+        // Merge cells for company name
+        const merge = { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }; // Adjust the number of columns (c: 5) as needed
+        if (!worksheet['!merges']) worksheet['!merges'] = [];
+        worksheet['!merges'].push(merge);
+    
+        // Add headers
+        const headers = getExcelHeaders(activeTab);
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A2" });
+    
+        // Add data rows
+        const dataRows = tableData.map(patient => getExcelDataRow(patient, activeTab));
+        XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A3", skipHeader: true });
+    
+        // Auto-size columns
+        const columnsWidth = headers.map((header, index) => ({
+            wch: Math.max(header.length, ...dataRows.map(row => String(Object.values(row)[index]).length))
+        }));
+        worksheet['!cols'] = columnsWidth;
+    
+        // Create workbook and append worksheet
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     
+        // Convert workbook to Excel buffer
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+        // Convert Excel buffer to Blob
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    
+        // Save Blob as Excel file
         saveAs(data, `${sheetName}.xlsx`);
+    };
+    
+    // Helper function to get Excel headers
+    const getExcelHeaders = (tab) => {
+        switch (tab) {
+            case 'allPatients':
+            case 'pending':
+                return ['Name', 'Age', 'Gender', 'Contact', 'Email', 'Branch'];
+            case 'transferees':
+                return ['Name', 'From Branch', 'To Branch', 'Age', 'Gender', 'Contact', 'Email'];
+            default:
+                return [];
+        }
     };
     
     // Helper functions

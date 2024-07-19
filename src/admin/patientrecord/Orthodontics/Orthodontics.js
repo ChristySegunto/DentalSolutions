@@ -213,6 +213,25 @@ const Orthodontics = () => {
 
     const exportToPDF = () => {
         const doc = new jsPDF();
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        
+        // Set font size, style, and color for the company name
+        doc.setFontSize(16); // Larger font size for the company name
+        doc.setFont("helvetica", "bold"); // Set font to Helvetica and style to bold
+        doc.setTextColor(51, 153, 255); // Blue color for the company name
+        
+        // Add the company name with enhanced styling
+        const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const pageWidth = doc.internal.pageSize.width;
+        const startX = (pageWidth - companyNameWidth) / 2;
+        doc.text(companyName, startX, 20); // Adjust the Y coordinate (20) and alignment as needed
+        
+        // Reset font settings for the table
+        doc.setFontSize(12); // Reset font size for the table content
+        doc.setFont("helvetica", "normal"); // Reset font style to normal
+        doc.setTextColor(0); // Reset text color to black
+        
+        // Move cursor down for the table
         doc.autoTable({
             head: [['Date', 'Procedure', 'Next Visit', 'Dental/Assistant']],
             body: orthodontics.map(ortho => [
@@ -220,20 +239,52 @@ const Orthodontics = () => {
                 ortho.ortho_procedure,
                 ortho.ortho_nextvisit,
                 ortho.ortho_dentist
-            ])
+            ]),
+            startY: 30 // Adjust startY to leave space after the company name
         });
+    
+        // Save the PDF with the specified title
         doc.save('orthodontics-list.pdf');
     };
 
     const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(orthodontics);
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        
+        // Create a new workbook and worksheet
         const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet([]);
+    
+        // Add company name as the first row
+        XLSX.utils.sheet_add_aoa(worksheet, [[companyName]], { origin: "A1" });
+    
+        // Prepare data without orthodontics_id and patient_id
+        const exportData = orthodontics.map(({ ortho_date, ortho_procedure, ortho_nextvisit, ortho_dentist }) => ({
+            Date: ortho_date,
+            Procedure: ortho_procedure,
+            "Next Visit": ortho_nextvisit,
+            "Dental/Assistant": ortho_dentist
+        }));
+    
+        // Add data starting from the second row
+        XLSX.utils.sheet_add_json(worksheet, exportData, { origin: "A2", skipHeader: false });
+    
+        // Adjust column widths
+        const columnWidths = [
+            { wch: 15 },  // Date
+            { wch: 30 },  // Procedure
+            { wch: 15 },  // Next Visit
+            { wch: 20 }   // Dental/Assistant
+        ];
+        worksheet["!cols"] = columnWidths;
+    
+        // Add the worksheet to the workbook
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Orthodontics');
+    
+        // Generate Excel file
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
         saveAs(data, 'orthodontics.xlsx');
     };
-
 
     const handleView = (patient_id, orthodontics_id) => {
         navigate(`/patientrecord/${patient_id}/viewprocedure/${orthodontics_id}`);
@@ -270,9 +321,9 @@ const Orthodontics = () => {
 
     return (
         <>
-            <div className="personalinfo-container row">
+            <div className="personalinfo-container">
 
-                <div className="avatar-col col-10 col-md-2 col-sm-12 order-md-1 d-flex justify-content-center">
+                <div className="avatar-col col-12 col-md-2 order-md-1 order-1 d-flex justify-content-center">
                     <Avatar
                         src={imageSource}
                         alt="uploadpic"
