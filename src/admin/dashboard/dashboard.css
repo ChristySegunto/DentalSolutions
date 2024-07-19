@@ -30,6 +30,7 @@
     width: 70%;
     padding: 0 10px;
     text-align: center;
+    
 }
 
 .header-container h1 {
@@ -47,7 +48,7 @@
 
 
 .currentdate {
-    margin-right: 50px;
+    width: 70px;
     flex: 1; 
     display: flex;
     justify-content: flex-end;
@@ -177,7 +178,7 @@
 .summary-cards-row {
     padding-left: 0px;
     align-items: flex-end;
-    width: 100%;
+    width: 98%;
 }
 .cards {
     background-color: #ffffff;
@@ -215,7 +216,7 @@
 .treatment-report {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     height: 100%;
     justify-content: center;
 
@@ -226,22 +227,22 @@
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     width: 96%;
-    height: 250px;
+    height: 96%;
     padding: 10px;
     margin-top: 5px;
-    
+    margin-bottom: 10px;
 }
 
 .daily-treatment-report h1, .monthly-treatment-report h1 {
     font-size: 1.05em;
     font-weight: 600;
-    padding: 10px;
     color: #005590;
+    padding: 10px;
 }
 
 .cases-status-report {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     height: 100%;
     
     
@@ -342,23 +343,81 @@
     color: #005590;
 }
 
+@media (max-width: 840px) {
+    .header-container {
+        flex-direction: row; 
+        width: 100%;  
+    }
 
-@media (max-width: 768px) {
+    .header-container h1, .header-container h3 {
+        margin-right: 5px; 
+        text-align: center;
+    }
+    
     .currentdate {
         margin-left: 10px;
         width: 100%;
-        font-size: 12px; 
     }
 
-    .currentdate  {
-        font-size: 12px; 
+    .currentdate h3 {
+        width: 100%;
+        align-content: center;
+        font-size: 1.4em;
+    }
+    .summary-cards-row {
+        width: 100%;
+    }
+
+    .cards {
+        width: 100%;
+        height: 95%;
+        padding-left: 10px;
+        margin-top: 60px;
+    }
+
+    .cards h2 {
+        font-size: 15px;
+    }
+    .cards h3 {
+        font-size: 13px;
+    }
+    .cards h1 {
+        font-size: 20px;
+    }
+    .cards h4 {
+        font-size: 15px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: row; 
+        width: 100%;
+    }
+
+    .header-container h1, .header-container h3 {
+        margin-right: 5; 
+        text-align: center;
+    }
+    
+    .currentdate {
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .currentdate h3 {
+        width: 100%;
+        align-content: center;
+        font-size: 1.4em;
+
 
     }
     .cards {
         width: 100%;
         height: 95%;
         padding-left: 10px;
-        margin-top: 10px;
+        margin-top: 60px;
     }
 
 

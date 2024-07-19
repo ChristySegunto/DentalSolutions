@@ -245,53 +245,6 @@ const graphdata = [
   ];
 
   {/* BRANCH PATIENTS */}
-//   useEffect(() => {
-//     const fetchBranchPatients = async () => {
-//         const { data, error } = await supabase
-//         .from('patient')
-//         .select('patient_branch', { count: 'exact' });
-        
-//         if (error) {
-//           console.error('Error fetching branch patients', error);
-//         } else {
-//           const patientCounts = {};
-//           data.forEach((item) => {
-//             patientCounts[item.patient_branch] = item.total_patients;
-//           });
-//           setBranchPatients(patientCounts);
-//         }
-//       };
-  
-//       fetchBranchPatients();
-//     }, []);
-    
-//     async function fetchPatientCountsPerBranch() {
-//         const { data, error } = await supabase
-//             .from('patient')
-//             .select('patient_branch');
-    
-//         if (error) {
-//             console.error('Error fetching patient counts:', error);
-//             return {};
-//         }
-    
-//         // Group and count patients by branch
-//         const branchPatients = data.reduce((acc, row) => {
-//             acc[row.patient_branch] = (acc[row.patient_branch] || 0) + 1;
-//             return acc;
-//         }, {});
-    
-//         return branchPatients;
-//     }
-    
-//         useEffect(() => {
-//             async function loadPatientCounts() {
-//                 const counts = await fetchPatientCountsPerBranch();
-//                 setBranchPatients(counts);
-//             }
-    
-//             loadPatientCounts();
-//         }, []);
     
 const fetchPatientTreatmentCounts = async () => {
     const { data: treatments, error: treatmentError } = await supabase
@@ -383,7 +336,7 @@ useEffect(() => {
     return (
         <div className="dashboard-container container-fluid">
             <div className="dashboard">
-          <Col className='header-container'>
+          <Col className='allheader-container'>
         <h1>Dashboard</h1>
         <Dropdown onSelect={handleSelect}>
             <Dropdown.Toggle className="dropdownbranch">
@@ -399,8 +352,8 @@ useEffect(() => {
     </Col>
             
                 <Container fluid>
-                <div className="allbranch-summary-cards container-fluid">
-                    <Row className="allbranch-summary-cards-row container-fluid">
+                <div className="allbranch-summary-cards">
+                    <Row className="allbranch-summary-cards-row">
                         <Col>
                             <div className="allbranch-card">
                                 <h2>TOTAL BRANCHES</h2>
@@ -418,15 +371,15 @@ useEffect(() => {
 
                         <Col  className='profile-allbranch-container'>
                         <div className="myprofile-allbranch-card">
-                            <div className="myprofilecard-header rounded">
-                            <Link to="/settings" className="myprofile-link">
+                            <div className="myprofilecard-allbranch-header rounded">
+                            <Link to="/settings" className="allmyprofile-link">
                                 MY PROFILE <IoMdSettings size={ICON_SIZE} className="myprofile-icon" />
                                 </Link>
                             </div>
                             <div className="profile-allbranch-card-body">
-                                <div className="myprofile-fulln">{fullName}</div>
-                                <p className="myprofile-role">{userRole}</p>
-                                <p className="myprofile-branch">{branch} BRANCH</p>
+                                <div className="allmyprofile-fulln">{fullName}</div>
+                                <p className="allmyprofile-role">{userRole}</p>
+                                <p className="allmyprofile-branch">{branch} BRANCH</p>
                             </div>
                         </div>
                     </Col>

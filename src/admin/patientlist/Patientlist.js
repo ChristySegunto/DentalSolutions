@@ -101,7 +101,10 @@ const Patientlist = () => {
 {/*MODALS*/}
       {/*ALL PATIENT MODALS*/}
       const handleDeleteClose = () => setShowDelete(false);
-      const handleDeleteShow = () => setShowDelete(true);
+      const handleDeleteShow = (patient_id) => {
+        setPatientToDelete(patient_id);
+        setShowDelete(true);
+    };
 
       const handleReasonClose = () => setShowReason(false);
       const handleReasonShow = (patient_id) => {
@@ -113,8 +116,9 @@ const Patientlist = () => {
     const handleSuccessClose = () => setShowSuccess(false);
     
     const handleSuccessShow = () => {
-            setShowSuccess(true);
-            handleDeleteClose();
+        setShowSuccess(true);
+        setShowDelete(false);
+        handleDeleteClose();
     };
 
 {/*TRANSFEREE MODALS*/}
@@ -345,24 +349,25 @@ useEffect(() => {
         if (!patientToDelete) return;
     
         try {
-            console.log('Deleting patient with id:', patientToDelete);
+            console.log('Attempting to delete patient with id:', patientToDelete);
             console.log('Delete reason:', deleteReason);
-
     
             const { data: patientDetails, error: fetchError } = await supabase
                 .from('patient')
                 .select('patient_id, user_id, patient_fname, patient_lname')
                 .eq('patient_id', patientToDelete)
-                .single(); 
+                .single();
     
             if (fetchError) {
+                console.error('Error fetching patient details:', fetchError);
                 throw fetchError;
             }
     
             if (!patientDetails) {
+                console.error('Patient not found.');
                 throw new Error('Patient not found.');
             }
-            
+    
             const { user_id } = patientDetails;            
 
             const { error: reasonError } = await supabase
@@ -376,34 +381,35 @@ useEffect(() => {
                 });
     
             if (reasonError) {
+                console.error('Error inserting delete reason:', reasonError);
                 throw reasonError;
             }
     
-
             const { error: deleteError } = await supabase
                 .from('patient')
                 .delete()
                 .eq('patient_id', patientToDelete);
     
             if (deleteError) {
+                console.error('Error deleting patient:', deleteError);
                 throw deleteError;
             }
     
             setPatients(patients.filter(patient => patient.patient_id !== patientToDelete));
             console.log('Successfully deleted patient with id:', patientToDelete);
             
-            
-    
-        } catch (error) {
-            console.error('Error deleting patient:', error);
-        } finally {
-            handleReasonClose();
-        }
+        // Show success modal
 
-        setDeleteReason('');
-            setPatientToDelete(null);
-            handleSuccessShow(true);
-    };
+    } catch (error) {
+        console.error('Error deleting patient:', error);
+    } finally {
+        handleReasonClose();
+    }
+
+    setDeleteReason('');
+        setPatientToDelete(null);
+        handleSuccessShow(true);
+};
     
 {/*Pending List  */}
     const handlePendingDeclineSuccessShow = async () => {
@@ -935,7 +941,7 @@ const handleAccept = async () => {
                                         <Button onClick={() => handleEdit(patient.patient_id)} className="allpatients-actionbuttons">
                                             <FaEdit className="icon" />
                                         </Button>
-                                        <Button onClick={handleDeleteShow} className="allpatients-actionbuttons">
+                                        <Button onClick={() => handleDeleteShow(patient.patient_id)} className="allpatients-actionbuttons">
                                             <FaTrash className="icon"/>
                                         </Button>
                                         </td>
@@ -949,7 +955,7 @@ const handleAccept = async () => {
                                              Are you sure you want to delete this patient? <br/> This action cannot be undone.
                                             </Modal.Body>
                                             <Modal.Footer className="plmodal-footer">
-                                            <Button onClick={() => handleReasonShow(patient.patient_id)} className="deletebtn-modal">
+                                            <Button onClick={() => handleReasonShow(patientToDelete)} className="deletebtn-modal">
                                                     Delete
                                                 </Button>
                                                 <Button onClick={handleDeleteClose} className="closebtn-modal">
@@ -958,23 +964,6 @@ const handleAccept = async () => {
                                             </Modal.Footer>
                                         </Modal>
 
-                                        {/* Deleting Patient Modal */}
-                                        <Modal show={showDelete} onHide={handleDeleteClose} centered backdropClassName="custom-modal-backdrop" dialogClassName="deletemodal">
-                                        <Modal.Header closeButton className="plmodal-header">
-                                            <Modal.Title className="plmodal-title"> <center> Confirm Deletion </center></Modal.Title>
-                                        </Modal.Header>
-                                        <Modal.Body className="plmodal-body">
-                                            Are you sure you want to delete this patient? <br/> This action cannot be undone.
-                                        </Modal.Body>
-                                        <Modal.Footer className="plmodal-footer">
-                                        <Button onClick={() => handleReasonShow(patient.patient_id)} className="deletebtn-modal">
-                                                Delete
-                                            </Button>
-                                            <Button onClick={handleDeleteClose} className="closebtn-modal">
-                                                Cancel
-                                            </Button>
-                                        </Modal.Footer>
-                                    </Modal>
 
                                     {/* Reason For Deleting Patient */}
                                     <Modal show={showReason} onHide={handleReasonClose} centered backdropClassName="custom-modal-backdrop" dialogClassName="reasonmodal">
@@ -1063,9 +1052,9 @@ const handleAccept = async () => {
                                     <td>{patient.patient_email}</td>
                                     <td>{patient.patient_branch}</td>
                                     <td>
-                                        <Button onClick={handleAcceptShow} className="acceptbtn" variant="link" >Accept</Button>
+                                        <Button onClick={() => handleAcceptShow (patient.patient_id)} className="acceptbtn" variant="link" >Accept</Button>
                                         <br/>
-                                        <Button onClick={handleDeclineShow} className="declinebtn" variant="link" >Decline</Button>
+                                        <Button onClick={() => handleDeclineShow (patient.patient_id)} className="declinebtn" variant="link" >Decline</Button>
                                     </td>
 
                                     {/* Accepting Transferee Modal */}
@@ -1079,7 +1068,7 @@ const handleAccept = async () => {
                                                 Are you sure you want to accept this transferee?
                                             </Modal.Body>
                                             <Modal.Footer className="plmodal-footer">
-                                                <Button onClick={handleAccept} className="acceptbtn-modal">
+                                                <Button onClick={() => handleAccept (patient.patient_id)} className="acceptbtn-modal">
                                                     Accept
                                                 </Button>
                                                 <Button onClick={handleDecline} className="closebtn-modal">

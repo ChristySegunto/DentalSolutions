@@ -212,29 +212,25 @@ const Dashboard = () => {
 
     {/*SUMMARY CARDS */}
     const fetchPatientBranches = async (patientIds) => {
-        const patientBranchPromises = patientIds.map(async (patientId) => {
+        if (patientIds.length === 0) return [];
             const { data: patientData, error: patientError } = await supabase
-                .from('patient')
-                .select('patient_branch')
-                .eq('patient_id', patientId)
-                .single();
+            .from('patient')
+            .select('patient_id, patient_branch')
+            .in('patient_id', patientIds)
+            .eq('verification_status', 'verified');
 
             if (patientError) {
-                throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
+                throw new Error(`Error fetching patient branches: ${patientError.message}`);
             }
+        
+            const patientBranches = patientData.map(patient => patient.patient_branch);
+            return patientBranches;
+        };
 
-            return patientData.patient_branch;
-        });
-
-        const patientBranches = await Promise.all(patientBranchPromises);
-        return patientBranches;
-    };
-
-    useEffect(() => {
+useEffect(() => {
     const fetchPatientCounts = async () => {
         try {
             console.log('Fetching patient counts...');
-
             const start = performance.now();
             const currentDate = new Date();
 
@@ -243,94 +239,69 @@ const Dashboard = () => {
             const todayEnd = new Date();
             todayEnd.setHours(23, 59, 59, 999);
 
-            const { data: treatmentsToday, error: treatmentsErrorToday } = await supabase
-                .from('patient_Treatments')
-                .select('patient_id')
-                .gte('created_at', todayStart.toISOString())
-                .lt('created_at', todayEnd.toISOString());
+            const fetchData = async (tableName) => {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .select('patient_id')
+                    .gte('created_at', todayStart.toISOString())
+                    .lt('created_at', todayEnd.toISOString());
 
-            if (treatmentsErrorToday) {
-                console.error('Error fetching patient_Treatments for today:', treatmentsErrorToday);
-                setPatientTodayCount(0);
-                return;
-            }
+                if (error) throw new Error(`Error fetching ${tableName}: ${error.message}`);
+                return data.map(d => d.patient_id);
+            };
 
-            const { data: orthoToday, error: orthoErrorToday } = await supabase
-                .from('patient_Orthodontics')
-                .select('patient_id')
-                .gte('created_at', todayStart.toISOString())
-                .lt('created_at', todayEnd.toISOString());
+            const fetchMonthlyData = async (tableName, startOfMonth, endOfMonth) => {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .select('patient_id')
+                    .gte('created_at', startOfMonth)
+                    .lte('created_at', endOfMonth);
 
-            if (orthoErrorToday) {
-                console.error('Error fetching patient_Orthodontics for today:', orthoErrorToday);
-                setPatientTodayCount(0);
-                return;
-            }
+                if (error) throw new Error(`Error fetching ${tableName}: ${error.message}`);
+                return data.map(d => d.patient_id);
+            };
 
-            
+            const [treatmentsToday, orthoToday] = await Promise.all([
+                fetchData('patient_Treatments'),
+                fetchData('patient_Orthodontics')
+            ]);
+
             const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString();
             const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
 
-            const { data: treatmentsMonth, error: treatmentsErrorMonth } = await supabase
-                .from('patient_Treatments')
-                .select('patient_id')
-                .gte('created_at', startOfMonth)
-                .lte('created_at', endOfMonth);
+            const [treatmentsMonth, orthoMonth] = await Promise.all([
+                fetchMonthlyData('patient_Treatments', startOfMonth, endOfMonth),
+                fetchMonthlyData('patient_Orthodontics', startOfMonth, endOfMonth)
+            ]);
 
-            if (treatmentsErrorMonth) {
-                console.error('Error fetching patient_Treatments for this month:', treatmentsErrorMonth);
-                setPatientMonthCount(0);
-                return;
-            }
-
-            const { data: orthoMonth, error: orthoErrorMonth } = await supabase
-                .from('patient_Orthodontics')
-                .select('patient_id')
-                .gte('created_at', startOfMonth)
-                .lte('created_at', endOfMonth);
-
-            if (orthoErrorMonth) {
-                console.error('Error fetching patient_Orthodontics for this month:', orthoErrorMonth);
-                setPatientMonthCount(0);
-                return;
-            }
-
-            
             const { data: treatmentsTotal, error: treatmentsErrorTotal } = await supabase
                 .from('patient_Treatments')
                 .select('patient_id');
-
-            if (treatmentsErrorTotal) {
-                console.error('Error fetching patient_Treatments for total count:', treatmentsErrorTotal);
-                setPatientTotalCount(0);
-                return;
-            }
 
             const { data: orthoTotal, error: orthoErrorTotal } = await supabase
                 .from('patient_Orthodontics')
                 .select('patient_id');
 
-            if (orthoErrorTotal) {
-                console.error('Error fetching patient_Orthodontics for total count:', orthoErrorTotal);
-                setPatientTotalCount(0);
-                return;
+            if (treatmentsErrorTotal || orthoErrorTotal) {
+                throw new Error(`Error fetching total patient counts: ${treatmentsErrorTotal || orthoErrorTotal}`);
             }
 
-            // Combine patient data and calculate counts
-            const allPatientIdsToday = [...treatmentsToday.map(d => d.patient_id), ...orthoToday.map(d => d.patient_id)];
-            const allPatientIdsMonth = [...treatmentsMonth.map(d => d.patient_id), ...orthoMonth.map(d => d.patient_id)];
-            const allPatientIdsTotal = [...treatmentsTotal.map(d => d.patient_id), ...orthoTotal.map(d => d.patient_id)];
+            const allPatientIdsToday = [...new Set([...treatmentsToday, ...orthoToday])];
+            const allPatientIdsMonth = [...new Set([...treatmentsMonth, ...orthoMonth])];
+            const allPatientIdsTotal = [...new Set([...treatmentsTotal.map(d => d.patient_id), ...orthoTotal.map(d => d.patient_id)])];
 
-            const patientBranchesToday = await fetchPatientBranches(allPatientIdsToday);
-            const patientBranchesMonth = await fetchPatientBranches(allPatientIdsMonth);
-            const patientBranchesTotal = await fetchPatientBranches(allPatientIdsTotal);
+            const [patientBranchesToday, patientBranchesMonth, patientBranchesTotal] = await Promise.all([
+                fetchPatientBranches(allPatientIdsToday),
+                fetchPatientBranches(allPatientIdsMonth),
+                fetchPatientBranches(allPatientIdsTotal)
+            ]);
 
             const userBranch = profileDetails.branch;
+
             const patientTodayCount = patientBranchesToday.filter(branch => branch === userBranch).length;
             const patientMonthCount = patientBranchesMonth.filter(branch => branch === userBranch).length;
             const patientTotalCount = patientBranchesTotal.filter(branch => branch === userBranch).length;
 
-            
             setPatientTodayCount(patientTodayCount);
             setPatientMonthCount(patientMonthCount);
             setPatientTotalCount(patientTotalCount);
@@ -339,6 +310,9 @@ const Dashboard = () => {
             console.log(`Fetched patient counts in ${end - start} ms`);
         } catch (error) {
             console.error('Error fetching patient counts:', error.message);
+            setPatientTodayCount(0);
+            setPatientMonthCount(0);
+            setPatientTotalCount(0);
         }
     };
 
@@ -347,101 +321,196 @@ const Dashboard = () => {
     }
 }, [userDetails, profileDetails]);
 
-
 {/*TREATMENT REPORTS */}
-    
+    // useEffect(() => {
+    //     const fetchDailyTreatmentCounts = async () => {
+    //         try {
+    //             console.log('Fetching daily treatment counts...');
+
+    //             const treatments = ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'];
+    //             const currentDate = new Date();
+    //             const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 0, 0, 0);
+    //             const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59);
+
+    //             const fetchPromises = treatments.map(async (treatment) => {
+    //                 if (treatment === 'Orthodontic Treatment') {
+    //                     const orthoQuery = supabase
+    //                         .from('patient_Orthodontics')
+    //                         .select('patient_id')
+    //                         .gte('created_at', start.toISOString())
+    //                         .lte('created_at', end.toISOString());
+
+    //                     const { data: orthoData, error: orthoError } = await orthoQuery;
+
+    //                     if (orthoError) {
+    //                         throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
+    //                     }
+
+    //                     const patientIds = orthoData.map((ortho) => ortho.patient_id);
+
+    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
+    //                         const { data: patientData, error: patientError } = await supabase
+    //                             .from('patient')
+    //                             .select('patient_branch')
+    //                             .eq('patient_id', patientId)
+    //                             .single();
+
+    //                         if (patientError) {
+    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
+    //                         }
+
+    //                         return patientData.patient_branch;
+    //                     });
+
+    //                     const patientBranches = await Promise.all(patientBranchPromises);
+
+    //                     const userBranch = profileDetails.branch;
+    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
+
+    //                     return { treatment, count };
+    //                 } else {
+    //                     const treatmentsQuery = supabase
+    //                         .from('patient_Treatments')
+    //                         .select('patient_id')
+    //                         .eq('treatment', treatment)
+    //                         .gte('created_at', start.toISOString())
+    //                         .lte('created_at', end.toISOString());
+
+    //                     const { data: treatmentsData, error: treatmentsError } = await treatmentsQuery;
+
+    //                     if (treatmentsError) {
+    //                         throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
+    //                     }
+
+    //                     const patientIds = treatmentsData.map((treatment) => treatment.patient_id);
+
+    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
+    //                         const { data: patientData, error: patientError } = await supabase
+    //                             .from('patient')
+    //                             .select('patient_branch')
+    //                             .eq('patient_id', patientId)
+    //                             .single();
+
+    //                         if (patientError) {
+    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
+    //                         }
+
+    //                         return patientData.patient_branch;
+    //                     });
+
+    //                     const patientBranches = await Promise.all(patientBranchPromises);
+
+    //                     const userBranch = profileDetails.branch;
+    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
+
+    //                     return { treatment, count };
+    //                 }
+    //             });
+
+    //             const counts = await Promise.all(fetchPromises);
+
+    //             const newData = counts.map(({ treatment, count }) => count);
+
+    //             const dailyTreatmentReportData = {
+    //                 labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
+    //                 datasets: [
+    //                     {
+    //                         label: 'Daily Treatment Counts',
+    //                         data: newData,
+    //                         backgroundColor: [
+    //                             '#7B43F3',
+    //                             '#FE0000',
+    //                             '#E65C4F',
+    //                             '#FDD037',
+    //                             '#68C66C',
+    //                             '#75E2FF',
+    //                         ],
+    //                         borderWidth: 1,
+    //                     },
+    //                 ],
+    //             };
+
+    //             setDailyTreatmentReport(dailyTreatmentReportData);
+    //             console.log('Daily Treatment Report:', dailyTreatmentReportData);
+    //         } catch (error) {
+    //             console.error('Error fetching daily treatment counts:', error.message);
+    //         }
+    //     };
+
+    //     fetchDailyTreatmentCounts();
+    // }, [profileDetails]);
 
     useEffect(() => {
         const fetchDailyTreatmentCounts = async () => {
             try {
                 console.log('Fetching daily treatment counts...');
-
+    
                 const treatments = ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'];
                 const currentDate = new Date();
                 const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 0, 0, 0);
                 const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59);
-
+    
+                const fetchPatientBranches = async (patientIds) => {
+                    if (patientIds.length === 0) return [];
+    
+                    const { data: patientData, error: patientError } = await supabase
+                        .from('patient')
+                        .select('patient_id, patient_branch')
+                        .in('patient_id', patientIds)
+                        .eq('verification_status', 'verified');
+    
+                    if (patientError) {
+                        throw new Error(`Error fetching patient branches: ${patientError.message}`);
+                    }
+    
+                    return patientData.map(patient => patient.patient_branch);
+                };
+    
                 const fetchPromises = treatments.map(async (treatment) => {
                     if (treatment === 'Orthodontic Treatment') {
-                        const orthoQuery = supabase
+                        const { data: orthoData, error: orthoError } = await supabase
                             .from('patient_Orthodontics')
                             .select('patient_id')
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
-
-                        const { data: orthoData, error: orthoError } = await orthoQuery;
-
+    
                         if (orthoError) {
                             throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
                         }
-
-                        const patientIds = orthoData.map((ortho) => ortho.patient_id);
-
-                        const patientBranchPromises = patientIds.map(async (patientId) => {
-                            const { data: patientData, error: patientError } = await supabase
-                                .from('patient')
-                                .select('patient_branch')
-                                .eq('patient_id', patientId)
-                                .single();
-
-                            if (patientError) {
-                                throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-                            }
-
-                            return patientData.patient_branch;
-                        });
-
-                        const patientBranches = await Promise.all(patientBranchPromises);
-
+    
+                        const patientIds = orthoData.map(ortho => ortho.patient_id);
+                        const patientBranches = await fetchPatientBranches(patientIds);
                         const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter((branch) => branch === userBranch).length;
-
+                        const count = patientBranches.filter(branch => branch === userBranch).length;
+    
                         return { treatment, count };
                     } else {
-                        const treatmentsQuery = supabase
+                        const { data: treatmentsData, error: treatmentsError } = await supabase
                             .from('patient_Treatments')
                             .select('patient_id')
                             .eq('treatment', treatment)
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
-
-                        const { data: treatmentsData, error: treatmentsError } = await treatmentsQuery;
-
+    
                         if (treatmentsError) {
                             throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
                         }
-
-                        const patientIds = treatmentsData.map((treatment) => treatment.patient_id);
-
-                        const patientBranchPromises = patientIds.map(async (patientId) => {
-                            const { data: patientData, error: patientError } = await supabase
-                                .from('patient')
-                                .select('patient_branch')
-                                .eq('patient_id', patientId)
-                                .single();
-
-                            if (patientError) {
-                                throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-                            }
-
-                            return patientData.patient_branch;
-                        });
-
-                        const patientBranches = await Promise.all(patientBranchPromises);
-
+    
+                        const patientIds = treatmentsData.map(treatment => treatment.patient_id);
+                        const patientBranches = await fetchPatientBranches(patientIds);
                         const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter((branch) => branch === userBranch).length;
-
+                        const count = patientBranches.filter(branch => branch === userBranch).length;
+    
                         return { treatment, count };
                     }
                 });
-
+    
                 const counts = await Promise.all(fetchPromises);
-
+    
                 const newData = counts.map(({ treatment, count }) => count);
-
+    
                 const dailyTreatmentReportData = {
-                    labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
+                    labels: treatments,
                     datasets: [
                         {
                             label: 'Daily Treatment Counts',
@@ -458,108 +527,208 @@ const Dashboard = () => {
                         },
                     ],
                 };
-
+    
                 setDailyTreatmentReport(dailyTreatmentReportData);
                 console.log('Daily Treatment Report:', dailyTreatmentReportData);
             } catch (error) {
                 console.error('Error fetching daily treatment counts:', error.message);
             }
         };
-
-        fetchDailyTreatmentCounts();
+    
+        if (profileDetails?.branch) {
+            fetchDailyTreatmentCounts();
+        }
     }, [profileDetails]);
 
+    // useEffect(() => {
+    //     const fetchMonthlyTreatmentCounts = async () => {
+    //         try {
+    //             console.log('Fetching monthly treatment counts...');
+
+    //             const treatments = ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'];
+    //             const currentDate = new Date();
+    //             const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    //             const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
+
+    //             const fetchPromises = treatments.map(async (treatment) => {
+    //                 if (treatment === 'Orthodontic Treatment') {
+    //                     const orthoQuery = supabase
+    //                         .from('patient_Orthodontics')
+    //                         .select('patient_id')
+    //                         .gte('created_at', start.toISOString())
+    //                         .lte('created_at', end.toISOString());
+
+    //                     const { data: orthoData, error: orthoError } = await orthoQuery;
+
+    //                     if (orthoError) {
+    //                         throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
+    //                     }
+
+    //                     const patientIds = orthoData.map((ortho) => ortho.patient_id);
+
+    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
+    //                         const { data: patientData, error: patientError } = await supabase
+    //                             .from('patient')
+    //                             .select('patient_branch')
+    //                             .eq('patient_id', patientId)
+    //                             .single();
+
+    //                         if (patientError) {
+    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
+    //                         }
+
+    //                         return patientData.patient_branch;
+    //                     });
+
+    //                     const patientBranches = await Promise.all(patientBranchPromises);
+
+    //                     const userBranch = profileDetails.branch;
+    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
+
+    //                     return { treatment, count };
+    //                 } else {
+    //                     const treatmentsQuery = supabase
+    //                         .from('patient_Treatments')
+    //                         .select('patient_id')
+    //                         .eq('treatment', treatment)
+    //                         .gte('created_at', start.toISOString())
+    //                         .lte('created_at', end.toISOString());
+
+    //                     const { data: treatmentsData, error: treatmentsError } = await treatmentsQuery;
+
+    //                     if (treatmentsError) {
+    //                         throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
+    //                     }
+
+    //                     const patientIds = treatmentsData.map((treatment) => treatment.patient_id);
+
+    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
+    //                         const { data: patientData, error: patientError } = await supabase
+    //                             .from('patient')
+    //                             .select('patient_branch')
+    //                             .eq('patient_id', patientId)
+    //                             .single();
+
+    //                         if (patientError) {
+    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
+    //                         }
+
+    //                         return patientData.patient_branch;
+    //                     });
+
+    //                     const patientBranches = await Promise.all(patientBranchPromises);
+
+    //                     const userBranch = profileDetails.branch;
+    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
+
+    //                     return { treatment, count };
+    //                 }
+    //             });
+
+    //             const counts = await Promise.all(fetchPromises);
+
+    //             const newData = counts.map(({ treatment, count }) => count);
+
+    //             const monthlyTreatmentReportData = {
+    //                 labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
+    //                 datasets: [
+    //                     {
+    //                         label: 'Monthly Treatment Counts',
+    //                         data: newData,
+    //                         backgroundColor: [
+    //                             '#7B43F3',
+    //                             '#FE0000',
+    //                             '#E65C4F',
+    //                             '#FDD037',
+    //                             '#68C66C',
+    //                             '#75E2FF',
+    //                         ],
+    //                         borderWidth: 1,
+    //                     },
+    //                 ],
+    //             };
+
+    //             setMonthlyTreatmentReport(monthlyTreatmentReportData);
+    //             console.log('Monthly Treatment Report:', monthlyTreatmentReportData);
+    //         } catch (error) {
+    //             console.error('Error fetching monthly treatment counts:', error.message);
+    //         }
+    //     };
+
+    //     fetchMonthlyTreatmentCounts();
+    // }, [profileDetails]);
+    
     useEffect(() => {
         const fetchMonthlyTreatmentCounts = async () => {
             try {
                 console.log('Fetching monthly treatment counts...');
-
+    
                 const treatments = ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'];
                 const currentDate = new Date();
                 const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
                 const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
-
+    
+                const fetchPatientBranches = async (patientIds) => {
+                    if (patientIds.length === 0) return [];
+    
+                    const { data: patientData, error: patientError } = await supabase
+                        .from('patient')
+                        .select('patient_id, patient_branch')
+                        .in('patient_id', patientIds)
+                        .eq('verification_status', 'verified');
+    
+                    if (patientError) {
+                        throw new Error(`Error fetching patient branches: ${patientError.message}`);
+                    }
+    
+                    return patientData.map(patient => patient.patient_branch);
+                };
+    
                 const fetchPromises = treatments.map(async (treatment) => {
                     if (treatment === 'Orthodontic Treatment') {
-                        const orthoQuery = supabase
+                        const { data: orthoData, error: orthoError } = await supabase
                             .from('patient_Orthodontics')
                             .select('patient_id')
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
-
-                        const { data: orthoData, error: orthoError } = await orthoQuery;
-
+    
                         if (orthoError) {
                             throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
                         }
-
-                        const patientIds = orthoData.map((ortho) => ortho.patient_id);
-
-                        const patientBranchPromises = patientIds.map(async (patientId) => {
-                            const { data: patientData, error: patientError } = await supabase
-                                .from('patient')
-                                .select('patient_branch')
-                                .eq('patient_id', patientId)
-                                .single();
-
-                            if (patientError) {
-                                throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-                            }
-
-                            return patientData.patient_branch;
-                        });
-
-                        const patientBranches = await Promise.all(patientBranchPromises);
-
+    
+                        const patientIds = orthoData.map(ortho => ortho.patient_id);
+                        const patientBranches = await fetchPatientBranches(patientIds);
                         const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter((branch) => branch === userBranch).length;
-
+                        const count = patientBranches.filter(branch => branch === userBranch).length;
+    
                         return { treatment, count };
                     } else {
-                        const treatmentsQuery = supabase
+                        const { data: treatmentsData, error: treatmentsError } = await supabase
                             .from('patient_Treatments')
                             .select('patient_id')
                             .eq('treatment', treatment)
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
-
-                        const { data: treatmentsData, error: treatmentsError } = await treatmentsQuery;
-
+    
                         if (treatmentsError) {
                             throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
                         }
-
-                        const patientIds = treatmentsData.map((treatment) => treatment.patient_id);
-
-                        const patientBranchPromises = patientIds.map(async (patientId) => {
-                            const { data: patientData, error: patientError } = await supabase
-                                .from('patient')
-                                .select('patient_branch')
-                                .eq('patient_id', patientId)
-                                .single();
-
-                            if (patientError) {
-                                throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-                            }
-
-                            return patientData.patient_branch;
-                        });
-
-                        const patientBranches = await Promise.all(patientBranchPromises);
-
+    
+                        const patientIds = treatmentsData.map(treatment => treatment.patient_id);
+                        const patientBranches = await fetchPatientBranches(patientIds);
                         const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter((branch) => branch === userBranch).length;
-
+                        const count = patientBranches.filter(branch => branch === userBranch).length;
+    
                         return { treatment, count };
                     }
                 });
-
+    
                 const counts = await Promise.all(fetchPromises);
-
+    
                 const newData = counts.map(({ treatment, count }) => count);
-
+    
                 const monthlyTreatmentReportData = {
-                    labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
+                    labels: treatments,
                     datasets: [
                         {
                             label: 'Monthly Treatment Counts',
@@ -576,57 +745,59 @@ const Dashboard = () => {
                         },
                     ],
                 };
-
+    
                 setMonthlyTreatmentReport(monthlyTreatmentReportData);
                 console.log('Monthly Treatment Report:', monthlyTreatmentReportData);
             } catch (error) {
                 console.error('Error fetching monthly treatment counts:', error.message);
             }
         };
-
-        fetchMonthlyTreatmentCounts();
+    
+        if (profileDetails?.branch) {
+            fetchMonthlyTreatmentCounts();
+        }
     }, [profileDetails]);
     
 {/*ORTHODONTIC CASES */}
-    async function fetchFirstPatientIds() {
-        try {
-            const { data: patientIds, error: patientIdsError } = await supabase
-                .from('patient')
-                .select('patient_id');
-            
-            if (patientIdsError) {
-                throw patientIdsError;
-            }
+async function fetchFirstPatientIds() {
+    try {
+        const { data: patientIds, error: patientIdsError } = await supabase
+            .from('patient')
+            .select('patient_id')
+            .eq('verification_status', 'verified'); // Filter by verification_status
 
-            
-            const ids = patientIds.map(item => item.patient_id);
-
-            return ids;
-        } catch (error) {
-            console.error('Error fetching first patient IDs:', error.message);
-            return [];
+        if (patientIdsError) {
+            throw patientIdsError;
         }
+
+        const ids = patientIds.map(item => item.patient_id);
+        return ids;
+    } catch (error) {
+        console.error('Error fetching first patient IDs:', error.message);
+        return [];
     }
+}
 
    
-    async function fetchPatientBranch(patientId) {
-        try {
-            const { data: patientData, error } = await supabase
-                .from('patient')
-                .select('patient_branch')
-                .eq('patient_id', patientId)
-                .single();
+async function fetchPatientBranch(patientId) {
+    try {
+        const { data: patientData, error } = await supabase
+            .from('patient')
+            .select('patient_branch')
+            .eq('patient_id', patientId)
+            .eq('verification_status', 'verified') 
+            .single();
 
-            if (error) {
-                throw error;
-            }
-
-            return patientData.patient_branch;
-        } catch (error) {
-            console.error(`Error fetching patient branch for ${patientId}:`, error.message);
-            return null;
+        if (error) {
+            throw error;
         }
+
+        return patientData.patient_branch;
+    } catch (error) {
+        console.error(`Error fetching patient branch for ${patientId}:`, error.message);
+        return null;
     }
+}
 
     async function countOrthodonticCasesForPatients(patientIds, profileDetails) {
         try {
@@ -694,7 +865,6 @@ const Dashboard = () => {
     useEffect(() => {
         async function fetchDataAndUpdate() {
             try {
-                
                 const patientIds = await fetchFirstPatientIds();
 
                 const filteredPatientIds = await Promise.all(patientIds.map(async (patientId) => {
@@ -718,72 +888,60 @@ const Dashboard = () => {
             try {
                 const sixMonthsAgo = new Date();
                 sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-                      
-                
+
+                // Fetch patient IDs with treatments in the last 6 months
                 const { data: treatments, error: treatmentsError } = await supabase
                     .from('patient_Treatments')
                     .select('patient_id')
                     .gte('created_at', sixMonthsAgo.toISOString());
-                
+                   
                 if (treatmentsError) throw treatmentsError;
 
-                
+                // Fetch patient IDs with orthodontics treatments in the last 6 months
                 const { data: orthodontics, error: orthodonticsError } = await supabase
                     .from('patient_Orthodontics')
                     .select('patient_id')
                     .gte('created_at', sixMonthsAgo.toISOString());
+                   
 
                 if (orthodonticsError) throw orthodonticsError;
 
-                
+                // Gather active patient IDs (those with either treatments or orthodontics)
                 const activePatientIds = new Set([
                     ...treatments.map(record => record.patient_id),
                     ...orthodontics.map(record => record.patient_id),
                 ]);
 
-                
+                // Fetch all patients in the current branch
                 const { data: allPatients, error: allPatientsError } = await supabase
                     .from('patient')
                     .select('patient_id')
-                    .eq('patient_branch', profileDetails.branch);
+                    .eq('patient_branch', profileDetails.branch)
+                    .eq('verification_status', 'verified'); // Filter by verification_status
 
                 if (allPatientsError) throw allPatientsError;
 
-                //Filter patients based sa branch
+                // Separate active and inactive patients
                 const activePatients = allPatients.filter(patient => activePatientIds.has(patient.patient_id));
                 const inactivePatients = allPatients.filter(patient => !activePatientIds.has(patient.patient_id));
 
-                
-                const activeCount = Array.from(activePatientIds).length;
-                const inactiveCount = allPatients.length - activeCount;
+                const activeCount = activePatients.length;
+                const inactiveCount = inactivePatients.length;
 
-                
-                console.log('Active count:', activeCount);
-                console.log('Inactive count:', inactiveCount);
-
-              
+                // Prepare data for patient status chart
                 const patientStatusData = {
                     labels: ['Active', 'Inactive'],
                     datasets: [
                         {
                             data: [activeCount, inactiveCount],
                             label: 'Patients',
-                            backgroundColor: [
-                                '#5FE465',
-                                '#E3E3E3',
-                            ],
+                            backgroundColor: ['#5FE465', '#E3E3E3'],
                             borderColor: '#ffffff',
                             borderWidth: 1,
-                            hoverBackgroundColor: [
-                                '#5FE465',
-                                '#E3E3E3',
-                            ],
+                            hoverBackgroundColor: ['#5FE465', '#E3E3E3'],
                         },
                     ],
                 };
-
-                
-                console.log('Patient Status Data:', patientStatusData);
 
                 setPatientStatus(patientStatusData);
             } catch (error) {
@@ -792,9 +950,8 @@ const Dashboard = () => {
         };
 
         fetchPatientStatus();
-    }, [profileDetails]); 
-    
-    
+    }, [profileDetails]);
+
     {/*RECENT PATIENTS */}
     useEffect(() => {
         const fetchRecentData = async () => {
@@ -908,12 +1065,10 @@ const Dashboard = () => {
         <div className='currentdate '>
             <h3>{currentDate}</h3>
         </div>
-    
-    
     </Col>   
     <Container fluid>
-                <div className="summary-cards container-fluid">
-                    <Row className='summary-cards-row container-fluid'>
+                <div className="summary-cards ">
+                    <Row className='summary-cards-row'>
                         <Col >
                             <div className="cards">
                                 <h2>TODAY</h2>
@@ -935,7 +1090,7 @@ const Dashboard = () => {
                                 <h4>Patients</h4> 
                             </div>
                         </Col>
-                        <Col className='profile-container '>
+                        <Col className='profile-container'>
                         <div className="myprofile-card ">
                             <div className="myprofilecard-header rounded">
                             <Link to="/settings" className="myprofile-link">

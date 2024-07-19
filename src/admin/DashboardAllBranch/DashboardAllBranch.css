@@ -17,13 +17,45 @@
     min-height: 100vh;
 }
 
-.profile-allbranch-container {
+.allheader-container {
+    display: flex;
+    top: 0;
+    flex: 1;
+    width: 70%;
+    padding: 0 10px;
+    text-align: center;
+ 
+}
+
+.allheader-container h1 {
+    font-weight: 700;
+    color: #005590;
+    margin-right: 20px;
+}
+
+.allheader-container h3 {
+    font-size: 2.0em;
+    font-weight: 500;
+    color: #005590;
+}
+
+.profile-allbranch-container .col{
     display: flex;
     width: 100%;
     margin-right: -25px;
     justify-content: flex-end; 
-    
 }
+.myprofilecard-allbranch-header {
+    background-color: #005590;
+    border-radius: 15px;
+    font-family: 'Poppins';
+    width: 100%;
+    font-size: 18px;
+    font-weight: 400;
+    padding: 10px;
+
+}
+
 .myprofile-allbranch-card {
     background-color: #ffffff;
     border-radius: 10px;
@@ -34,20 +66,22 @@
     text-align: left;
     display: flex;
     flex-direction: column;
-    margin-bottom: 5px;   
+    margin-bottom: 5px;     
     
 }
 .profile-allbranch-card-body {
     padding: 10px;
-    width: 350px;
+    width: 100%;
     height: 90%;
+    
     
 }
 
 .currentdate-allbranch {
+    width: 70px;
+    flex: 1; 
     display: flex;
-    flex: 1;
-    margin-right: 100px;
+    margin-right: 80px;
     justify-content: flex-end;
 
 }
@@ -59,11 +93,10 @@
 
 .allbranch-summary-cards {
     display: flex;
-    flex-wrap: wrap;
-    display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     padding-left: 0px;
-    margin-top: -50px;
+    margin-top: -40px;
+    
 }
 .allbranch-summary-cards-row {
     padding-left: 0px;
@@ -175,8 +208,6 @@
     text-align: left;
     padding: 20px;
     margin-bottom: 10px;
-    
-    
 
 }
 
@@ -197,3 +228,140 @@
     font-size: 1.0em;
     color: #005590;
 }
+.allmyprofile-fulln {
+    color: #005590;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+.allmyprofile-role {
+    color: #005590;
+    font-size: 20px;
+    font-weight: 400;
+    margin-top: -10px;
+}
+
+.allmyprofile-branch {
+    color: #005590;
+    font-size: 23px;
+    font-weight: 600;
+    margin-top: -5px;
+    margin-bottom: 0px;
+}
+
+.allmyprofile-link {
+    display: flex;
+    justify-content: space-between;
+    text-decoration: none;
+    color: #FFF;
+    
+}
+
+@media (max-width: 840px) {
+    .allheader-container {
+        flex-direction: row; 
+        width: 100%;  
+    }
+
+    .allheader-container h1, .allheader-container h3 {
+        margin-right: 5px; 
+        text-align: center;
+    }
+    
+    .currentdate-allbranch {
+        margin-left: 10px;
+        margin-right: 10px;
+        width: 100%;
+    }
+
+    .currentdate-allbranch h3 {
+        width: 100%;
+        align-content: center;
+        font-size: 1.4em;
+    }
+
+    .allbranch-summary-cards-row {
+        width: 100%;
+        margin-top: 30px;
+    }
+
+    .allbranch-card {
+        width: 100%;
+        height: 95%;
+        padding-left: 10px;
+        margin-top: 60px;
+    } 
+    .allmyprofile-fulln {
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .allmyprofile-role {
+        font-size: 12px;
+        font-weight: 400;
+        margin-top: 0;
+    }
+    
+    .allmyprofile-branch {
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: -5px;
+        margin-bottom: 0px;
+    }
+
+    .allmyprofile-link {
+        display: flex;
+        font-size: 12px;
+        align-items: center;
+        
+    }
+
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: row; 
+        width: 100%;
+    }
+
+    .header-container h1, .header-container h3 {
+        margin-right: 5; 
+        text-align: center;
+    }
+    
+    .currentdate-allbranch {
+        margin-left: 10px;
+        width: 100%;
+    }
+
+    .currentdate-allbranch h3 {
+        width: 100%;
+        align-content: center;
+        font-size: 1.4em;
+
+    }
+
+    .allbranch-card {
+        width: 100%;
+        height: 95%;
+        padding-left: 10px;
+        margin-top: 15px;
+        
+    }
+
+    .allbranch-card h2 {
+        font-size: 15px;
+      
+    }
+    .allbranch-card h3 {
+        font-size: 13px;
+    }
+    .cards h1 {
+        font-size: 20px;
+    }
+    
+    .cards h4 {
+        font-size: 15px;
+    }
+}
+
