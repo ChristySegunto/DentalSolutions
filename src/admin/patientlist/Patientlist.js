@@ -683,7 +683,8 @@ const handleAccept = async () => {
     const exportToPDF = () => {
         const tableData = getFilteredData(activeTab);
         const title = getExportTitle(activeTab);
-        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        const companyName = "Dental Solutions, Inc.";
+        const branchInfo = branch === "ALL BRANCH" ? "All Patients List in All Branch" : `All Patients List ${branch} Branch`;
     
         if (tableData.length === 0) {
             console.error("No data to export.");
@@ -693,36 +694,39 @@ const handleAccept = async () => {
         const doc = new jsPDF();
         
         // Set font size, style, and color for the company name
-        doc.setFontSize(16); // Larger font size for the company name
-        doc.setFont("helvetica", "bold"); // Set font to Helvetica and style to bold
-        doc.setTextColor(51, 153, 255); // Blue color for the company name
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(51, 153, 255);
         
         // Add the company name with enhanced styling
         const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
         const pageWidth = doc.internal.pageSize.width;
         const startX = (pageWidth - companyNameWidth) / 2;
-        doc.text(companyName, startX, 20); // Adjust the Y coordinate (20) and alignment as needed
+        doc.text(companyName, startX, 20);
     
-        // Reset font settings for the table
-        doc.setFontSize(12); // Reset font size for the table content
-        doc.setFont("helvetica", "normal"); // Reset font style to normal
-        doc.setTextColor(0); // Reset text color to black
+        // Add branch information
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 153, 255);
+        const branchInfoWidth = doc.getStringUnitWidth(branchInfo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const branchStartX = (pageWidth - branchInfoWidth) / 2;
+        doc.text(branchInfo, branchStartX, 30);
     
         // Move cursor down for the table
         doc.autoTable({
             head: getPDFTableHeaders(activeTab),
             body: tableData.map(patient => getPDFTableRow(patient, activeTab)),
-            startY: 30 // Adjust startY to leave space after the company name
+            startY: 40 // Adjust startY to leave space after the branch info
         });
     
         doc.save(`${title}.pdf`);
     };
     
-    
     const exportToExcel = () => {
         const tableData = getFilteredData(activeTab);
         const sheetName = getExportTitle(activeTab);
-        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        const companyName = "Dental Solutions, Inc.";
+        const branchInfo = branch === "ALL BRANCH" ? "All Patients List in All Branch" : `All Patients List ${branch} Branch`;
     
         if (tableData.length === 0) {
             console.error("No data to export.");
@@ -737,18 +741,24 @@ const handleAccept = async () => {
         const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 });
         worksheet[companyNameCellRef] = companyNameCell;
     
-        // Merge cells for company name
-        const merge = { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }; // Adjust the number of columns (c: 5) as needed
+        // Add branch information to cell A2 with styling
+        const branchInfoCell = { v: branchInfo, t: 's', s: { font: { bold: true, sz: 12 }, alignment: { horizontal: 'center' } } };
+        const branchInfoCellRef = XLSX.utils.encode_cell({ r: 1, c: 0 });
+        worksheet[branchInfoCellRef] = branchInfoCell;
+    
+        // Merge cells for company name and branch info
+        const mergeCompany = { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } };
+        const mergeBranch = { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } };
         if (!worksheet['!merges']) worksheet['!merges'] = [];
-        worksheet['!merges'].push(merge);
+        worksheet['!merges'].push(mergeCompany, mergeBranch);
     
         // Add headers
         const headers = getExcelHeaders(activeTab);
-        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A2" });
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A3" });
     
         // Add data rows
         const dataRows = tableData.map(patient => getExcelDataRow(patient, activeTab));
-        XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A3", skipHeader: true });
+        XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A4", skipHeader: true });
     
         // Auto-size columns
         const columnsWidth = headers.map((header, index) => ({

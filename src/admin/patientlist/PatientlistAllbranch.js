@@ -178,11 +178,13 @@ const PatientlistAllbranch = () => {
         const doc = new jsPDF();
         let tableData = [];
         let title = '';
+        let branchInfo = '';
     
         switch (activeTab) {
             case 'allPatients':
                 tableData = filteredAllPatients; 
-                title = 'All Patients - All BRANCH';
+                title = 'All Patients List';
+                branchInfo = activeTab === 'allPatients' ? 'All Branch' : dentistBranch;
                 break;
             default:
                 tableData = [];
@@ -194,25 +196,29 @@ const PatientlistAllbranch = () => {
             return;
         }
     
-        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        const companyName = "Dental Solutions, Inc.";
+        const listInfo = `${title} - ${branchInfo}`;
         
-        // Set font size, style, and color for the company name in the header
-        doc.setFontSize(16); // Larger font size for the company name
-        doc.setFont("helvetica", "bold"); // Set font to Helvetica and style to bold
-        doc.setTextColor(51, 153, 255); // Blue color for the company name
+        // Company name
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(51, 153, 255);
         
-        // Calculate positioning for centering the company name
         const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
         const pageWidth = doc.internal.pageSize.width;
         const startX = (pageWidth - companyNameWidth) / 2;
         
-        // Add the company name in the header
-        doc.text(companyName, startX, 10); // Adjust the Y coordinate (10) and alignment as needed
+        doc.text(companyName, startX, 10);
     
-        // Reset font settings for the table
-        doc.setFontSize(12); // Reset font size for the table content
-        doc.setFont("helvetica", "normal"); // Reset font style to normal
-        doc.setTextColor(0); // Reset text color to black
+        // Branch info
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 153, 255);
+        
+        const listInfoWidth = doc.getStringUnitWidth(listInfo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const listInfoStartX = (pageWidth - listInfoWidth) / 2;
+        
+        doc.text(listInfo, listInfoStartX, 20);
     
         // Generate the table
         doc.autoTable({
@@ -225,22 +231,22 @@ const PatientlistAllbranch = () => {
                 patient.patient_email,
                 patient.patient_branch,
             ]),
-            startY: 20 // Adjust startY to leave space after the company name
+            startY: 30
         });
     
-        // Save the PDF with the specified title
-        doc.save(`${title}.pdf`);
+        doc.save(`${title} - ${branchInfo}.pdf`);
     };
     
-
     const exportToExcel = () => {
         let tableData = [];
         let sheetName = '';
+        let branchInfo = '';
     
         switch (activeTab) {
             case 'allPatients':
                 tableData = filteredAllPatients;
-                sheetName = 'All Patients - All BRANCH';
+                sheetName = 'All Patients List';
+                branchInfo = activeTab === 'allPatients' ? 'All Branch' : dentistBranch;
                 break;
             default:
                 console.error("Invalid active tab.");
@@ -256,10 +262,16 @@ const PatientlistAllbranch = () => {
         const worksheet = XLSX.utils.json_to_sheet([]);
     
         // Add company name to cell A1
-        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
-        const companyNameCell = { v: companyName, t: 's' }; // 's' means string type
-        const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 }); // A1 cell position
+        const companyName = "Dental Solutions, Inc.";
+        const companyNameCell = { v: companyName, t: 's' };
+        const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 });
         worksheet[companyNameCellRef] = companyNameCell;
+    
+        // Add branch info to cell A2
+        const listInfo = `${sheetName} - ${branchInfo}`;
+        const listInfoCell = { v: listInfo, t: 's' };
+        const listInfoCellRef = XLSX.utils.encode_cell({ r: 1, c: 0 });
+        worksheet[listInfoCellRef] = listInfoCell;
     
         // Shift data down starting from A3
         const dataRows = tableData.map(patient => ({
@@ -283,7 +295,7 @@ const PatientlistAllbranch = () => {
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
     
         // Save Blob as Excel file
-        saveAs(data, `${sheetName}.xlsx`);
+        saveAs(data, `${sheetName} - ${branchInfo}.xlsx`);
     };
     
     return (
