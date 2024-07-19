@@ -1052,7 +1052,7 @@ async function fetchPatientBranch(patientId) {
     return (
         <div className="dashboard-container container-fluid">
             <div className="dashboard">
-            <Col className='header-container'>
+            <Col className='header-container '>
         <h1>Dashboard</h1>
         <Dropdown onSelect={handleSelect}>
             <Dropdown.Toggle className="dropdownbranch">
