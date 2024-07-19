@@ -14,6 +14,9 @@ const Verifypatient = () => {
     const [patientUsername, setPatientUsername] = useState('Unknown');
     const navigate = useNavigate();
 
+    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+
     const [ModalTitle, setModalTitle] = useState('');
     const [ModalBody, setModalBody] = useState('');
 
@@ -144,8 +147,10 @@ const Verifypatient = () => {
 
                 if (detections.length > 0) {
                     setBorderColor('green');
+                    setIsButtonDisabled(false); // Enable the scan button
                 } else {
                     setBorderColor('red');
+                    setIsButtonDisabled(true); // Disable the scan button
                 }
             }, 1000);
         }
@@ -235,7 +240,7 @@ const Verifypatient = () => {
                     </Modal>
 
                     <div className="scanbtn-div">
-                        <Button className="scanbtn btn" onClick={handleCheckRecord}>Scan</Button>
+                        <Button className="scanbtn btn" onClick={handleCheckRecord} disabled={isButtonDisabled}>Scan</Button>
                     </div>
                 </div>
             </div>
