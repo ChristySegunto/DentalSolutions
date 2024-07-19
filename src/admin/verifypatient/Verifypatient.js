@@ -29,9 +29,31 @@ const Verifypatient = () => {
     };
 
     useEffect(() => {
+        if (!isGetUserMediaSupported()) {
+            alert('getUserMedia is not supported by your browser. Please use a different browser.');
+            return;
+        }
+    
         loadModels();
         handleScan();
+    
+        return () => {
+            if (streamRef.current) {
+                const tracks = streamRef.current.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        };
     }, []);
+
+    const isGetUserMediaSupported = () => {
+        return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    };
+    
+    if (isGetUserMediaSupported()) {
+        console.log('getUserMedia is supported in this browser.');
+    } else {
+        console.log('getUserMedia is not supported in this browser.');
+    }
 
     const handleScan = async () => {
         await loadModels(); // Ensure models are loaded before starting the scan
@@ -50,13 +72,7 @@ const Verifypatient = () => {
     };
 
     const handleReset = () => {
-        // if (videoRef.current && videoRef.current.srcObject) {
-        //     const stream = videoRef.current.srcObject;
-        //     const tracks = stream.getTracks();
 
-        //     tracks.forEach(track => track.stop());
-        //     videoRef.current.srcObject = null;
-        // }
         setIsScanning(false);
         setShowModal(false);
         setBorderColor('red'); // Reset border color
