@@ -163,13 +163,46 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
 
     return (
         <>
-            <div className="scanface-custom">
+            <div className="scanface-custom mb-3">
                 <h2>SCAN FACE</h2>
-                <div className="video-container" style={{ position: 'relative' }}>
-                    <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
-                    <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480"></canvas>
-                    <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
+                <div className='d-flex justify-content-center'>
+                    <div className="video-container" style={{ position: 'relative' }}>
+                        <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
+                        <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480"></canvas>
+                        <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
+                    </div>
                 </div>
+                
+                <div className='facedirectioncontainer d-flex justify-content-center'>
+                    <div className='d-flex justify-content-center align-items-center'>
+                        {capturedImages === 0 && (
+                            <p className="facedirection-message">Capture front face</p>
+                        )}
+
+                        {capturedImages === 1 && (
+                            <p className="facedirection-message">Capture left part of the face</p>
+                        )}
+
+                        {capturedImages === 2 && (
+                            <p className="facedirection-message">Capture right part of the face</p>
+                        )}
+
+                        {capturedImages === 3 && (
+                            <p className="facedirection-message">Capture top part of the face</p>
+                        )}
+
+                        {capturedImages === 4 && (
+                            <p className="facedirection-message">Capture bottom part of the face</p>
+                        )}
+
+                        {capturedImages === 5 && (
+                            <p className="facedirection-message">Please click the submit button to save.</p>
+                        )}
+
+                    </div>
+                </div>
+                
+                
                 <div className="form-group">
                     <label>Patient Name:</label>
                     <input
@@ -179,7 +212,7 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                         readOnly
                     />
                 </div>
-                <div className='d-flex justify-content-center'>
+                <div className='d-flex justify-content-center mt-3 mb-5'>
                     <button
                         onClick={handleCaptureImage}
                         disabled={!buttonEnabled}
@@ -204,6 +237,21 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                     margin-top: 10px;
                     // background-color: ${buttonEnabled ? '#005590' : '#7a8185'};
                 }
+                .facedirectioncontainer{
+                    background-color: '#fff';
+                    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+                    width: 50%;
+                    height: 10%;
+                    border-radius: 10px;
+                    margin: 10px auto; // Change this line
+                }
+                .facedirection-message{
+                    color: #005590;
+                    font-size: 25px;
+                    margin: 0;
+                }
+
+
             `}</style>
         </>
     );
