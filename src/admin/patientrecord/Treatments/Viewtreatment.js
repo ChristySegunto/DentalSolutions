@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import './Viewtreatment.css';
+import { FaEye } from 'react-icons/fa';
 import { Button, Form, Table } from 'react-bootstrap';
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from "../../../settings/AuthContext";
 import supabase from "../../../settings/supabase";
-
-import { Avatar } from "@files-ui/react";
-import userImage from '../../../img/user.png';
 
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -18,8 +16,6 @@ const Viewtreatment = () => {
     const [userDetails, setUserDetails] = useState(null);
     const [adminDetails, setAdminDetails] = useState({});
     const { patient_id, treatment_id } = useParams();
-
-    const [imageSource, setImageSource] = useState(userImage);
 
     const [patient, setPatient] = useState({
         patient_fname: '',
@@ -202,10 +198,6 @@ const Viewtreatment = () => {
         navigate(`/patientrecord/${patient_id}`, { state: { activeTab: 'treatments' } });
     };
 
-    const handleChangeSource = (selectedFile) => {
-        setImageSource(selectedFile);
-    };
-
         //if data is null, then the placeholder will display n/a instead of blank
         const getPlaceholder = (value) => value ? value : "N/A";
 
@@ -243,33 +235,18 @@ const Viewtreatment = () => {
                 const { data, error } = await supabase
                     .storage
                     .from('treatment_fileupload')
-                    .download(`public/${patient_id}/${treatment_id}/${fileName}`);
+                    .createSignedUrl(`public/${patient_id}/${treatment_id}/${fileName}`, 60); // URL valid for 60 seconds
         
                 if (error) {
-                    console.error('Error downloading file:', error.message);
+                    console.error('Error creating signed URL:', error.message);
                     throw error;
                 }
         
-                // Create a Blob from the file data with correct MIME type
-                const blob = new Blob([data], { type: 'application/octet-stream' });
-        
-                // Create a temporary URL for the Blob
-                const url = window.URL.createObjectURL(blob);
-        
-                // Create a link element to trigger the download
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-        
-                // Trigger the download
-                link.click();
-        
-                // Clean up
-                link.parentNode.removeChild(link);
+                // Open the signed URL in a new tab
+                window.open(data.signedUrl, '_blank');
             } catch (error) {
-                console.error('Error downloading file:', error.message);
-                setUserError('Failed to download file');
+                console.error('Error opening file:', error.message);
+                setUserError('Failed to open file');
             }
         };
 
@@ -371,55 +348,41 @@ const Viewtreatment = () => {
             </div>
 
             {patient && (
-                <div className="personalinfo-container row">
+                <div className="personalinfo-container">
+                    <div className="name-branch row">
+                        <div className="fullname col-lg-8">
+                            <h4>{patient_fname} {patient_mname} {patient_lname}</h4>
+                        </div>
+                        <div className="branch-label col-lg-4">
+                            <p>{patient_branch}</p>
+                        </div>
+                    </div>  
 
-                    <div className="avatar-col col-10 col-md-2 col-sm-12 order-md-1 d-flex justify-content-center">
-                        <Avatar
-                            src={imageSource}
-                            alt="uploadpic"
-                            changeLabel={"Upload Picture"}
-                            onChange={handleChangeSource}
-                        />
+                    <div className="otherdetails row">
+                        <div className="agegenderbday col-lg-6">
+                            <p><span className="bold">Age:</span> {patient.patient_age}</p>
+                            <p><span className="bold">Gender:</span> {patient.patient_gender}</p>
+                            <p><span className="bold">Birthdate:</span> {patient.patient_birthdate}</p>
+                        </div>
+                        <div className="numemailadd col-lg-6">
+                            <p><span className="bold">Contact Number:</span> {patient.patient_contact}</p>
+                            <p><span className="bold">Email:</span> {patient.patient_email}</p>
+                            <p><span className="bold">Address:</span> {patient.patient_address}</p>
+                        </div>
                     </div>
-                    
-                    <div className="personalinfo-col col-12 col-md-8 order-md-2 order-2 ">
-                        <div className="name-branch row">
-                            <div className="fullname col-lg-8">
-                                <h4>{patient_fname} {patient_mname} {patient_lname}</h4>
-                            </div>
-                            <div className="branch-label col-lg-4">
-                                <p>{patient_branch}</p>
-                            </div>
-                        </div>  
 
+                    {showGuardianForm && (
                         <div className="otherdetails row">
-                            <div className="agegenderbday col-lg-6">
-                                <p><span className="bold">Age:</span> {patient.patient_age}</p>
-                                <p><span className="bold">Gender:</span> {patient.patient_gender}</p>
-                                <p><span className="bold">Birthdate:</span> {patient.patient_birthdate}</p>
+                            <div className="numemailadd col-lg-6">
+                                <p><span className="bold">Guardian Name:</span> {patient.guardian_name}</p>
+                                <p><span className="bold">Relationship with Patient:</span> {patient.guardian_relationship}</p>
                             </div>
                             <div className="numemailadd col-lg-6">
-                                <p><span className="bold">Contact Number:</span> {patient.patient_contact}</p>
-                                <p><span className="bold">Email:</span> {patient.patient_email}</p>
-                                <p><span className="bold">Address:</span> {patient.patient_address}</p>
+                                <p><span className="bold">Guardian Email:</span> {patient.guardian_email}</p>
+                                <p><span className="bold">Guardian Number:</span> {patient.guardian_number}</p>
                             </div>
                         </div>
-
-                        {showGuardianForm && (
-                            <>
-                                <div className="otherdetails row">
-                                    <div className="numemailadd col-lg-6">
-                                        <p><span className="bold">Guardian Name:</span> {patient.guardian_name}</p>
-                                        <p><span className="bold">Relationship with Patient:</span> {patient.guardian_relationship}</p>
-                                    </div>
-                                    <div className="numemailadd col-lg-6">
-                                        <p><span className="bold">Guardian Name:</span> {patient.guardian_email}</p>
-                                        <p><span className="bold">Relationship with Patient:</span> {patient.guardian_number}</p>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    )}
                 </div>
             )}
 
@@ -810,7 +773,7 @@ const Viewtreatment = () => {
                                                             className="downloadbtn btn"
                                                             onClick={() => handleFileDownload(p.treatment_filename)}
                                                         >
-                                                            Download
+                                                           <FaEye></FaEye> 
                                                         </button>
                                                     </td>
                                                 </tr>

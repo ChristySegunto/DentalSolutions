@@ -362,70 +362,77 @@ const Details = () => {
     const emailjs = require('emailjs-com');
 
 
-    const handleTransferPatientSubmit = async () => {
-        setShowConfirmModal(false);
+   const handleTransferPatientSubmit = async () => {
+    setShowConfirmModal(false);
 
-        // Customize template parameters
-        const templateParams = {
-            from_name: 'dentalsolutionsample@gmail.com',
-            send_to: patient.patient_email,
-            to_name: patient.patient_fname,
-            message: transferReason 
-        };
-
-        // Send email using EmailJS
-        const emailResult = await emailjs.send(
-            'service_41jqk43', // Your EmailJS service ID
-            'template_uyupudb', // Your EmailJS template ID
-            templateParams, // Parameters for the email template
-            'b7q1Mru-GSMKmpTr7' // Your EmailJS user ID
-        );
-
-        console.log('Email sent:', emailResult);
-
-
-        const transferPatient = {
-            patient_id,
-            from_branch: patient.patient_branch,
-            to_branch: selectedBranches,
-            transfer_status: 'Pending',
-            patient_fname: patient.patient_fname,
-            patient_lname: patient.patient_lname,
-            transferred_by: fullName,
-            transfer_date: new Date().toISOString(),
-            transfer_reason: transferReason
-        }
-
-        try{
-            const { data, error } = await supabase
-                .from('patient_Transfer')
-                .insert(transferPatient)
-                .single();
-
-            const {updatePatient, error: updateError} = await supabase
-                .from('patient')
-                .update({transfer_status: 'pending'})
-                .eq('patient_id', patient_id)
-                .single();
-
-
-            if (error) {
-                throw error;
-            }
-
-            console.log('Patient transferred:', data);
-
-            setShowSuccessMessage(true);
-            setTimeout(() => {
-                navigate('/patientlist');
-            }, 3000);
-
-        } catch (error) {
-            console.error('Error transferring patient:', error.message);
-        }
-
-
+    // Customize template parameters
+    const templateParams = {
+        from_name: 'dentalsolutionsample@gmail.com',
+        send_to: patient.patient_email,
+        to_name: patient.patient_fname,
+        message: transferReason,
+        from_branch: patient.patient_branch,
+        to_branch: selectedBranches
     };
+
+    let emailResult = null;
+    if (patient.patient_email) {
+        // Send email using EmailJS
+        try {
+            emailResult = await emailjs.send(
+                'service_iwcf84r', // Your EmailJS service ID
+                'template_z60nwjf', // Your EmailJS template ID
+                templateParams, // Parameters for the email template
+                'ZxEa7HaIX1rzrgO7n' // Your EmailJS user ID
+            );
+
+            console.log('Email sent:', emailResult);
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+    } else {
+        console.log('Patient does not have an email address. Skipping email sending.');
+    }
+
+    const transferPatient = {
+        patient_id,
+        from_branch: patient.patient_branch,
+        to_branch: selectedBranches,
+        transfer_status: 'Pending',
+        patient_fname: patient.patient_fname,
+        patient_lname: patient.patient_lname,
+        transferred_by: fullName,
+        transfer_date: new Date().toISOString(),
+        transfer_reason: transferReason
+    };
+
+    try {
+        const { data, error } = await supabase
+            .from('patient_Transfer')
+            .insert(transferPatient)
+            .single();
+
+        const { updatePatient, updateError } = await supabase
+            .from('patient')
+            .update({ transfer_status: 'pending' })
+            .eq('patient_id', patient_id)
+            .single();
+
+        if (error) {
+            throw error;
+        }
+
+        console.log('Patient transferred:', data);
+
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+            navigate('/patientlist');
+        }, 3000);
+
+    } catch (error) {
+        console.error('Error transferring patient:', error.message);
+    }
+};
 
     const handleConfirm = (event) => {
         event.preventDefault();

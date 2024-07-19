@@ -686,20 +686,43 @@ const handleAccept = async () => {
     };
 
 
-      const exportToPDF = () => {
+    const exportToPDF = () => {
         const tableData = getFilteredData(activeTab);
         const title = getExportTitle(activeTab);
+        const companyName = "Dental Solutions, Inc.";
+        const branchInfo = branch === "ALL BRANCH" ? "All Patients List in All Branch" : `All Patients List ${branch} Branch`;
     
         if (tableData.length === 0) {
             console.error("No data to export.");
             return;
         }
     
-
         const doc = new jsPDF();
+        
+        // Set font size, style, and color for the company name
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(51, 153, 255);
+        
+        // Add the company name with enhanced styling
+        const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const pageWidth = doc.internal.pageSize.width;
+        const startX = (pageWidth - companyNameWidth) / 2;
+        doc.text(companyName, startX, 20);
+    
+        // Add branch information
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 153, 255);
+        const branchInfoWidth = doc.getStringUnitWidth(branchInfo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const branchStartX = (pageWidth - branchInfoWidth) / 2;
+        doc.text(branchInfo, branchStartX, 30);
+    
+        // Move cursor down for the table
         doc.autoTable({
             head: getPDFTableHeaders(activeTab),
-            body: tableData.map(patient => getPDFTableRow(patient, activeTab))
+            body: tableData.map(patient => getPDFTableRow(patient, activeTab)),
+            startY: 40 // Adjust startY to leave space after the branch info
         });
     
         doc.save(`${title}.pdf`);
@@ -708,20 +731,72 @@ const handleAccept = async () => {
     const exportToExcel = () => {
         const tableData = getFilteredData(activeTab);
         const sheetName = getExportTitle(activeTab);
+        const companyName = "Dental Solutions, Inc.";
+        const branchInfo = branch === "ALL BRANCH" ? "All Patients List in All Branch" : `All Patients List ${branch} Branch`;
     
         if (tableData.length === 0) {
             console.error("No data to export.");
             return;
         }
     
-        const worksheet = XLSX.utils.json_to_sheet(tableData.map(patient => getExcelDataRow(patient, activeTab)));
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet([]);
     
+        // Add company name to cell A1 with styling
+        const companyNameCell = { v: companyName, t: 's', s: { font: { bold: true, sz: 16 }, alignment: { horizontal: 'center' } } };
+        const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 });
+        worksheet[companyNameCellRef] = companyNameCell;
+    
+        // Add branch information to cell A2 with styling
+        const branchInfoCell = { v: branchInfo, t: 's', s: { font: { bold: true, sz: 12 }, alignment: { horizontal: 'center' } } };
+        const branchInfoCellRef = XLSX.utils.encode_cell({ r: 1, c: 0 });
+        worksheet[branchInfoCellRef] = branchInfoCell;
+    
+        // Merge cells for company name and branch info
+        const mergeCompany = { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } };
+        const mergeBranch = { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } };
+        if (!worksheet['!merges']) worksheet['!merges'] = [];
+        worksheet['!merges'].push(mergeCompany, mergeBranch);
+    
+        // Add headers
+        const headers = getExcelHeaders(activeTab);
+        XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A3" });
+    
+        // Add data rows
+        const dataRows = tableData.map(patient => getExcelDataRow(patient, activeTab));
+        XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A4", skipHeader: true });
+    
+        // Auto-size columns
+        const columnsWidth = headers.map((header, index) => ({
+            wch: Math.max(header.length, ...dataRows.map(row => String(Object.values(row)[index]).length))
+        }));
+        worksheet['!cols'] = columnsWidth;
+    
+        // Create workbook and append worksheet
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     
+        // Convert workbook to Excel buffer
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+        // Convert Excel buffer to Blob
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    
+        // Save Blob as Excel file
         saveAs(data, `${sheetName}.xlsx`);
+    };
+    
+    // Helper function to get Excel headers
+    const getExcelHeaders = (tab) => {
+        switch (tab) {
+            case 'allPatients':
+            case 'pending':
+                return ['Name', 'Age', 'Gender', 'Contact', 'Email', 'Branch'];
+            case 'transferees':
+                return ['Name', 'From Branch', 'To Branch', 'Age', 'Gender', 'Contact', 'Email'];
+            default:
+                return [];
+        }
     };
     
     // Helper functions

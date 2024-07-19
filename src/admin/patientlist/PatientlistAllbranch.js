@@ -178,72 +178,126 @@ const PatientlistAllbranch = () => {
         const doc = new jsPDF();
         let tableData = [];
         let title = '';
-
+        let branchInfo = '';
+    
         switch (activeTab) {
             case 'allPatients':
-              tableData = filteredAllPatients; 
-              title = 'All Patients - All BRANCH';
-              break;
+                tableData = filteredAllPatients; 
+                title = 'All Patients List';
+                branchInfo = activeTab === 'allPatients' ? 'All Branch' : dentistBranch;
+                break;
             default:
-              tableData = [];
-              title = 'Patients';
-          }
-
-          if (tableData.length === 0) {
-            console.error("No data to export.");
-            return;
-          }
-
-          doc.autoTable({
-            head: [['Name', 'Age', 'Gender', 'Contact', 'Email', 'Branch']],
-            body: tableData.map(patient => [
-              `${patient.patient_fname} ${patient.patient_lname}`,
-              patient.patient_age,
-              patient.patient_gender,
-              patient.patient_contact,
-              patient.patient_email,
-              patient.patient_branch,
-            ])
-          });
-        
-          doc.save(`${title}.pdf`);
-        };
-
-        const exportToExcel = () => {
-            let tableData = [];
-            let sheetName = '';
-
-            switch (activeTab) {
-            case 'allPatients':
-            tableData = filteredAllPatients; 
-            sheetName = 'All Patients - All BRANCH';
-            break;
-            default:
-            tableData = [];
-            sheetName = 'Patients';
+                tableData = [];
+                title = 'Patients';
         }
+    
         if (tableData.length === 0) {
             console.error("No data to export.");
             return;
-          }
-
-              const worksheet = XLSX.utils.json_to_sheet(tableData.map(patient => ({
-                'Name': `${patient.patient_fname} ${patient.patient_lname}`,
-                'Age': patient.patient_age,
-                'Gender': patient.patient_gender,
-                'Contact': patient.patient_contact,
-                'Email': patient.patient_email,
-                'Branch':patient.patient_branch,
-              })));
-            
-              const workbook = XLSX.utils.book_new();
-              XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-            
-              const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-              const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-              saveAs(data, `${sheetName}.xlsx`);
-            };
-
+        }
+    
+        const companyName = "Dental Solutions, Inc.";
+        const listInfo = `${title} - ${branchInfo}`;
+        
+        // Company name
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(51, 153, 255);
+        
+        const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const pageWidth = doc.internal.pageSize.width;
+        const startX = (pageWidth - companyNameWidth) / 2;
+        
+        doc.text(companyName, startX, 10);
+    
+        // Branch info
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(51, 153, 255);
+        
+        const listInfoWidth = doc.getStringUnitWidth(listInfo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const listInfoStartX = (pageWidth - listInfoWidth) / 2;
+        
+        doc.text(listInfo, listInfoStartX, 20);
+    
+        // Generate the table
+        doc.autoTable({
+            head: [['Name', 'Age', 'Gender', 'Contact', 'Email', 'Branch']],
+            body: tableData.map(patient => [
+                `${patient.patient_fname} ${patient.patient_lname}`,
+                patient.patient_age,
+                patient.patient_gender,
+                patient.patient_contact,
+                patient.patient_email,
+                patient.patient_branch,
+            ]),
+            startY: 30
+        });
+    
+        doc.save(`${title} - ${branchInfo}.pdf`);
+    };
+    
+    const exportToExcel = () => {
+        let tableData = [];
+        let sheetName = '';
+        let branchInfo = '';
+    
+        switch (activeTab) {
+            case 'allPatients':
+                tableData = filteredAllPatients;
+                sheetName = 'All Patients List';
+                branchInfo = activeTab === 'allPatients' ? 'All Branch' : dentistBranch;
+                break;
+            default:
+                console.error("Invalid active tab.");
+                return;
+        }
+    
+        if (tableData.length === 0) {
+            console.error("No data to export.");
+            return;
+        }
+    
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet([]);
+    
+        // Add company name to cell A1
+        const companyName = "Dental Solutions, Inc.";
+        const companyNameCell = { v: companyName, t: 's' };
+        const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 });
+        worksheet[companyNameCellRef] = companyNameCell;
+    
+        // Add branch info to cell A2
+        const listInfo = `${sheetName} - ${branchInfo}`;
+        const listInfoCell = { v: listInfo, t: 's' };
+        const listInfoCellRef = XLSX.utils.encode_cell({ r: 1, c: 0 });
+        worksheet[listInfoCellRef] = listInfoCell;
+    
+        // Shift data down starting from A3
+        const dataRows = tableData.map(patient => ({
+            'Name': `${patient.patient_fname} ${patient.patient_lname}`,
+            'Age': patient.patient_age,
+            'Gender': patient.patient_gender,
+            'Contact Number': patient.patient_contact,
+            'Email': patient.patient_email,
+            'Branch': patient.patient_branch,
+        }));
+        XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A3", skipHeader: false });
+    
+        // Create workbook and append worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    
+        // Convert workbook to Excel buffer
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+        // Convert Excel buffer to Blob
+        const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    
+        // Save Blob as Excel file
+        saveAs(data, `${sheetName} - ${branchInfo}.xlsx`);
+    };
+    
     return (
             <div className="patientlist-allbranch-box container-fluid">
             <Col>
