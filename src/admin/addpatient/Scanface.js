@@ -165,6 +165,7 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
         <>
             <div className="scanface-custom mb-3">
                 <h2>SCAN FACE</h2>
+                <div className='divider'></div>
                 <div className='d-flex justify-content-center'>
                     <div className="video-container" style={{ position: 'relative' }}>
                         <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
@@ -249,6 +250,18 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                     color: #005590;
                     font-size: 25px;
                     margin: 0;
+                }
+
+                .scanface-custom h2{
+                    color: #005590;
+                    font-family: Poppins;
+                    font-size: 30px;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: normal;
+                }
+                .scanface-custom{
+                    border-radius: 10px;
                 }
 
 
