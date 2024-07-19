@@ -8,6 +8,7 @@ import AccountInfoForm from './AccountInfoForm';
 import Scanface from './Scanface';
 import supabase from './../../settings/supabase.js';
 import { useNavigate } from 'react-router-dom'; // Import useHistory hook
+import CryptoJS from 'crypto-js';
 
 
 
@@ -275,6 +276,8 @@ const Addpatient = () => {
         }
 
         if (currentStep === 4) {
+            const hashedPassword = CryptoJS.SHA256(accountInfoData.password).toString();
+
             const { data: existingUsers, error: userQueryError } = await supabase
                 .from('user')
                 .select('username')
@@ -293,7 +296,7 @@ const Addpatient = () => {
             const userData = {
                 role: 'patient',
                 username: accountInfoData.username,
-                password: accountInfoData.password,
+                password: hashedPassword,
                 email: patientData.patient_email
             }
 
@@ -308,6 +311,7 @@ const Addpatient = () => {
                 patient_email: patientData.patient_email,
                 patient_contact: patientData.patient_contact,
                 verification_status: 'not verified',
+                patient_pendingstatus: 'pending',
                 patient_branch: selectedBranch,
                 consent_checked: consentChecked
             }
@@ -451,7 +455,7 @@ const Addpatient = () => {
         if (patientId) {
             const { data, error} = await supabase
                 .from('patient')
-                .update({ verification_status: 'verified' })
+                .update({ verification_status: 'verified', patient_pendingstatus: null })
                 .eq('patient_id', patientId)
 
                 if (error) {

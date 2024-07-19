@@ -12,6 +12,7 @@ import { Modal } from 'react-bootstrap';
 //Firebase
 import supabase from './../settings/supabase';
 import { ModalBody } from "react-bootstrap";
+import CryptoJS from 'crypto-js';
 
 const LoginForm = () => {
     const [credential, setCredential] = useState(''); // This will hold username or email
@@ -70,6 +71,10 @@ const LoginForm = () => {
 
     const handleClose = () => setShowModal(false);
 
+    const hashPassword = (password) => {
+        return CryptoJS.SHA256(password).toString();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -106,8 +111,10 @@ const LoginForm = () => {
                 throw userError;
             }
 
-            // Compare the fetched password with the input password
-            if (!userData || userData.password !== password) {
+
+            // Hash the entered password and compare it with the stored hash
+            const hashedPassword = hashPassword(password);
+            if (!userData || userData.password !== hashedPassword) {
                 setAttempts(prevAttempts => {
                     const newAttempts = prevAttempts + 1;
                     localStorage.setItem('loginAttempts', newAttempts);
@@ -131,6 +138,7 @@ const LoginForm = () => {
                 if (patientError) {
                     throw patientError;
                 }
+                
 
                 if (patientData[0].verification_status === 'not verified') {
                     setShowModal(true);

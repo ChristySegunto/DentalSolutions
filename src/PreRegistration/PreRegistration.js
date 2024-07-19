@@ -8,6 +8,7 @@ import DentalAndMedForm from './DentalAndMedForm';
 import AccountInfoForm from './AccountInfoForm';
 import supabase from './../settings/supabase';
 import { useNavigate } from 'react-router-dom'; // Import useHistory hook
+import CryptoJS from 'crypto-js';
 
 
 
@@ -273,6 +274,8 @@ const Prereg = () => {
                 setModalHeader("Password Not Matched");
                 setShowModal(true);
             } else {
+                const hashedPassword = CryptoJS.SHA256(accountInfoData.password).toString();
+
                 const { data: existingUsers, error: userQueryError } = await supabase
                     .from('user')
                     .select('username')
@@ -289,7 +292,7 @@ const Prereg = () => {
                     const userData = {
                         role: 'patient',
                         username: accountInfoData.username,
-                        password: accountInfoData.password,
+                        password: hashedPassword,
                         email: patientData.patient_email
                     }
     

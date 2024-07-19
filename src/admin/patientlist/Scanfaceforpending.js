@@ -250,6 +250,36 @@ const Scanfaceforpending = () => {
                         <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
                     </div>
                 </div>
+
+                <div className='facedirectioncontainer d-flex justify-content-center'>
+                    <div className='d-flex justify-content-center align-items-center'>
+                        {capturedImages === 0 && (
+                            <p className="facedirection-message">Capture front face</p>
+                        )}
+
+                        {capturedImages === 1 && (
+                            <p className="facedirection-message">Capture left part of the face</p>
+                        )}
+
+                        {capturedImages === 2 && (
+                            <p className="facedirection-message">Capture right part of the face</p>
+                        )}
+
+                        {capturedImages === 3 && (
+                            <p className="facedirection-message">Capture top part of the face</p>
+                        )}
+
+                        {capturedImages === 4 && (
+                            <p className="facedirection-message">Capture bottom part of the face</p>
+                        )}
+
+                        {capturedImages === 5 && (
+                            <p className="facedirection-message">Please click the submit button to save.</p>
+                        )}
+
+                    </div>
+                </div>
+                
                 
                 <div className="form-group">
                     <label>Patient Name:</label>
@@ -291,6 +321,19 @@ const Scanfaceforpending = () => {
                 }
                 .capture-button {
                     margin-top: 10px;
+                }
+                .facedirectioncontainer{
+                    background-color: '#fff';
+                    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.06);
+                    width: 50%;
+                    height: 10%;
+                    border-radius: 10px;
+                    margin: 10px auto; // Change this line
+                }
+                .facedirection-message{
+                    color: #005590;
+                    font-size: 25px;
+                    margin: 0;
                 }
             `}</style>
         </>
