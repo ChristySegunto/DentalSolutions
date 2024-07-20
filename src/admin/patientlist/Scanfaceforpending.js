@@ -1,3 +1,5 @@
+//scan face for pending
+
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -341,3 +343,4 @@ const Scanfaceforpending = () => {
 };
 
 export default Scanfaceforpending;
+
