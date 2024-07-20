@@ -273,3 +273,26 @@
     background-color: #F1F9FF;
     color: #005590;
 }
+
+.toothbtn {
+    position: relative;
+}
+
+.tooth-x {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    color: red;
+}
+
+.tooth-y {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    color: red;
+}
+

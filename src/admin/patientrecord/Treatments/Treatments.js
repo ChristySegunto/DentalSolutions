@@ -79,6 +79,10 @@ const Treatments = () => {
                 console.error('Error fetching patient details:', error.message);
             }
         };
+        
+        const checkAndSendEmails = async () => {
+            await sendEmailsForNextVisit();
+        };
 
         const fetchTreatmentDetails = async () => {
             try {
@@ -103,74 +107,62 @@ const Treatments = () => {
     
         fetchPatientDetails();
         fetchTreatmentDetails();
+        checkAndSendEmails();
 
-        sendEmailsForNextVisit();
-        // // Schedule automatic email sending
-        // const intervalId = setInterval(() => {
-        //     sendEmailsForNextVisit();
-        // }, 24 * 60 * 60 * 1000); // Daily interval (adjust as per your requirement)
+       
+        // Schedule automatic email sending
+        const intervalId = setInterval(checkAndSendEmails, 24 * 60 * 60 * 1000);
 
-        // return () => clearInterval(intervalId);
-        
-    
-    }, [patient_id, treatments.treatment_id]);
+        return () => clearInterval(intervalId);
+    }, [patient_id]);
 
     const emailjs = require('emailjs-com');
 
+
     const sendEmailsForNextVisit = async () => {
         try {
-            // Fetch patient details including email
             const { data: patientData, error: patientError } = await supabase
                 .from('patient')
                 .select('patient_fname, patient_email')
                 .eq('patient_id', parseInt(patient_id))
                 .single();
 
-            if (patientError) {
-                throw patientError;
-            }
+            if (patientError) throw patientError;
 
-            // Fetch treatments including next visit date
             const { data: treatmentsData, error } = await supabase
                 .from('patient_Treatments')
                 .select('*')
                 .eq('patient_id', parseInt(patient_id));
 
-            // Filter treatments that are due for the next visit
-            const today = new Date();
-            const formattedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            if (error) throw error;
 
-            const dueTreatments = treatmentsData.filter(treatment => {
-                const nextVisitDate = new Date(treatment.treatment_nextvisit);
-                
-                // Set time part of nextVisitDate to 0 to compare only the date part
-                nextVisitDate.setHours(null);
-                console.log('Next visit date:', nextVisitDate);
-                formattedToday.setHours(null);
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
 
-                // Compare dates
-                return nextVisitDate <= formattedToday;
-            });
+            const dueTreatments = treatmentsData.filter(treatment => 
+                treatment.treatment_nextvisit === tomorrowFormatted
+            );
 
-            console.log('Due treatments:', dueTreatments);
-            console.log('Today:', formattedToday);
+            for (const treatment of dueTreatments) {
+                const templateParams = {
+                    from_name: 'dentalsolutionsample@gmail.com',
+                    send_to: patientData.patient_email,
+                    to_name: patientData.patient_fname,
+                    nextVisit: treatment.treatment_nextvisit,
+                    pastTreatment: treatment.treatment,
+                    pastTreatmentType: treatment.treatment_type,
+                    pastDentist: treatment.treatment_dentist
+                };
 
-            // // Send email for each due treatment
-            // for (const treatment of dueTreatments) {
-            //     const templateParams = {
-            //         from_name: 'dentalsolutionsample@gmail.com', // Example: Sender's name
-            //         send_to: patientData.patient_email,
-            //         to_name: patientData.patient_fname, // Example: Patient's email
-            //         nextVisit: treatment.treatment_nextvisit,
-            //         pastTreatment: treatment.treatment,
-            //         pastTreatmentType: treatment.treatment_type,
-            //         pastDentist: treatment.treatment_dentist
-            //     };
-
-            //     // Send email using EmailJS
-            //     const result = await emailjs.send('service_41jqk43', 'template_u7swi2b', templateParams, 'b7q1Mru-GSMKmpTr7');
-            //     console.log('Email sent successfully:', result);
-            // }
+                const result = await emailjs.send(
+                    'service_a3rqcog', 
+                    'template_2nqf2rb', 
+                    templateParams, 
+                    'b3gcupxddmxFGzL4v'
+                );
+                console.log('Email sent successfully:', result);
+            }
 
         } catch (error) {
             console.error('Error sending emails for next visit:', error);
@@ -187,6 +179,25 @@ const Treatments = () => {
 
     const exportToPDF = () => {
         const doc = new jsPDF();
+        const companyName = "Dental Solutions, Inc."; // Replace with your actual company name
+        
+        // Set font size, style, and color for the company name
+        doc.setFontSize(16); // Larger font size for the company name
+        doc.setFont("helvetica", "bold"); // Set font to Helvetica and style to bold
+        doc.setTextColor(51, 153, 255); // Blue color for the company name
+        
+        // Add the company name with enhanced styling
+        const companyNameWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+        const pageWidth = doc.internal.pageSize.width;
+        const startX = (pageWidth - companyNameWidth) / 2;
+        doc.text(companyName, startX, 20); // Adjust the Y coordinate (20) and alignment as needed
+        
+        // Reset font settings for the table
+        doc.setFontSize(12); // Reset font size for the table content
+        doc.setFont("helvetica", "normal"); // Reset font style to normal
+        doc.setTextColor(0); // Reset text color to black
+        
+        // Move cursor down for the table
         doc.autoTable({
             head: [['Date', 'Procedure', 'Next Visit', 'Dental/Assistant']],
             body: treatments.map(t => [
@@ -196,17 +207,59 @@ const Treatments = () => {
                 t.treatment_type,
                 t.treatment_nextvisit,
                 t.treatment_dentist
-            ])
+            ]),
+            startY: 30 // Adjust startY to leave space after the company name
         });
+    
+        // Save the PDF with the specified title
         doc.save('treatment-list.pdf');
     };
+    
 
     const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(treatments);
+        // Create a new workbook
         const workbook = XLSX.utils.book_new();
+    
+        // Add company name as the first row
+        const companyName = "Dental Solutions, Inc.";
+        const companyRow = [["", companyName]];
+    
+        // Create the data for the worksheet, including the company name
+        const wsData = [
+            ...companyRow,
+            ["Date", "Tooth No.", "Treatment", "Type", "Next Visit", "Dental/Assistant"],
+            ...treatments.map(t => [
+                t.treatment_date,
+                t.treatment_toothnum,
+                t.treatment,
+                t.treatment_type,
+                t.treatment_nextvisit,
+                t.treatment_dentist
+            ])
+        ];
+    
+        // Create a worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+    
+        // Set column widths
+        const columnWidths = [
+            {wch: 15},  // Date
+            {wch: 10},  // Tooth No.
+            {wch: 30},  // Treatment
+            {wch: 15},  // Type
+            {wch: 15},  // Next Visit
+            {wch: 25}   // Dental/Assistant
+        ];
+        worksheet['!cols'] = columnWidths;
+    
+        // Add the worksheet to the workbook
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Treatments');
+    
+        // Generate Excel file
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+        
+        // Save the file
         saveAs(data, 'treatment-list.xlsx');
     };
 
@@ -320,8 +373,8 @@ const Treatments = () => {
 
     return (
         <>
-            <div className="personalinfo-container row">
-                <div className="avatar-col col-10 col-md-2 col-sm-12 order-md-1 d-flex justify-content-center">
+            <div className="personalinfo-container">
+                <div className="avatar-col col-12 col-md-2 order-md-1 order-1 d-flex justify-content-center">
                     <Avatar
                         src={imageSource}
                         alt="uploadpic"

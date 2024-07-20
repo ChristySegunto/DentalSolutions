@@ -5,6 +5,7 @@
   "dependencies": {
     "@emailjs/nodejs": "^4.0.4",
     "@files-ui/react": "^1.2.4",
+    "@supabase/supabase-js": "^2.44.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
