@@ -6,6 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import supabase from './../../settings/supabase';
 import './Scanfaceforpending.css';
 import * as faceapi from 'face-api.js';
+import { addISOWeekYears } from 'date-fns';
 
 const Scanfaceforpending = () => {
     const { patient_id } = useParams();
@@ -26,6 +27,19 @@ const Scanfaceforpending = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalHeader, setModalHeader] = useState('');
     const [modalMessage, setModalMessage] = useState('');
+
+    // Load face-api models
+    const loadModels = async () => {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('models/tiny_face_detector');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('models/face_recognition');
+        
+    };
+
+    useEffect(() => {
+        loadModels();
+        startVideo();
+    }, []);
 
     useEffect(() => {
         const fetchPatientName = async () => {
@@ -66,17 +80,6 @@ const Scanfaceforpending = () => {
         }
     }, [capturedImages]);
 
-    // Load face-api models
-    const loadModels = async () => {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('models/tiny_face_detector');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68');
-        await faceapi.nets.faceRecognitionNet.loadFromUri('models/face_recognition');
-    };
-
-    useEffect(() => {
-        loadModels();
-        startVideo();
-    }, []);
 
     useEffect(() => {
         const intervalId = setInterval(detectFace, 100);
@@ -89,7 +92,6 @@ const Scanfaceforpending = () => {
 
     // Function to start video capture
     const startVideo = () => {
-        
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
                 if (videoRef.current) {
