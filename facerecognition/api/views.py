@@ -15,6 +15,15 @@ import json
 from io import BytesIO
 from django.conf import settings  # Ensure your Django settings are imported
 
+import pandas as pd
+from django.http import JsonResponse
+from statsmodels.tsa.arima.model import ARIMA
+from .supabase_client import supabase  # Import Supabase client
+
+import logging
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize FaceNet model
 model = InceptionResnetV1(pretrained='vggface2').eval()
@@ -143,3 +152,50 @@ def compare_face(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@csrf_exempt
+def predict_treatment_trends(request):
+    if request.method == 'GET':
+        categories = ['Oral Surgery', 'Periodontics', 'Prosthodontics', 'Restorative Dentistry', 'Others']
+        
+        # Fetch all patient data including branch
+        patient_response = supabase.table('patient').select('*').execute()
+        patients = patient_response.data
+        logger.info(f"Fetched {len(patients)} patients")
+
+        patient_branch_map = {patient['patient_id']: patient['patient_branch'] for patient in patients}
+        logger.info(f"Unique branches: {set(patient_branch_map.values())}")
+
+        # Create a mapping from branches to treatment counts
+        forecasts = {}
+
+        for branch in set(patient_branch_map.values()):
+            forecasts[branch] = {}
+            for category in categories:
+                # Fetch treatment data for the current branch and category
+                response = supabase.table('patient_Treatments').select('*').eq('treatment', category).execute()
+                data = response.data
+                logger.info(f"Fetched {len(data)} treatments for category {category}")
+
+                if not data:
+                    forecasts[branch][category] = 0  # Set to 0 if no data available
+                    continue
+
+                df = pd.DataFrame(data)
+                df['treatment_date'] = pd.to_datetime(df['treatment_date'])
+                df.set_index('treatment_date', inplace=True)
+                df = df.sort_index()
+
+                try:
+                    model = ARIMA(df['count'], order=(1, 1, 0))
+                    model_fit = model.fit()
+                    forecast = model_fit.forecast(steps=1)
+                    forecasts[branch][category] = round(forecast[0], 2)
+                except Exception as e:
+                    logger.info(f"Error fitting ARIMA model for {branch}, {category}: {str(e)}")
+                    forecasts[branch][category] = 0
+
+    return JsonResponse(forecasts)
+
+
