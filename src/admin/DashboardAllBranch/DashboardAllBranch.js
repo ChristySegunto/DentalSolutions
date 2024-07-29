@@ -468,7 +468,7 @@ useEffect(() => {
 
                 <Col>
                     <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS CUBAO</h2>
+                    <h2>TOTAL PATIENTS LEON GUINTO</h2>
                     <h1>{branchPatientCounts['Leon Guinto'] || 0}</h1>
                     <h4>Patients</h4>
                     </div>
@@ -476,7 +476,7 @@ useEffect(() => {
 
                 <Col>
                     <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS MAKATI</h2>
+                    <h2>TOTAL PATIENTS MABINI</h2>
                     <h1>{branchPatientCounts['Mabini'] || 0}</h1>
                     <h4>Patients</h4>
                     </div>
