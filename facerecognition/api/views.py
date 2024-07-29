@@ -157,7 +157,6 @@ def compare_face(request):
 
 @csrf_exempt
 def predict_treatment_trends(request):
-    if request.method == 'GET':
         categories = ['Oral Surgery', 'Periodontics', 'Prosthodontics', 'Restorative Dentistry', 'Others']
         
         # Fetch all patient data including branch
@@ -208,6 +207,8 @@ def predict_treatment_trends(request):
                     logger.info(f"Error fitting ARIMA model for {branch}, {category}: {str(e)}")
                     forecasts[branch][category] = 0
 
-    return JsonResponse(forecasts)
+        return JsonResponse(forecasts)
+
+
 
 
