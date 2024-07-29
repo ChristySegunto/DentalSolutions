@@ -30,6 +30,8 @@ const Scanfaceforpending = () => {
 
     const [loading, setLoading] = useState(true); // Loading state for models
     const [modelsLoaded, setModelsLoaded] = useState(false);
+    const [mediaStream, setMediaStream] = useState(null);
+
     
     const loadModels = async () => {
         setLoading(true);
@@ -109,6 +111,7 @@ const Scanfaceforpending = () => {
                         overlayCanvasRef.current.height = videoRef.current.videoHeight;
                         drawOverlay();
                     };
+                    setMediaStream(stream); // Store the stream reference
                 }
             })
             .catch((error) => {
@@ -122,6 +125,14 @@ const Scanfaceforpending = () => {
     useEffect(() => {
         startVideo();
     }, []);
+
+    useEffect(() => {
+        return () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [mediaStream]);
 
     useEffect(() => {
         drawOverlay();
