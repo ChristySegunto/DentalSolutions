@@ -28,17 +28,29 @@ const Scanfaceforpending = () => {
     const [modalHeader, setModalHeader] = useState('');
     const [modalMessage, setModalMessage] = useState('');
 
-    // Load face-api models
+    const [loading, setLoading] = useState(true); // Loading state for models
+    const [modelsLoaded, setModelsLoaded] = useState(false);
+    
     const loadModels = async () => {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('models/tiny_face_detector');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68');
-        await faceapi.nets.faceRecognitionNet.loadFromUri('models/face_recognition');
-        
+        setLoading(true);
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models/tiny_face_detector');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face_landmark_68');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face_recognition');
+            setModelsLoaded(true); // Add this line
+        } catch (error) {
+            console.error('Error loading models:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        loadModels();
-        startVideo();
+        const initialize = async () => {
+            await loadModels();  // Ensure models are loaded
+            startVideo();        // Then start video
+        };
+        initialize();
     }, []);
 
     useEffect(() => {
@@ -81,21 +93,22 @@ const Scanfaceforpending = () => {
     }, [capturedImages]);
 
 
-    useEffect(() => {
-        const intervalId = setInterval(detectFace, 100);
-        return () => clearInterval(intervalId);
-    }, []);
+    
 
-    useEffect(() => {
-        drawOverlay();
-    }, [borderColor]);
 
-    // Function to start video capture
     const startVideo = () => {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
+                    videoRef.current.onloadedmetadata = () => {
+                        videoRef.current.play();
+                        canvasRef.current.width = videoRef.current.videoWidth;
+                        canvasRef.current.height = videoRef.current.videoHeight;
+                        overlayCanvasRef.current.width = videoRef.current.videoWidth;
+                        overlayCanvasRef.current.height = videoRef.current.videoHeight;
+                        drawOverlay();
+                    };
                 }
             })
             .catch((error) => {
@@ -103,11 +116,16 @@ const Scanfaceforpending = () => {
                 alert('Failed to access camera. Please check if camera permissions are granted.');
             });
     };
+    
 
     // Call startVideo when component mounts
     useEffect(() => {
         startVideo();
     }, []);
+
+    useEffect(() => {
+        drawOverlay();
+    }, [borderColor]);
 
     const handleCaptureImage = async () => {
         if (!videoRef.current || capturedImages >= numImages) return;
@@ -169,84 +187,118 @@ const Scanfaceforpending = () => {
     };
 
     const detectFace = async () => {
+        if (!modelsLoaded) {
+            console.warn('Models not loaded yet');
+            return;
+        }
         if (videoRef.current) {
-            const detections = await faceapi.detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions());
-            if (detections) {
-                const canvas = overlayCanvasRef.current;
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                const ovalWidth = 150;
-                const ovalHeight = 200;
-
-                const { x, y, width, height } = detections.box;
-                const faceCenterX = x + width / 2;
-                const faceCenterY = y + height / 2;
-
-                const isFaceCenterWithinOval = (
-                    faceCenterX > centerX - ovalWidth &&
-                    faceCenterX < centerX + ovalWidth &&
-                    faceCenterY > centerY - ovalHeight &&
-                    faceCenterY < centerY + ovalHeight
-                );
-
-                const isFaceWithinOval = (
-                    x >= centerX - ovalWidth &&
-                    x + width <= centerX + ovalWidth &&
-                    y >= centerY - ovalHeight &&
-                    y + height <= centerY + ovalHeight
-                );
-
-                console.log(`Face detected: Center within oval: ${isFaceCenterWithinOval}, Full face within oval: ${isFaceWithinOval}`);
-
-                if (isFaceCenterWithinOval || isFaceWithinOval) {
-                    setBorderColor('green');
-                    setButtonEnabled(true);
+            // Ensure video is playing
+            if (videoRef.current.readyState === 4) {
+                const detections = await faceapi.detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions());
+                console.log('Detections:', detections);
+    
+                if (detections) {
+                    const canvas = overlayCanvasRef.current;
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const ovalWidth = 150;
+                    const ovalHeight = 200;
+    
+                    const { x, y, width, height } = detections.box;
+                    const faceCenterX = x + width / 2;
+                    const faceCenterY = y + height / 2;
+    
+                    const isFaceCenterWithinOval = (
+                        faceCenterX > centerX - ovalWidth &&
+                        faceCenterX < centerX + ovalWidth &&
+                        faceCenterY > centerY - ovalHeight &&
+                        faceCenterY < centerY + ovalHeight
+                    );
+    
+                    const isFaceWithinOval = (
+                        x >= centerX - ovalWidth &&
+                        x + width <= centerX + ovalWidth &&
+                        y >= centerY - ovalHeight &&
+                        y + height <= centerY + ovalHeight
+                    );
+    
+                    console.log(`Face detected: Center within oval: ${isFaceCenterWithinOval}, Full face within oval: ${isFaceWithinOval}`);
+    
+                    if (isFaceCenterWithinOval || isFaceWithinOval) {
+                        setBorderColor('green');
+                        setButtonEnabled(true);
+                    } else {
+                        setBorderColor('red');
+                        setFaceInOvalStartTime(null); // Reset timer when face leaves oval
+                        setButtonEnabled(false);
+                    }
                 } else {
                     setBorderColor('red');
-                    setFaceInOvalStartTime(null); // Reset timer when face leaves oval
+                    setFaceInOvalStartTime(null); // Reset timer if no face detected
                     setButtonEnabled(false);
                 }
             } else {
-                setBorderColor('red');
-                setFaceInOvalStartTime(null); // Reset timer if no face detected
-                setButtonEnabled(false);
+                console.warn('Video not ready for detection');
             }
         }
     };
 
+    useEffect(() => {
+        if (modelsLoaded) {
+            const intervalId = setInterval(detectFace, 100);
+            return () => clearInterval(intervalId);
+        }
+    }, [modelsLoaded]);
+    
+    
+
     const drawOverlay = () => {
         const canvas = overlayCanvasRef.current;
+        if (!canvas) return; // Ensure canvas is not null
+    
         const context = canvas.getContext('2d');
-
+        if (!context) return; // Ensure context is not null
+    
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const ovalWidth = 150;
         const ovalHeight = 200;
-
+    
         context.clearRect(0, 0, canvas.width, canvas.height);
-
+    
         context.fillStyle = 'rgba(0, 0, 0, 0.6)';
         context.fillRect(0, 0, canvas.width, canvas.height);
-
+    
         context.globalCompositeOperation = 'destination-out';
         context.beginPath();
         context.ellipse(centerX, centerY, ovalWidth, ovalHeight, 0, 0, 2 * Math.PI);
         context.fill();
-
+    
         context.globalCompositeOperation = 'source-over';
-
+    
         context.beginPath();
         context.ellipse(centerX, centerY, ovalWidth, ovalHeight, 0, 0, 2 * Math.PI);
-        context.strokeStyle = borderColor;
+        context.strokeStyle = borderColor; // Update strokeStyle with borderColor
         context.lineWidth = 7;
         context.stroke();
     };
+    
+
+   
 
     return (
         <>
             <div className="scanfacecontainer">
                 <h2>SCAN FACE</h2>
                 <div className='divider'></div>
+
+                {loading ? (
+                    <div className="spinner-container row d-flex justify-content-center">
+                        <div class="spinner-border text-secondary" role="status"></div>
+                        <p className='text-center'>Loading models, please wait...</p>
+                    </div>
+                ) : (
+                <>
                 <div className='videobox d-flex justify-content-center'>
                     <div className="video-container" style={{ position: 'relative' }}>
                         <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
@@ -254,6 +306,7 @@ const Scanfaceforpending = () => {
                         <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
                     </div>
                 </div>
+                
 
                 <div className='facedirectioncontainer d-flex justify-content-center'>
                     <div className='d-flex justify-content-center align-items-center'>
@@ -304,7 +357,8 @@ const Scanfaceforpending = () => {
                         Capture Image ({capturedImages}/{numImages})
                     </button>
                 </div>
-                
+                </>
+                )}
                 <div className='d-flex justify-content-center'>
                     <button
                         className='d-flex justify-content-center m-4 submitbtn btn'
@@ -315,6 +369,16 @@ const Scanfaceforpending = () => {
                         Submit
                     </button>
                 </div>
+                
+                {showModal && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h2>{modalHeader}</h2>
+                        <p>{modalMessage}</p>
+                        <button onClick={() => setShowModal(false)}>Close</button>
+                    </div>
+                </div>
+                )}
             </div>
 
             <style jsx>{`
@@ -322,6 +386,7 @@ const Scanfaceforpending = () => {
                     position: absolute;
                     top: 0;
                     left: 0;
+                    z-index: 1;
                 }
                 .capture-button {
                     margin-top: 10px;
