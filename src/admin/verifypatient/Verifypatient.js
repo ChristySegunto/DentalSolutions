@@ -36,10 +36,11 @@ const Verifypatient = () => {
             alert('getUserMedia is not supported by your browser. Please use a different browser.');
             return;
         }
-    
+
         loadModels();
         handleScan();
-    
+
+        // Cleanup function to stop the video stream when the component unmounts
         return () => {
             if (streamRef.current) {
                 const tracks = streamRef.current.getTracks();
