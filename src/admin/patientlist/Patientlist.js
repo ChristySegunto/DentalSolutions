@@ -417,6 +417,14 @@ useEffect(() => {
 {/*Pending List  */}
     const handlePendingDeclineSuccessShow = async () => {
         try {
+            const getCurrentDate = () => {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                const dd = String(today.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            };
+
           if (!patientToDeclinePending) return;
       
 
@@ -441,7 +449,7 @@ useEffect(() => {
                 patient_id: patientDetails.patient_id,
                 patient_fname: patientDetails.patient_fname,
                 patient_lname: patientDetails.patient_lname,
-                declinepending_date: new Date().toISOString(),
+                declinepending_date: getCurrentDate(),
                 declinepending_from: patientDetails.patient_branch,
                 declinepending_reason: pendingDeclineReason
               }
@@ -513,13 +521,19 @@ const handleAccept = async () => {
 
         console.log('Patient branch updated successfully:', updatePatient);
 
-        const acceptedDate = new Date().toISOString();
+        const getCurrentDate = () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); 
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
 
         const { data: updateTransfer, error: updateTransferError } = await supabase
             .from('patient_Transfer')
             .update({ 
                 transfer_status: 'Accepted', 
-                accepted_date: acceptedDate 
+                accepted_date: getCurrentDate() 
             })
             .eq('patient_id', transfereeDetails.patient_id);
 
@@ -545,7 +559,13 @@ const handleAccept = async () => {
 const handleDeclineSuccessShow = async () => {
     try {
         if (!patientToDeclineTransferee) return;
-        const declinedDate = new Date().toISOString();
+        const getCurrentDate = () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
    
         const { data: transfereeDetails, error: fetchError } = await supabase
             .from('patient')
@@ -590,7 +610,7 @@ const handleDeclineSuccessShow = async () => {
                     patient_fname: transfereeDetails.patient_fname,
                     patient_lname: transfereeDetails.patient_lname,
                     declinetransferee_reason: declineReason,
-                    declined_date: declinedDate,
+                    declined_date: getCurrentDate(),
                     declined_from: toBranch,
                     decline_by: fullName,
                 },
@@ -607,7 +627,7 @@ const handleDeclineSuccessShow = async () => {
             .from('patient_Transfer')
             .update({ 
                 transfer_status: 'Declined', 
-                declined_date: declinedDate 
+                declined_date: getCurrentDate() 
             })
             .eq('patient_id', patientToDeclineTransferee);
 
