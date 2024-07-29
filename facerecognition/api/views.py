@@ -20,6 +20,7 @@ from django.http import JsonResponse
 from statsmodels.tsa.arima.model import ARIMA
 from .supabase_client import supabase  # Import Supabase client
 
+
 import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -173,25 +174,36 @@ def predict_treatment_trends(request):
         for branch in set(patient_branch_map.values()):
             forecasts[branch] = {}
             for category in categories:
-                # Fetch treatment data for the current branch and category
+                # Fetch treatment data for the current category
                 response = supabase.table('patient_Treatments').select('*').eq('treatment', category).execute()
-                data = response.data
-                logger.info(f"Fetched {len(data)} treatments for category {category}")
+                treatments = response.data
+                logger.info(f"Fetched {len(treatments)} treatments for category {category}")
 
-                if not data:
+                # Filter treatments by patients belonging to the current branch
+                branch_treatments = [treatment for treatment in treatments if patient_branch_map.get(treatment['patient_id']) == branch]
+                logger.info(f"Filtered {len(branch_treatments)} treatments for branch {branch} and category {category}")
+
+                if not branch_treatments:
                     forecasts[branch][category] = 0  # Set to 0 if no data available
                     continue
 
-                df = pd.DataFrame(data)
+                df = pd.DataFrame(branch_treatments)
                 df['treatment_date'] = pd.to_datetime(df['treatment_date'])
                 df.set_index('treatment_date', inplace=True)
                 df = df.sort_index()
 
+                # Aggregate by day and count the treatments per day
+                df['count'] = 1  # Create a count column if not present
+                df = df.resample('M').sum()  # Group by month
+                df = df.sort_index()
+
                 try:
-                    model = ARIMA(df['count'], order=(1, 1, 0))
+                    model = ARIMA(df['count'], order=(5, 1, 0))
                     model_fit = model.fit()
                     forecast = model_fit.forecast(steps=1)
-                    forecasts[branch][category] = round(forecast[0], 2)
+                    forecast_value = round(forecast[0], 1)
+                    # Replace negative forecast values with 0
+                    forecasts[branch][category] = max(forecast_value, 0)
                 except Exception as e:
                     logger.info(f"Error fitting ARIMA model for {branch}, {category}: {str(e)}")
                     forecasts[branch][category] = 0
