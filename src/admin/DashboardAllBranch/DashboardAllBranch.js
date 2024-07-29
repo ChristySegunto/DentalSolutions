@@ -48,13 +48,7 @@ const DashboardAllBranch = () => {
   const [error, setError] = useState('');
   const [allBrancPatientMonthCount, setAllBranchPatientMonthCount] = useState(0);
   const [branchPatientCounts, setBranchPatientCounts] = useState({});
-//   const [branchPatients, setBranchPatients] = useState({
-//     Mabini: 0,
-//     Alabang: 0,
-//     Cubao: 0,
-//     Makati: 0,
-//     'Leon Guinto': 0,
-// });
+const [treatmentTrends, setTreatmentTrends] = useState({});
 
 
   useEffect(() => {
@@ -195,298 +189,289 @@ console.log('User Details:', userDetails);
         fetchAllBranchPatientMonthCount();
     }, []);
 
-// Sample data
-const graphdata = [
-    {
-      name: 'Mabini Branch',
-      Orthodontic: 4000,
-      Surgery: 2400,
-      Prosthodontics: 2400,
-      Periodontics: 2000,
-      Restorative: 2780,
-      Others: 1890,
-    },
-    {
-      name: 'Alabang Branch',
-      Orthodontic: 3000,
-      Surgery: 1398,
-      Prosthodontics: 2210,
-      Periodontics: 2290,
-      Restorative: 2000,
-      Others: 2181,
-    },
-    {
-      name: 'QC Branch',
-      Orthodontic: 5000,
-      Surgery: 2300,
-      Prosthodontics: 2290,
-      Periodontics: 2000,
-      Restorative: 4000,
-      Others: 2181,
-    },
-    {
-      name: 'Leon Guinto Branch',
-      Orthodontic: 2780,
-      Surgery: 3908,
-      Prosthodontics: 2000,
-      Periodontics: 1890,
-      Restorative: 2780,
-      Others: 2000,
-    },
-    {
-      name: 'Makati Branch',
-      Orthodontic: 1890,
-      Surgery: 4800,
-      Prosthodontics: 2000,
-      Periodontics: 2181,
-      Restorative: 2500,
-      Others: 2181,
-    }
-  ];
-
-  {/* BRANCH PATIENTS */}
+    useEffect(() => {
+        const fetchTreatmentTrends = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/predict-treatment-trends/');
+                if (!response.ok) {
+                    const text = await response.text(); // Get the response as text
+                    console.log('Raw response:', text); // Log the raw response
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setTreatmentTrends(data);
+                console.log('Fetched treatment trends:', data);
+            } catch (error) {
+                console.error('Error fetching treatment trends:', error);
+            }
+        };
+      
+        fetchTreatmentTrends();
+    }, []);
     
-const fetchPatientTreatmentCounts = async () => {
-    const { data: treatments, error: treatmentError } = await supabase
-        .from('patient_Treatments')
-        .select('patient_id');
-
-    if (treatmentError) {
-        console.error('Error fetching treatment patient IDs:', treatmentError);
-        return {};
-    }
-
-    const treatmentCounts = treatments.reduce((acc, { patient_id }) => {
-        acc[patient_id] = (acc[patient_id] || 0) + 1;
-        return acc;
-    }, {});
-
-    return treatmentCounts;
-};
-
-const fetchPatientOrthodonticsCounts = async () => {
-    const { data: orthodontics, error: orthodonticsError } = await supabase
-        .from('patient_Orthodontics')
-        .select('patient_id');
-
-    if (orthodonticsError) {
-        console.error('Error fetching orthodontics patient IDs:', orthodonticsError);
-        return {};
-    }
-
-    const orthodonticsCounts = orthodontics.reduce((acc, { patient_id }) => {
-        acc[patient_id] = (acc[patient_id] || 0) + 1;
-        return acc;
-    }, {});
-
-    return orthodonticsCounts;
-};
-
-const fetchPatientsByIds = async (patientIds) => {
-    const { data: patients, error: patientsError } = await supabase
-        .from('patient')
-        .select('patient_id, patient_branch')
-        .in('patient_id', patientIds);
-
-    if (patientsError) {
-        console.error('Error fetching patients by IDs:', patientsError);
-        return [];
-    }
-
-    return patients;
-};
-
-const categorizePatientsByBranch = (patients, treatmentCounts, orthodonticsCounts) => {
-    const branchPatientCounts = {};
-
-    patients.forEach(patient => {
-        const { patient_id, patient_branch } = patient;
-        const totalCount = (treatmentCounts[patient_id] || 0) + (orthodonticsCounts[patient_id] || 0);
-
-        if (!branchPatientCounts[patient_branch]) {
-            branchPatientCounts[patient_branch] = 0;
+    
+      
+    const formatTrendsForChart = () => {
+        if (Object.keys(treatmentTrends).length === 0) {
+            console.log('Treatment trends data is empty');
+            return [];
         }
 
-        branchPatientCounts[patient_branch] += totalCount;
-    });
-
-    return branchPatientCounts;
-};
-
-const fetchAndCategorizePatients = async () => {
-    const treatmentCounts = await fetchPatientTreatmentCounts();
-    const orthodonticsCounts = await fetchPatientOrthodonticsCounts();
-    const allPatientIds = [...new Set([...Object.keys(treatmentCounts), ...Object.keys(orthodonticsCounts)])];
-
-    const patients = await fetchPatientsByIds(allPatientIds);
-    const branchPatientCounts = categorizePatientsByBranch(patients, treatmentCounts, orthodonticsCounts);
-
-    return branchPatientCounts;
-};
-
-useEffect(() => {
-    const getPatientCounts = async () => {
-        const counts = await fetchAndCategorizePatients();
-        setBranchPatientCounts(counts);
+        const formattedData = [];
+    
+        for (const [branch, treatments] of Object.entries(treatmentTrends)) {
+            const dataEntry = { name: branch };
+    
+            for (const [category, count] of Object.entries(treatments)) {
+                dataEntry[category] = count;
+            }
+    
+            formattedData.push(dataEntry);
+        }
+    
+        console.log('Formatted data for chart:', formattedData);
+        return formattedData;
     };
 
-    getPatientCounts();
-}, []);
+    const [chartData, setChartData] = useState([]);
+
+    useEffect(() => {
+        const formattedData = formatTrendsForChart();
+        setChartData(formattedData);
+    }, [treatmentTrends]);
+
+    useEffect(() => {
+        console.log('Current treatmentTrends:', treatmentTrends);
+    }, [treatmentTrends]);
+
+    useEffect(() => {
+        console.log('chartData updated:', chartData);
+    }, [chartData]);
+
+    // const graphData = formatTrendsForChart();
+
+    const fetchPatientTreatmentCounts = async () => {
+        const { data: treatments, error: treatmentError } = await supabase
+            .from('patient_Treatments')
+            .select('patient_id');
+
+        if (treatmentError) {
+            console.error('Error fetching treatment patient IDs:', treatmentError);
+            return {};
+        }
+
+        const treatmentCounts = treatments.reduce((acc, { patient_id }) => {
+            acc[patient_id] = (acc[patient_id] || 0) + 1;
+            return acc;
+        }, {});
+
+        return treatmentCounts;
+    };
+
+    const fetchPatientOrthodonticsCounts = async () => {
+        const { data: orthodontics, error: orthodonticsError } = await supabase
+            .from('patient_Orthodontics')
+            .select('patient_id');
+
+        if (orthodonticsError) {
+            console.error('Error fetching orthodontics patient IDs:', orthodonticsError);
+            return {};
+        }
+
+        const orthodonticsCounts = orthodontics.reduce((acc, { patient_id }) => {
+            acc[patient_id] = (acc[patient_id] || 0) + 1;
+            return acc;
+        }, {});
+
+        return orthodonticsCounts;
+    };
+
+    const fetchPatientsByIds = async (patientIds) => {
+        const { data: patients, error: patientsError } = await supabase
+            .from('patient')
+            .select('patient_id, patient_branch')
+            .in('patient_id', patientIds);
+
+        if (patientsError) {
+            console.error('Error fetching patients by IDs:', patientsError);
+            return [];
+        }
+
+        return patients;
+    };
+
+    const categorizePatientsByBranch = (patients, treatmentCounts, orthodonticsCounts) => {
+        const branchPatientCounts = {};
+
+        patients.forEach(patient => {
+            const { patient_id, patient_branch } = patient;
+            const totalCount = (treatmentCounts[patient_id] || 0) + (orthodonticsCounts[patient_id] || 0);
+
+            if (!branchPatientCounts[patient_branch]) {
+                branchPatientCounts[patient_branch] = 0;
+            }
+
+            branchPatientCounts[patient_branch] += totalCount;
+        });
+
+        return branchPatientCounts;
+    };
+
+    const fetchAndCategorizePatients = async () => {
+        const treatmentCounts = await fetchPatientTreatmentCounts();
+        const orthodonticsCounts = await fetchPatientOrthodonticsCounts();
+        const allPatientIds = [...new Set([...Object.keys(treatmentCounts), ...Object.keys(orthodonticsCounts)])];
+
+        const patients = await fetchPatientsByIds(allPatientIds);
+        const branchPatientCounts = categorizePatientsByBranch(patients, treatmentCounts, orthodonticsCounts);
+
+        return branchPatientCounts;
+    };
+
+    useEffect(() => {
+        const getPatientCounts = async () => {
+            const counts = await fetchAndCategorizePatients();
+            setBranchPatientCounts(counts);
+        };
+
+        getPatientCounts();
+    }, []);
 
     return (
         <div className="dashboard-container container-fluid">
             <div className="dashboard">
-          <Col className='allheader-container'>
-        <h1>Dashboard</h1>
-        <Dropdown onSelect={handleSelect}>
-            <Dropdown.Toggle className="dropdownbranch">
-                ALL BRANCH
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="dropdownbutton-menu">
-                <Dropdown.Item eventKey="/Dashboard" className="dropdownbutton-item">{branch} BRANCH</Dropdown.Item>
-            </Dropdown.Menu>
-        </Dropdown>
-        <div className='currentdate-allbranch'>
-            <h3>{currentDate}</h3>
-        </div>
-    </Col>
+                <Col className='allheader-container'>
+                    <h1>Dashboard</h1>
+                    <Dropdown onSelect={handleSelect}>
+                        <Dropdown.Toggle className="dropdownbranch">
+                            ALL BRANCH
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu className="dropdownbutton-menu">
+                            <Dropdown.Item eventKey="/Dashboard" className="dropdownbutton-item">{branch} BRANCH</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                    <div className='currentdate-allbranch'>
+                        <h3>{currentDate}</h3>
+                    </div>
+                </Col>
             
                 <Container fluid>
-                <div className="allbranch-summary-cards">
-                    <Row className="allbranch-summary-cards-row">
-                        <Col>
-                            <div className="allbranch-card">
-                                <h2>TOTAL BRANCHES</h2>
-                                <h1>5</h1>
-                                <h4>Patients</h4>
-                            </div>
-                        </Col>
-                        <Col>
-                            <div className="allbranch-card">
-                                <h2>CURRENT MONTH</h2>
-                                <h1>{allBrancPatientMonthCount}</h1>
-                                <h4>Patients</h4>
-                            </div>
-                        </Col>
+                    <div className="allbranch-summary-cards">
+                        <Row className="allbranch-summary-cards-row">
+                            <Col>
+                                <div className="allbranch-card">
+                                    <h2>TOTAL BRANCHES</h2>
+                                    <h1>5</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
+                            <Col>
+                                <div className="allbranch-card">
+                                    <h2>CURRENT MONTH</h2>
+                                    <h1>{allBrancPatientMonthCount}</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
 
-                        <Col  className='profile-allbranch-container'>
-                        <div className="myprofile-allbranch-card">
-                            <div className="myprofilecard-allbranch-header rounded">
-                            <Link to="/settings" className="allmyprofile-link">
-                                MY PROFILE <IoMdSettings size={ICON_SIZE} className="myprofile-icon" />
-                                </Link>
-                            </div>
-                            <div className="profile-allbranch-card-body">
-                                <div className="allmyprofile-fulln">{fullName}</div>
-                                <p className="allmyprofile-role">{userRole}</p>
-                                <p className="allmyprofile-branch">{branch} BRANCH</p>
-                            </div>
-                        </div>
-                    </Col>
-                    </Row>
+                            <Col  className='profile-allbranch-container'>
+                                <div className="myprofile-allbranch-card">
+                                    <div className="myprofilecard-allbranch-header rounded">
+                                    <Link to="/settings" className="allmyprofile-link">
+                                        MY PROFILE <IoMdSettings size={ICON_SIZE} className="myprofile-icon" />
+                                        </Link>
+                                    </div>
+                                    <div className="profile-allbranch-card-body">
+                                        <div className="allmyprofile-fulln">{fullName}</div>
+                                        <p className="allmyprofile-role">{userRole}</p>
+                                        <p className="allmyprofile-branch">{branch} BRANCH</p>
+                                    </div>
+                                </div>
+                            </Col>
+                        </Row>
                     </div>
+
                     <Row className="treatment-trends">
-                    <Col>
-                                <h1>TREATMENT TRENDS</h1>
-                                </Col>
-                                <Col>
-                                <Dropdown onSelect={handleSelect} >
-                                <Dropdown.Toggle className="month-dropdownbutton" >
-                                    MONTH - YEAR
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu className="month-dropdownbutton-menu">
-                                    <Dropdown.Item eventKey="/" className="month-dropdownbutton-item"> September 2024 </Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
+                        <Col>
+                            <h1>TREATMENT TRENDS</h1>
                         </Col>
                     
                         <Row className="treatmenttrends-graph">
-              <div style={{ padding: '20px', borderRadius: '8px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    width={500}
-                    height={300}
-                    data={graphdata}
-                    margin={{
-                      top: 20, right: 30, left: 20, bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <RechartsTooltip />
-                    <RechartsLegend className='legend'/>
-                    <Bar dataKey="Orthodontic" name="Orthodontic Treatment" stackId="a" fill="#7B43F3" />
-                    <Bar dataKey="Surgery" name="Oral Surgery" stackId="b" fill="#FE0000" />
-                    <Bar dataKey="Prosthodontics" stackId="c" fill="#E65C4F" />
-                    <Bar dataKey="Periodontics" stackId="d" fill="#FDD037" />
-                    <Bar dataKey="Restorative" name="Restorative Dentistry" stackId="e" fill="#68C66C" />
-                    <Bar dataKey="Others" stackId="f" fill="#75E2FF" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Row>
+                            <div style={{ padding: '20px', borderRadius: '8px' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        width={500}
+                                        height={300}
+                                        data={chartData}
+                                        margin={{
+                                        top: 20, right: 30, left: 20, bottom: 5,
+                                        }}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis />
+                                        <RechartsTooltip />
+                                        <RechartsLegend className='legend'/>
+                                        {/* <Bar dataKey="Orthodontic" name="Orthodontic Treatment" stackId="a" fill="#7B43F3" /> */}
+                                        <Bar dataKey="Oral Surgery" name="Oral Surgery" stackId="b" fill="#FE0000" />
+                                        <Bar dataKey="Prosthodontics" name="Prosthodontics" stackId="c" fill="#E65C4F" />
+                                        <Bar dataKey="Periodontics" name="Periodontics" stackId="d" fill="#FDD037" />
+                                        <Bar dataKey="Restorative" name="Restorative Dentistry" stackId="e" fill="#68C66C" />
+                                        <Bar dataKey="Others" name="Others" stackId="f" fill="#75E2FF" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </Row>
                     </Row>
                     
                     <div className="totalpatients-summary-cards">
-                    {/* <Row>
-                    {['Mabini', 'Alabang', 'Cubao', 'Makati', 'Leon Guinto'].map(branch => (
-                        <Col key={branch}>
-                            <div className="totalpatients-card">
-                                <h2>TOTAL PATIENTS {branch.toUpperCase()}</h2>
-                                <h1>{branchPatients[branch]}</h1>
-                                <h4>Patients</h4>
-                            </div>
-                        </Col>
-                    ))}
-                </Row> */}
-                <Row>
-                <Col>
-                    <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS ALABANG</h2>
-                    <h1>{branchPatientCounts['Alabang'] || 0}</h1>
-                    <h4>Patients</h4>
-                    </div>
-                </Col>
 
-                <Col>
-                    <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS CUBAO</h2>
-                    <h1>{branchPatientCounts['Cubao'] || 0}</h1>
-                    <h4>Patients</h4>
-                    </div>
-                </Col>
+                        <Row>
+                            <Col>
+                                <div className="totalpatients-card">
+                                    <h2>TOTAL PATIENTS ALABANG</h2>
+                                    <h1>{branchPatientCounts['Alabang'] || 0}</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
 
-                <Col>
-                    <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS MAKATI</h2>
-                    <h1>{branchPatientCounts['Makati'] || 0}</h1>
-                    <h4>Patients</h4>
-                    </div>
-                </Col>
+                            <Col>
+                                <div className="totalpatients-card">
+                                    <h2>TOTAL PATIENTS CUBAO</h2>
+                                    <h1>{branchPatientCounts['Cubao'] || 0}</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
 
-                <Col>
-                    <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS CUBAO</h2>
-                    <h1>{branchPatientCounts['Leon Guinto'] || 0}</h1>
-                    <h4>Patients</h4>
-                    </div>
-                </Col>
+                            <Col>
+                                <div className="totalpatients-card">
+                                    <h2>TOTAL PATIENTS MAKATI</h2>
+                                    <h1>{branchPatientCounts['Makati'] || 0}</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
 
-                <Col>
-                    <div className="totalpatients-card">
-                    <h2>TOTAL PATIENTS MAKATI</h2>
-                    <h1>{branchPatientCounts['Mabini'] || 0}</h1>
-                    <h4>Patients</h4>
+                            <Col>
+                                <div className="totalpatients-card">
+                                    <h2>TOTAL PATIENTS CUBAO</h2>
+                                    <h1>{branchPatientCounts['Leon Guinto'] || 0}</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
+
+                            <Col>
+                                <div className="totalpatients-card">
+                                    <h2>TOTAL PATIENTS MAKATI</h2>
+                                    <h1>{branchPatientCounts['Mabini'] || 0}</h1>
+                                    <h4>Patients</h4>
+                                </div>
+                            </Col>
+                        </Row>
                     </div>
-                </Col>
-                    </Row>
+
+                </Container>
                 
+            </div>
         </div>
-                    </Container>
-                
-                </div>
-                </div>
                 
 
             
