@@ -90,7 +90,7 @@ const OrthodonticsPatient = () => {
     
         fetchPatientDetails();
         fetchOrthoDetails();
-    }, [orthodontics.ortho_id]);
+    }, [orthodontics.ortho_id, patient.patient_id]);
 
     // Function to capitalize all letters of a string
     const capitalizeAllLetters = (string) => {
