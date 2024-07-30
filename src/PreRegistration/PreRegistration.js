@@ -191,14 +191,13 @@ const Prereg = () => {
     
 
     const calculateAge = (birthdate) => {
-        const birthDate = new Date(birthdate);
         const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        let age = today.getFullYear() - birthdate.getFullYear();
+        const monthDifference = today.getMonth() - birthdate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
             age--;
         }
-        return age;
+        return Math.max(0, age); // Ensure age is not negative
     };
 
     const handleUpdatePatientData = (data) => {
@@ -217,6 +216,26 @@ const Prereg = () => {
         setAccountInfoData(data);
     };
     
+    const isValidName = (name) => /^[a-zA-Z\s]*$/.test(name);
+    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
+    
+    const validateStep2 = (data) => {
+        if (!isValidName(data.patient_fname) || !isValidName(data.patient_mname) || !isValidName(data.patient_lname)) {
+            return "Names should only contain letters and spaces.";
+        }
+        if (data.patient_address.trim() === '') {
+            return "Address cannot be empty.";
+        }
+        if (data.patient_email && !isValidEmail(data.patient_email)) {
+            return "Invalid email format.";
+        }
+        if (!isValidPhoneNumber(data.patient_contact)) {
+            return "Phone number should start with '09' followed by 9 digits.";
+        }
+        return null;
+    };
+
     const handleNext = () => {
         if (currentStep === 1) {
             if (!selectedBranch || !consentChecked) {
@@ -228,7 +247,12 @@ const Prereg = () => {
                 setShowModal(false);
             }
         } else if (currentStep === 2) {
-            if (!validatePatientData(patientData)) {
+            const validationError = validateStep2(patientData);
+            if (validationError) {
+                setModalMessage(validationError);
+                setModalHeader("Invalid Input");
+                setShowModal(true);
+            } else if (!validatePatientData(patientData)) {
                 setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
                 setModalHeader("Complete Required Information");
                 setShowModal(true);
@@ -240,6 +264,16 @@ const Prereg = () => {
             if (!validateDentalAndMedData(dentalAndMedData)) {
                 setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
                 setModalHeader("Complete Required Information");
+                setShowModal(true);
+            } else {
+                setCurrentStep((prevStep) => prevStep + 1);
+                setShowModal(false);
+            }
+        } else if (currentStep === 4) {
+            const validationError = validateAccountInfoData(accountInfoData);
+            if (validationError) {
+                setModalMessage(validationError);
+                setModalHeader("Invalid Input");
                 setShowModal(true);
             } else {
                 setCurrentStep((prevStep) => prevStep + 1);
@@ -265,10 +299,12 @@ const Prereg = () => {
 
     const handleSubmit = async () => {
         if (currentStep === 4) {
-            if (!validateAccountInfoData(accountInfoData)) {
-                setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
-                setModalHeader("Complete Required Information");
-                setShowModal(true);
+            const validationError = validateAccountInfoData(accountInfoData);
+        if (validationError) {
+            setModalMessage(validationError);
+            setModalHeader("Invalid Input");
+            setShowModal(true);
+            return;
             } else if (!validatePassword(accountInfoData)) {
                 setModalMessage("Password and confirm password do not match. Please try again.");
                 setModalHeader("Password Not Matched");
@@ -518,8 +554,16 @@ const Prereg = () => {
 
                                 <h3>PATIENT CONSENT</h3>
                                 <div className='patientconsent'>
-                                    <input className="consentcheckbox" type="checkbox" id="consentCheckbox" checked={consentChecked} onChange={handleCheckboxChange} />
-                                    <p className='patientconstenttext'>I have read and understood the above information. I consent to the collection and use of my personal information, dental history, medical history, and facial recognition as described. I acknowledge that I have been informed of my rights under the Republic Act 10173 Data Privacy Act of 2012.</p>    
+                                <label htmlFor="consentCheckbox" className='consent-label'>
+                                <input
+                                    className="consentcheckbox"
+                                    type="checkbox"
+                                    id="consentCheckbox"
+                                    checked={consentChecked}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <p className='consent-text'>I have read and understood the above information. I consent to the collection and use of my personal information, dental history, medical history, and facial recognition as described. I acknowledge that I have been informed of my rights under the Republic Act 10173 Data Privacy Act of 2012.</p>
+                                </label>
                                 </div>
                             </div>
                             <div className='btn1'>
