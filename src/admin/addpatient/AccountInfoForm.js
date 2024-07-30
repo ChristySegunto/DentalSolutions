@@ -19,7 +19,7 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
         onUpdateAccountInfoData(accountInfoData);
     }, [accountInfoData, onUpdateAccountInfoData]);
 
-    const isValidUsername = (username) => /^[a-zA-Z0-9_-]+$/.test(username);
+    const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
 
     const isValidPassword = (password) => {
         const passwordRegex = /^[A-Z][a-zA-Z]{0,28}[0-9]{1,10}$/;

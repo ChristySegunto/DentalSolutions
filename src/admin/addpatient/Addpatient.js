@@ -160,7 +160,7 @@ const Addpatient = () => {
         }
     };
 
-    const isValidUsername = (username) => /^[a-zA-Z0-9_-]+$/.test(username);
+    const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
 
     const isValidPassword = (password) => {
         const passwordRegex = /^[A-Z][a-zA-Z]{0,28}[0-9]{1,10}$/;
@@ -663,7 +663,7 @@ const validateStep2 = (data) => {
                             
                             <Scanface 
             patient_username={username} 
-            patient_fullname={patientFullName}
+           
             onCapturedImagesChange={handleCapturedImagesChange}
         />
                             <div className='btns'>
