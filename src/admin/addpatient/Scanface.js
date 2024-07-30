@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import * as faceapi from 'face-api.js';
 
-const Scanface = ({ patient_fullname, onCapturedImagesChange }) => {
+const Scanface = ({ patient_username, onCapturedImagesChange }) => {
     const [numImages, setNumImages] = useState(5);
     const [capturedImages, setCapturedImages] = useState(0);
     const [borderColor, setBorderColor] = useState('red');
@@ -60,8 +60,8 @@ const Scanface = ({ patient_fullname, onCapturedImagesChange }) => {
         const blob = await (await fetch(dataUrl)).blob();
         const formData = new FormData();
 
-        formData.append('patient_fullname', patient_fullname);
-        formData.append('image', blob, `${patient_fullname}_capture${capturedImages + 1}.png`);
+        formData.append('patient_username', patient_username);
+        formData.append('image', blob, `${patient_username}_capture${capturedImages + 1}.png`);
 
         try {
             const response = await axios.post('http://localhost:8000/api/capture-images/', formData, {
@@ -209,7 +209,7 @@ const Scanface = ({ patient_fullname, onCapturedImagesChange }) => {
                     <input
                         type="text"
                         className="form-control"
-                        value={patient_fullname}
+                        value={patient_username}
                         readOnly
                     />
                 </div>
