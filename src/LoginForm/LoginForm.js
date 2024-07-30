@@ -29,6 +29,55 @@ const LoginForm = () => {
     const [modalBody, setModalBody] = useState('');
     const [countdown, setCountdown] = useState(null);
 
+    const [usernameError, setUsernameError] = useState('');
+
+    const validateUsername = (username) => {
+        // Basic format check: letters, numbers, single underscore, single dot
+        const validUsernameRegex = /^[a-zA-Z0-9]+([._]?[a-zA-Z0-9]+)*$/;
+        
+        if (!validUsernameRegex.test(username)) {
+            return "Username can only contain letters, numbers, and single underscore or dot.";
+        }
+
+        // Check length
+        if (username.length < 3 || username.length > 20) {
+            return "Username must be between 3 and 20 characters long.";
+        }
+
+        // Check for consecutive special characters
+        if (username.includes('..') || username.includes('__')) {
+            return "Username cannot contain consecutive dots or underscores.";
+        }
+
+        // Check start and end
+        if (username.startsWith('.') || username.startsWith('_') || 
+            username.endsWith('.') || username.endsWith('_')) {
+            return "Username cannot start or end with a dot or underscore.";
+        }
+
+        return "";  // No error
+    };
+
+    const handleCredentialChange = (e) => {
+        const value = e.target.value;
+        setCredential(value);
+        
+        // Clear error if input is empty
+        if (value === '') {
+            setUsernameError('');
+            return;
+        }
+
+        // Only validate if it's not an email (simple check for '@' symbol)
+        if (!value.includes('@')) {
+            const error = validateUsername(value);
+            setUsernameError(error);
+        } else {
+            setUsernameError('');
+        }
+    };
+
+    
     useEffect(() => {
         const storedAttempts = parseInt(localStorage.getItem('loginAttempts'), 10);
         const storedLockoutTime = parseInt(localStorage.getItem('lockoutTime'), 10);
@@ -78,10 +127,17 @@ const LoginForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!credential || !password) { // if no email/username or password
+        if (!credential || !password) {
             setError("Please insert your username/email and password");
             return;
         }
+
+        if (usernameError) {
+            setError("Please correct the username errors before submitting.");
+            return;
+        }
+
+
 
         const currentTime = new Date().getTime();
         if (lockoutTime && currentTime - lockoutTime < lockoutDuration) {
@@ -215,10 +271,14 @@ const LoginForm = () => {
                             </div>
                             <Form.Group className="mb-3 form-group" controlId="formBasicCredential">
                                 <Form.Label className="form-label">Username or Email</Form.Label>
-                                <Form.Control className="form-control" type="text" size="lg"
+                                <Form.Control 
+                                    className="form-control" 
+                                    type="text" 
+                                    size="lg"
                                     value={credential}
-                                    onChange={(e) => setCredential(e.target.value)}
+                                    onChange={handleCredentialChange}
                                 />
+                                {usernameError && <Form.Text className="text-danger">{usernameError}</Form.Text>}
                             </Form.Group>
 
                             <Form.Group className="mb-3 form-group" controlId="formBasicPassword">
