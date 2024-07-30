@@ -145,35 +145,35 @@ const handleCloseModal = () => setShowModal(false);
         }
     };
 
-    const handleDateChange = (date) => {
-        if (!date) {
-            // If the date is cleared, reset the birthdate and age fields, and hide the guardian form
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                patient_birthdate: null,
-                patient_age: ''
-            }));
-            setShowGuardianForm(false);
-            return;
-        }
-    
-        const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        const age = calculateAge(utcDate);
-        
-        if (age < 1) {
-            setModalMessage("Patient must be at least 1 year old. Ano may ngipin agad?");
-            setShowModal(true);
-            return;
-        }
-    
+  const handleDateChange = (date) => {
+    if (!date) {
+        // If the date is cleared, reset the birthdate and age fields, and hide the guardian form
         setPatientInfo(prevInfo => ({
             ...prevInfo,
-            patient_birthdate: utcDate,
-            patient_age: age
+            patient_birthdate: null,
+            patient_age: ''
         }));
+        setShowGuardianForm(false);
+        return;
+    }
+
+    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const age = calculateAge(utcDate);
     
-        setShowGuardianForm(age < 18);
-    };
+    if (age < 1) {
+        setModalMessage("Patient must be at least 1 year old. Ano may ngipin agad?");
+        setShowModal(true);
+        return;
+    }
+
+    setPatientInfo(prevInfo => ({
+        ...prevInfo,
+        patient_birthdate: utcDate,
+        patient_age: age
+    }));
+
+    setShowGuardianForm(age < 18);
+};
 
     return (
         <div className="personalinfo">

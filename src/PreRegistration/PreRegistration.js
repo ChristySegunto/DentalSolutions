@@ -152,13 +152,36 @@ const Prereg = () => {
         }
     };
 
-    const  validateAccountInfoData = (data) => {
-        // Check if all required fields have values
-        return (
-            data.username !== '' &&
-            data.password !== '' &&
-            data.confirmPassword !== ''
-        );
+    const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
+
+    const isValidPassword = (password) => {
+        const passwordRegex = /^[\p{Lu}][\p{L}]{0,28}[0-9]{1,10}\*$/u;
+        return passwordRegex.test(password);
+    };
+    
+    const validateAccountInfoData = (data) => {
+        if (!isValidUsername(data.username)) {
+            setModalMessage("Username can only contain letters (including accented characters), numbers, underscores, and hyphens.");
+            setModalHeader("Invalid Username");
+            setShowModal(true);
+            return false;
+        }
+        
+        if (!isValidPassword(data.password)) {
+            setModalMessage("Password must start with an uppercase letter, followed by up to 28 letters (including accented characters), then 1-10 numbers, and end with an asterisk.");
+            setModalHeader("Invalid Password");
+            setShowModal(true);
+            return false;
+        }
+        
+        if (data.password !== data.confirmPassword) {
+            setModalMessage("Passwords do not match.");
+            setModalHeader("Password Mismatch");
+            setShowModal(true);
+            return false;
+        }
+        
+        return true;
     };
 
     const validatePatientData = (data) => {
@@ -269,17 +292,7 @@ const Prereg = () => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
-        } else if (currentStep === 4) {
-            const validationError = validateAccountInfoData(accountInfoData);
-            if (validationError) {
-                setModalMessage(validationError);
-                setModalHeader("Invalid Input");
-                setShowModal(true);
-            } else {
-                setCurrentStep((prevStep) => prevStep + 1);
-                setShowModal(false);
-            }
-        }
+        } 
     };
 
 
@@ -299,12 +312,10 @@ const Prereg = () => {
 
     const handleSubmit = async () => {
         if (currentStep === 4) {
-            const validationError = validateAccountInfoData(accountInfoData);
-        if (validationError) {
-            setModalMessage(validationError);
-            setModalHeader("Invalid Input");
-            setShowModal(true);
-            return;
+            if (!validateAccountInfoData(accountInfoData)) {
+                setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
+                setModalHeader("Complete Required Information");
+                setShowModal(true);
             } else if (!validatePassword(accountInfoData)) {
                 setModalMessage("Password and confirm password do not match. Please try again.");
                 setModalHeader("Password Not Matched");
