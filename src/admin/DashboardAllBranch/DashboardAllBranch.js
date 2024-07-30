@@ -244,9 +244,18 @@ console.log('User Details:', userDetails);
         console.log('Current treatmentTrends:', treatmentTrends);
     }, [treatmentTrends]);
 
+
     useEffect(() => {
         console.log('chartData updated:', chartData);
     }, [chartData]);
+
+const fetchPatientsByIds = async (patientIds) => {
+    const { data: patients, error: patientsError } = await supabase
+        .from('patient')
+        .select('patient_id, patient_branch')
+        .in('patient_id', patientIds)
+        .eq('verification_status', 'verified');
+
 
     // const graphData = formatTrendsForChart();
 
@@ -468,7 +477,9 @@ console.log('User Details:', userDetails);
                         </Row>
                     </div>
 
+
                 </Container>
+
                 
             </div>
         </div>

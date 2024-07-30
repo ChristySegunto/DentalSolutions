@@ -4,6 +4,8 @@ import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { useAuth } from './../../settings/AuthContext';
 import supabase from "../../settings/supabase";
 import { useNavigate } from "react-router-dom";
+import moment from 'moment-timezone';
+
 
 
 
@@ -28,6 +30,7 @@ const Patientlist = () => {
     const [patients, setPatients] = useState([]);
     const navigate = useNavigate();
     const { user } = useAuth();
+    
 
     const [activeTab, setActiveTab] = useState('allPatients');
     const [searchTerm, setSearchTerm] = useState('');
@@ -414,12 +417,20 @@ useEffect(() => {
 {/*Pending List  */}
     const handlePendingDeclineSuccessShow = async () => {
         try {
+            const getCurrentDate = () => {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                const dd = String(today.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            };
+
           if (!patientToDeclinePending) return;
       
 
           const { data: patientDetails, error: fetchError } = await supabase
             .from('patient')
-            .select('patient_id, patient_fname, patient_lname')
+            .select('patient_id, patient_fname, patient_lname, patient_branch')
             .eq('patient_id', patientToDeclinePending)
             .single();
       
@@ -438,6 +449,8 @@ useEffect(() => {
                 patient_id: patientDetails.patient_id,
                 patient_fname: patientDetails.patient_fname,
                 patient_lname: patientDetails.patient_lname,
+                declinepending_date: getCurrentDate(),
+                declinepending_from: patientDetails.patient_branch,
                 declinepending_reason: pendingDeclineReason
               }
             ]);
@@ -508,9 +521,20 @@ const handleAccept = async () => {
 
         console.log('Patient branch updated successfully:', updatePatient);
 
+        const getCurrentDate = () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); 
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+
         const { data: updateTransfer, error: updateTransferError } = await supabase
             .from('patient_Transfer')
-            .update({ transfer_status: 'Accepted' })
+            .update({ 
+                transfer_status: 'Accepted', 
+                accepted_date: getCurrentDate() 
+            })
             .eq('patient_id', transfereeDetails.patient_id);
 
         if (updateTransferError) throw updateTransferError;
@@ -532,86 +556,113 @@ const handleAccept = async () => {
     setShowAccept(false);
 }
 
-    const handleDeclineSuccessShow = async () => {
-        try {
-            if (!patientToDeclineTransferee) return;
+const handleDeclineSuccessShow = async () => {
+    try {
+        if (!patientToDeclineTransferee) return;
+        const getCurrentDate = () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+   
+        const { data: transfereeDetails, error: fetchError } = await supabase
+            .from('patient')
+            .select('patient_id, patient_fname, patient_lname')
+            .eq('patient_id', patientToDeclineTransferee)
+            .single();
 
-            const { data: transfereeDetails, error: fetchError } = await supabase
-                .from('patient')
-                .select('patient_id, patient_fname, patient_lname')
-                .eq('patient_id', patientToDeclineTransferee)
-                .single();
-
-             if (fetchError) {
+        if (fetchError) {
             console.error('Error fetching transferee details:', fetchError.message);
-            
             return;
-            }
+        }
 
-            if (!transfereeDetails) {
-                throw new Error('Transferee not found.');
-            }
-            
-            if (!declineReason) {
-                throw new Error('Decline reason is not provided.');
-            }
-              
-            const { data: insertTransfereeData, error: insertTransfereeError } = await supabase
-                .from('patient_DeclineTransferee')
-                .insert([
-                    {
-                        patient_id: transfereeDetails.patient_id,
-                        patient_fname: transfereeDetails.patient_fname,
-                        patient_lname: transfereeDetails.patient_lname,
-                        declinetransferee_reason: declineReason,
-                        decline_by: fullName,  
-                    },
-                ]);
+        if (!transfereeDetails) {
+            throw new Error('Transferee not found.');
+        }
+
+        if (!declineReason) {
+            throw new Error('Decline reason is not provided.');
+        }
+
+        // Fetch 'to_branch' from 'patient_Transfer' table
+        const { data: transferDetails, error: transferError } = await supabase
+            .from('patient_Transfer')
+            .select('to_branch')
+            .eq('patient_id', patientToDeclineTransferee)
+            .single();
+
+        if (transferError) {
+            console.error('Error fetching transfer details:', transferError.message);
+            return;
+        }
+
+        const toBranch = transferDetails?.to_branch;
 
 
-            if (insertTransfereeError) {
-                throw insertTransfereeError;
-            }
+        // Insert decline reason into 'patient_DeclineTransferee' table
+        const { data: insertTransfereeData, error: insertTransfereeError } = await supabase
+            .from('patient_DeclineTransferee')
+            .insert([
+                {
+                    patient_id: transfereeDetails.patient_id,
+                    patient_fname: transfereeDetails.patient_fname,
+                    patient_lname: transfereeDetails.patient_lname,
+                    declinetransferee_reason: declineReason,
+                    declined_date: getCurrentDate(),
+                    declined_from: toBranch,
+                    decline_by: fullName,
+                },
+            ]);
 
-            console.log('Transferee decline data stored successfully:', insertTransfereeData);
-       
-            const { data: updateTransfer, error: updateTransferError } = await supabase
-                .from('patient_Transfer')
-                .update({ transfer_status: 'Declined' })
-                .eq('patient_id', patientToDeclineTransferee);
+        if (insertTransfereeError) {
+            throw insertTransfereeError;
+        }
 
-            if (updateTransferError) {
-                throw updateTransferError;
-            }
+        console.log('Transferee decline data stored successfully:', insertTransfereeData);
 
-            console.log('Transferee status updated to declined:', updateTransfer);
+        // Update transfer status in 'patient_Transfer' table
+        const { data: updateTransfer, error: updateTransferError } = await supabase
+            .from('patient_Transfer')
+            .update({ 
+                transfer_status: 'Declined', 
+                declined_date: getCurrentDate() 
+            })
+            .eq('patient_id', patientToDeclineTransferee);
 
-            const { data: updatePatient, error: updatePatientError } = await supabase
+        if (updateTransferError) {
+            throw updateTransferError;
+        }
+
+        console.log('Transferee status updated to declined:', updateTransfer);
+
+        // Update transfer status in 'patient' table
+        const { data: updatePatient, error: updatePatientError } = await supabase
             .from('patient')
             .update({ transfer_status: 'Declined' })
             .eq('patient_id', patientToDeclineTransferee);
 
-            if (updatePatientError) {
-                throw updatePatientError;
-            }
+        if (updatePatientError) {
+            throw updatePatientError;
+        }
 
-            console.log('Transferee status updated to declined:', updatePatient);
+        console.log('Transferee status updated to declined:', updatePatient);
 
+        // Update filtered transferee patients list
+        const updatedFilteredTransfereePatients = filteredTransfereePatients.filter(
+            patient => patient.patient_id !== patientToDeclineTransferee
+        );
 
-            const updatedFilteredTransfereePatients = filteredTransfereePatients.filter(
-                patient => patient.patient_id !== patientToDeclineTransferee
-            );
-
-            setFilteredTransfereePatients(updatedFilteredTransfereePatients);
-            setDeclineReason('');
-        } catch (error) {
-            console.error('Error storing transferee decline data:', error.message);
-           
-        } finally {
-            handleDeclineReasonClose(false);
-            setShowDeclineSuccess(true);
-          }
-    };
+        setFilteredTransfereePatients(updatedFilteredTransfereePatients);
+        setDeclineReason('');
+    } catch (error) {
+        console.error('Error storing transferee decline data:', error.message);
+    } finally {
+        handleDeclineReasonClose(false);
+        setShowDeclineSuccess(true);
+    }
+};
 
 
     const handleAddPatient = () => {

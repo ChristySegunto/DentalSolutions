@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
 
-import { Form } from 'react-bootstrap';
+import { Form, Modal, Button } from 'react-bootstrap';
 
 const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) => {
     const [patientInfo, setPatientInfo] = useState({
@@ -32,6 +32,11 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
 
     const [showGuardianForm, setShowGuardianForm] = useState(false);
 
+    const [showModal, setShowModal] = useState(false);
+const [modalMessage, setModalMessage] = useState("");
+
+const handleCloseModal = () => setShowModal(false);
+
     useEffect(() => {
         // Update parent component when patientInfo changes
         onUpdatePatientData(patientInfo);
@@ -40,11 +45,21 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
     useEffect(() => {
         if (patientInfo.patient_birthdate) {
             const age = calculateAge(patientInfo.patient_birthdate);
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                patient_age: age
-            }));
-            setShowGuardianForm(age < 18);
+            if (age >= 1) {
+                setPatientInfo(prevInfo => ({
+                    ...prevInfo,
+                    patient_age: age
+                }));
+                setShowGuardianForm(age < 18);
+            } else {
+                setPatientInfo(prevInfo => ({
+                    ...prevInfo,
+                    patient_birthdate: null,
+                    patient_age: ''
+                }));
+                setModalMessage("Patient must be at least 1 year old.");
+                setShowModal(true);
+            }
         }
     }, [patientInfo.patient_birthdate]);
 
@@ -130,14 +145,35 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         }
     };
 
-    const handleDateChange = (date) => {
-        const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-
+  const handleDateChange = (date) => {
+    if (!date) {
+        // If the date is cleared, reset the birthdate and age fields, and hide the guardian form
         setPatientInfo(prevInfo => ({
             ...prevInfo,
-            patient_birthdate: utcDate
+            patient_birthdate: null,
+            patient_age: ''
         }));
-    };
+        setShowGuardianForm(false);
+        return;
+    }
+
+    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const age = calculateAge(utcDate);
+    
+    if (age < 1) {
+        setModalMessage("Patient must be at least 1 year old. Ano may ngipin agad?");
+        setShowModal(true);
+        return;
+    }
+
+    setPatientInfo(prevInfo => ({
+        ...prevInfo,
+        patient_birthdate: utcDate,
+        patient_age: age
+    }));
+
+    setShowGuardianForm(age < 18);
+};
 
     return (
         <div className="personalinfo">
@@ -158,6 +194,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                     <Form.Control.Feedback type="invalid">{lnameError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
+            
             <div className='ageGenderBday row'>
                 <Form.Group className="col-lg-5 col-md-4 mb-3" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Birthdate<span className="required">*</span></Form.Label>
@@ -173,6 +210,19 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         required
                     />
                 </Form.Group>
+
+                <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
+                    <Modal.Header closeButton>
+                    <Modal.Title>Invalid Age</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>{modalMessage}</Modal.Body>
+                    <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Close
+                    </Button>
+                    </Modal.Footer>
+                    </Modal>
+
                 <Form.Group className="col-lg-2 col-md-6 mb-3" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Age<span className="required">*</span></Form.Label>
                     <Form.Control type="number" name="patient_age" placeholder="Enter age" value={patientInfo.patient_age} disabled />

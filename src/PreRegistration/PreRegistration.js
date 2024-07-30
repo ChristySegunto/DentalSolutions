@@ -152,13 +152,36 @@ const Prereg = () => {
         }
     };
 
-    const  validateAccountInfoData = (data) => {
-        // Check if all required fields have values
-        return (
-            data.username !== '' &&
-            data.password !== '' &&
-            data.confirmPassword !== ''
-        );
+    const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
+
+    const isValidPassword = (password) => {
+        const passwordRegex = /^[\p{Lu}][\p{L}]{0,28}[0-9]{1,10}\*$/u;
+        return passwordRegex.test(password);
+    };
+    
+    const validateAccountInfoData = (data) => {
+        if (!isValidUsername(data.username)) {
+            setModalMessage("Username can only contain letters (including accented characters), numbers, underscores, and hyphens.");
+            setModalHeader("Invalid Username");
+            setShowModal(true);
+            return false;
+        }
+        
+        if (!isValidPassword(data.password)) {
+            setModalMessage("Password must start with an uppercase letter, followed by up to 28 letters (including accented characters), then 1-10 numbers, and end with an asterisk.");
+            setModalHeader("Invalid Password");
+            setShowModal(true);
+            return false;
+        }
+        
+        if (data.password !== data.confirmPassword) {
+            setModalMessage("Passwords do not match.");
+            setModalHeader("Password Mismatch");
+            setShowModal(true);
+            return false;
+        }
+        
+        return true;
     };
 
     const validatePatientData = (data) => {
@@ -191,14 +214,13 @@ const Prereg = () => {
     
 
     const calculateAge = (birthdate) => {
-        const birthDate = new Date(birthdate);
         const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        let age = today.getFullYear() - birthdate.getFullYear();
+        const monthDifference = today.getMonth() - birthdate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
             age--;
         }
-        return age;
+        return Math.max(0, age); // Ensure age is not negative
     };
 
     const handleUpdatePatientData = (data) => {
@@ -217,6 +239,26 @@ const Prereg = () => {
         setAccountInfoData(data);
     };
     
+    const isValidName = (name) => /^[a-zA-Z\s]*$/.test(name);
+    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
+    
+    const validateStep2 = (data) => {
+        if (!isValidName(data.patient_fname) || !isValidName(data.patient_mname) || !isValidName(data.patient_lname)) {
+            return "Names should only contain letters and spaces.";
+        }
+        if (data.patient_address.trim() === '') {
+            return "Address cannot be empty.";
+        }
+        if (data.patient_email && !isValidEmail(data.patient_email)) {
+            return "Invalid email format.";
+        }
+        if (!isValidPhoneNumber(data.patient_contact)) {
+            return "Phone number should start with '09' followed by 9 digits.";
+        }
+        return null;
+    };
+
     const handleNext = () => {
         if (currentStep === 1) {
             if (!selectedBranch || !consentChecked) {
@@ -228,7 +270,12 @@ const Prereg = () => {
                 setShowModal(false);
             }
         } else if (currentStep === 2) {
-            if (!validatePatientData(patientData)) {
+            const validationError = validateStep2(patientData);
+            if (validationError) {
+                setModalMessage(validationError);
+                setModalHeader("Invalid Input");
+                setShowModal(true);
+            } else if (!validatePatientData(patientData)) {
                 setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
                 setModalHeader("Complete Required Information");
                 setShowModal(true);
@@ -245,7 +292,7 @@ const Prereg = () => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
-        }
+        } 
     };
 
 
@@ -518,8 +565,16 @@ const Prereg = () => {
 
                                 <h3>PATIENT CONSENT</h3>
                                 <div className='patientconsent'>
-                                    <input className="consentcheckbox" type="checkbox" id="consentCheckbox" checked={consentChecked} onChange={handleCheckboxChange} />
-                                    <p className='patientconstenttext'>I have read and understood the above information. I consent to the collection and use of my personal information, dental history, medical history, and facial recognition as described. I acknowledge that I have been informed of my rights under the Republic Act 10173 Data Privacy Act of 2012.</p>    
+                                <label htmlFor="consentCheckbox" className='consent-label'>
+                                <input
+                                    className="consentcheckbox"
+                                    type="checkbox"
+                                    id="consentCheckbox"
+                                    checked={consentChecked}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <p className='consent-text'>I have read and understood the above information. I consent to the collection and use of my personal information, dental history, medical history, and facial recognition as described. I acknowledge that I have been informed of my rights under the Republic Act 10173 Data Privacy Act of 2012.</p>
+                                </label>
                                 </div>
                             </div>
                             <div className='btn1'>
