@@ -24,7 +24,7 @@ const Addpatient = () => {
     const [patientId, setPatientId] = useState(null);
     const [username, setUsername] = useState('');
     const [capturedImages, setCapturedImages] = useState(0);
-
+    const [patientFullName, setPatientFullName] = useState('');
 
     const handleGoToLoginPage = () => {
         navigate('/login');
@@ -114,6 +114,12 @@ const Addpatient = () => {
         confirmPassword: ''
     });
 
+    const [accountErrors, setAccountErrors] = useState({
+        username: '',
+        password: '',
+        confirmPassword: ''
+    });
+
     const videoRef = useRef(null);
 
 
@@ -154,24 +160,31 @@ const Addpatient = () => {
         }
     };
 
-    const validateAccountInfoData = (data) => {
-        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-        const passwordRegex = /^[A-Z][a-zA-Z]{0,29}\d{1,10}\*$/;
-    
-        if (!usernameRegex.test(data.username)) {
-            return "Invalid username format. Username should be 3-20 characters long and can only contain letters, numbers, and underscores.";
-        }
-    
-        if (!passwordRegex.test(data.password)) {
-            return "Invalid password format. Password must start with an uppercase letter, followed by up to 29 letters, then 1-10 numbers, and end with an asterisk.";
-        }
-    
-        if (data.password !== data.confirmPassword) {
-            return "Passwords do not match.";
-        }
-    
-        return null;
+    const isValidUsername = (username) => /^[a-zA-Z0-9_-]+$/.test(username);
+
+    const isValidPassword = (password) => {
+        const passwordRegex = /^[A-Z][a-zA-Z]{0,28}[0-9]{1,10}$/;
+        return passwordRegex.test(password);
     };
+
+    const validateAccountInfoData = (data) => {
+        let errors = {};
+        if (!isValidUsername(data.username)) {
+            errors.username = "Username can only contain letters, numbers, underscores, and hyphens.";
+        }
+        
+        if (!isValidPassword(data.password)) {
+            errors.password = "Password must start with an uppercase letter, followed by up to 28 letters, then 1-10 numbers.";
+        }
+        
+        if (data.password !== data.confirmPassword) {
+            errors.confirmPassword = "Passwords do not match.";
+        }
+        
+        setAccountErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     
 
     const validatePatientData = (data) => {
@@ -200,6 +213,7 @@ const Addpatient = () => {
     const handleUpdatePatientData = (data) => {
         console.log('Updating patientData with:', data);
         setPatientData((prevData) => ({ ...prevData, ...data }));
+        setPatientFullName(`${data.patient_fname} ${data.patient_lname}`);
     };
 
     const handleUpdateDentalAndMedData = (data) => {
@@ -213,9 +227,9 @@ const Addpatient = () => {
         setAccountInfoData(data);
     };
     
-   const isValidName = (name) => /^[a-zA-Z\s]*$/.test(name);
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
+    const isValidName = (name) => /^[A-Za-zÀ-ÿ\s'-]*$/.test(name);
+    const isValidEmail = (email) => /^[A-Za-z0-9À-ÿ\s.,#'-]*$/.test(email);
+    const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
 
 const validateStep2 = (data) => {
     if (!isValidName(data.patient_fname) || !isValidName(data.patient_mname) || !isValidName(data.patient_lname)) {
@@ -266,10 +280,10 @@ const validateStep2 = (data) => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
-        } else if (currentStep === 4) {
-            const validationError = validateAccountInfoData(accountInfoData);
-            if (validationError) {
-                setModalMessage(validationError);
+        } else  if (currentStep === 4) {
+            if (!validateAccountInfoData(accountInfoData)) {
+                let errorMessage = Object.values(accountErrors).join('\n');
+                setModalMessage(errorMessage);
                 setModalHeader("Invalid Input");
                 setShowModal(true);
             } else {
@@ -277,7 +291,6 @@ const validateStep2 = (data) => {
                 setShowModal(false);
             }
         }
-        
     };
 
 
@@ -296,12 +309,13 @@ const validateStep2 = (data) => {
     };
 
     const handleSubmit = async () => {
-        const validationError = validateAccountInfoData(accountInfoData);
-        if (validationError) {
-            setModalMessage(validationError);
-            setModalHeader("Invalid Input");
-            setShowModal(true);
-            return;
+        if (currentStep === 4) { 
+            if (!validateAccountInfoData(accountInfoData)) {
+                let errorMessage = Object.values(accountErrors).join('\n');
+                setModalMessage(errorMessage);
+                setModalHeader("Invalid Input");
+                setShowModal(true);
+                return;
     
         } else if (!validatePassword(accountInfoData)) {
             setModalMessage("Password and confirm password do not match. Please try again.");
@@ -310,7 +324,7 @@ const validateStep2 = (data) => {
             return;
         }
 
-        if (currentStep === 4) {
+       
             const hashedPassword = CryptoJS.SHA256(accountInfoData.password).toString();
 
             const { data: existingUsers, error: userQueryError } = await supabase
@@ -632,20 +646,26 @@ const validateStep2 = (data) => {
 
                     {currentStep === 4 && (
                         <div className='step4-addp'>
-                            <AccountInfoForm onUpdateAccountInfoData={handleUpdateAccountInfoData}/>
-
-                            <div className='btns'>
-                                <button className="btn btn-secondary mr-2" onClick={handlePrev}>Previous</button>
-                                <button className="nextbtn btn btn-primary" onClick={handleSubmit}>Next</button>
-                            </div>
-                            
+                        <AccountInfoForm 
+                            accountdata={accountInfoData} 
+                            onUpdateAccountInfoData={handleUpdateAccountInfoData}
+                        />
+        
+                        <div className='btns'>
+                            <button className="btn btn-secondary mr-2" onClick={handlePrev}>Previous</button>
+                            <button className="nextbtn btn btn-primary" onClick={handleNext}>Next</button>
                         </div>
+                    </div>
                     )}
 
                     {currentStep === 5 && (
                         <div className='step5-addp'>
                             
-                            <Scanface patient_username={username} onCapturedImagesChange={handleCapturedImagesChange}/>
+                            <Scanface 
+            patient_username={username} 
+            patient_fullname={patientFullName}
+            onCapturedImagesChange={handleCapturedImagesChange}
+        />
                             <div className='btns'>
                                 <button className="btn btn-secondary mr-2" onClick={handlePrev}>Previous</button>
                                 <button className="btn btn-success" onClick={handleGoToPatientRecord} disabled={capturedImages !== 5}>Submit</button>
@@ -658,16 +678,21 @@ const validateStep2 = (data) => {
             </div>
 
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>{modalHeader}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>{modalMessage}</Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Close
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <Modal.Header closeButton>
+                <Modal.Title>{modalHeader}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{modalMessage.split('\n').map((line, index) => (
+                <React.Fragment key={index}>
+                    {line}
+                    <br />
+                </React.Fragment>
+            ))}</Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Close
+                </Button>
+            </Modal.Footer>
+        </Modal>
         </div>
         
     );
