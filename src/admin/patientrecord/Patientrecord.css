@@ -617,15 +617,18 @@ th:last-child {
     font-size: 18px;
     width: 15vh;
     height: 35px;
+    border-style: none;
+}
+
+.ortho-status:hover {   
+    background-color: #005590;
+    color: #ffffff;
 }
 
 .on-going {
     border-radius: 10px;
-    /* background-color: #D0E8F9;
-    color: #025590; */
     background-color: rgba(230, 92, 79, 0.4);
     color: #FF4E4E;
-    
     align-items: center;
     margin-left: 10px;
     display: flex; 
@@ -633,7 +636,30 @@ th:last-child {
 }
 
 .completed {
-    border-radius: 20px;
+    border-radius: 10px;
+    background-color: #BFF0C1;
+    color: #458948;
+    align-items: center;
+    margin-left: 10px;
+    display: flex; 
+    justify-content: center; 
+}
+
+
+.custom-modal-confirmbtn{
+    border-color: #005590;
+    background-color: #005590;
+}
+
+.custom-modal-confirmbtn:hover{
+    background-color: #013860;
+}
+
+.custom-button {
+    border: none;
+}
+.custom-button:disabled {
+    border-radius: 10px;
     background-color: #BFF0C1;
     color: #458948;
     align-items: center;
