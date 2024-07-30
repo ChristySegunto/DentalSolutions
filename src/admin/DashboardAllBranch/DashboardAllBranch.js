@@ -290,13 +290,14 @@ const DashboardAllBranch = () => {
         const { data: patients, error: patientsError } = await supabase
             .from('patient')
             .select('patient_id, patient_branch')
-            .in('patient_id', patientIds);
-
+            .in('patient_id', patientIds)
+            .eq('verification_status', 'verified');
+    
         if (patientsError) {
             console.error('Error fetching patients by IDs:', patientsError);
             return [];
         }
-
+    
         return patients;
     };
 
