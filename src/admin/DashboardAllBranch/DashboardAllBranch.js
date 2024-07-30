@@ -38,98 +38,98 @@ function getDate() {
 
 
 const DashboardAllBranch = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
-  const [currentDate, setCurrentDate] = useState(getDate());
-  const [profileDetails, setProfileDetails] = useState(null);
-  const [userDetails, setUserDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [allBrancPatientMonthCount, setAllBranchPatientMonthCount] = useState(0);
-  const [branchPatientCounts, setBranchPatientCounts] = useState({});
-const [treatmentTrends, setTreatmentTrends] = useState({});
+    const [currentDate, setCurrentDate] = useState(getDate());
+    const [profileDetails, setProfileDetails] = useState(null);
+    const [userDetails, setUserDetails] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [allBrancPatientMonthCount, setAllBranchPatientMonthCount] = useState(0);
+    const [branchPatientCounts, setBranchPatientCounts] = useState({});
+    const [treatmentTrends, setTreatmentTrends] = useState({});
 
 
-  useEffect(() => {
-    const fetchProfileDetails = async () => {
-        try {
-            setLoading(true);
-            setError('');
+    useEffect(() => {
+        const fetchProfileDetails = async () => {
+            try {
+                setLoading(true);
+                setError('');
 
-            if (!user || !user.user_id) {
-                throw new Error('User is not logged in or user ID is undefined');
+                if (!user || !user.user_id) {
+                    throw new Error('User is not logged in or user ID is undefined');
+                }
+
+                const userId = user.user_id;
+
+                // Fetch user details
+                const { data: userData, error: userError } = await supabase
+                    .from('user')
+                    .select('role')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (userError) {
+                    throw userError;
+                }
+
+                if (!userData) {
+                    throw new Error('User data not found');
+                }
+
+                setUserDetails(userData);
+                
+                const tableName = userData.role === 'dentist' ? 'dentist' : 'assistant';
+
+                const { data: profileData, error: profileError } = await supabase
+                    .from(tableName)
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (profileError) {
+                    throw profileError;
+                }
+
+                if (!profileData) {
+                    throw new Error('Profile data not found');
+                }
+
+                setProfileDetails(profileData);
+                
+            } catch (error) {
+                console.error('Error fetching profile details:', error.message);
+                setError('Failed to fetch profile details');
+            } finally {
+                setLoading(false);
             }
+        };
 
-            const userId = user.user_id;
+        fetchProfileDetails();
+    }, [user]);
 
-            // Fetch user details
-            const { data: userData, error: userError } = await supabase
-                .from('user')
-                .select('role')
-                .eq('user_id', userId)
-                .single();
-
-            if (userError) {
-                throw userError;
-            }
-
-            if (!userData) {
-                throw new Error('User data not found');
-            }
-
-            setUserDetails(userData);
-            
-            const tableName = userData.role === 'dentist' ? 'dentist' : 'assistant';
-
-            const { data: profileData, error: profileError } = await supabase
-                .from(tableName)
-                .select('*')
-                .eq('user_id', userId)
-                .single();
-
-            if (profileError) {
-                throw profileError;
-            }
-
-            if (!profileData) {
-                throw new Error('Profile data not found');
-            }
-
-            setProfileDetails(profileData);
-            
-        } catch (error) {
-            console.error('Error fetching profile details:', error.message);
-            setError('Failed to fetch profile details');
-        } finally {
-            setLoading(false);
-        }
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
-    fetchProfileDetails();
-}, [user]);
+    const capitalizeAllLetters = (string) => {
+        return string.toUpperCase();
+    };
 
-const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-};
+    const firstName = profileDetails?.fname ? capitalizeFirstLetter(profileDetails.fname) : 'First name not provided';
+    const lastName = profileDetails?.lname ? capitalizeFirstLetter(profileDetails.lname) : 'Last name not provided';
+    let fullName = `${firstName} ${lastName}`;
 
-const capitalizeAllLetters = (string) => {
-    return string.toUpperCase();
-};
+    if (userDetails && userDetails.role === 'dentist') {
+        fullName = `Dr. ${fullName}`;
+    }
 
-const firstName = profileDetails?.fname ? capitalizeFirstLetter(profileDetails.fname) : 'First name not provided';
-const lastName = profileDetails?.lname ? capitalizeFirstLetter(profileDetails.lname) : 'Last name not provided';
-let fullName = `${firstName} ${lastName}`;
+    const userRole = userDetails?.role ? capitalizeFirstLetter(userDetails.role) : 'Role not provided';
+    const branch = profileDetails?.branch ? capitalizeAllLetters(profileDetails.branch) : 'Branch not provided';
 
-if (userDetails && userDetails.role === 'dentist') {
-    fullName = `Dr. ${fullName}`;
-}
-
-const userRole = userDetails?.role ? capitalizeFirstLetter(userDetails.role) : 'Role not provided';
-const branch = profileDetails?.branch ? capitalizeAllLetters(profileDetails.branch) : 'Branch not provided';
-
-console.log('Profile Details:', profileDetails);
-console.log('User Details:', userDetails);
+    console.log('Profile Details:', profileDetails);
+    console.log('User Details:', userDetails);
 
 
     const handleSelect = (eventKey) => {
@@ -137,7 +137,7 @@ console.log('User Details:', userDetails);
     };
 
 
-{/*CURRENT MONTH CARD */}
+    {/*CURRENT MONTH CARD */}
     useEffect(() => {
         const fetchAllBranchPatientMonthCount = async () => {
             try {
@@ -174,10 +174,10 @@ console.log('User Details:', userDetails);
                 const treatmentsAllCount = treatmentsAllData.length; 
                 const orthodonticsAllCount = orthodonticsAllData.length; 
     
-               
+
                 const allBranchTotalMonthlyCount = treatmentsAllCount + orthodonticsAllCount;
     
-               
+
                 setAllBranchPatientMonthCount(allBranchTotalMonthlyCount);
     
             } catch (error) {
@@ -185,7 +185,7 @@ console.log('User Details:', userDetails);
             }
         };
     
-      
+
         fetchAllBranchPatientMonthCount();
     }, []);
 
@@ -205,12 +205,11 @@ console.log('User Details:', userDetails);
                 console.error('Error fetching treatment trends:', error);
             }
         };
-      
+
         fetchTreatmentTrends();
     }, []);
     
-    
-      
+
     const formatTrendsForChart = () => {
         if (Object.keys(treatmentTrends).length === 0) {
             console.log('Treatment trends data is empty');
@@ -249,15 +248,7 @@ console.log('User Details:', userDetails);
         console.log('chartData updated:', chartData);
     }, [chartData]);
 
-const fetchPatientsByIds = async (patientIds) => {
-    const { data: patients, error: patientsError } = await supabase
-        .from('patient')
-        .select('patient_id, patient_branch')
-        .in('patient_id', patientIds)
-        .eq('verification_status', 'verified');
 
-
-    // const graphData = formatTrendsForChart();
 
     const fetchPatientTreatmentCounts = async () => {
         const { data: treatments, error: treatmentError } = await supabase

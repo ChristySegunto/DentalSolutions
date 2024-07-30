@@ -4,7 +4,7 @@ import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { useAuth } from './../../settings/AuthContext';
 import supabase from "../../settings/supabase";
 import { useNavigate } from "react-router-dom";
-import moment from 'moment-timezone';
+// import moment from 'moment-timezone';
 
 
 
