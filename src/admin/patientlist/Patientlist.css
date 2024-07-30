@@ -5,10 +5,10 @@
 }
 
 .patientlist-box{
-
     margin-top: 30px;
     margin-bottom: 20px;
     width: 98%;
+    min-width: 300px;
 }
 
 .patientlist-header {
@@ -16,6 +16,8 @@
     margin-top: 20px;
     flex-direction: row;
     width: 98%;
+    min-width: 300px;
+    align-items: center;
 }
 
 .patientlist-header h1{
@@ -184,13 +186,19 @@
     margin-left: 20px;
     margin-right: 20px;
     width: 97%; 
+    overflow: auto;
+    
 }
 
 .all-patients-table, .transferees-table, .pending-table{
     margin-top: 30px;
     margin-left: 20px;
     width: 97%; 
+    min-width: 300px;
+    
+
 }
+
 .all-patients-table .actionsth, .transferees-table .actionsth, .pending-table .actionsth {
     padding-left: 50px;
     
@@ -225,6 +233,8 @@
     border: none; 
     color: #43A547;
     margin-left: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
     text-decoration: none;
 }
 
@@ -274,12 +284,14 @@
     border: none; 
     cursor: pointer; 
     border-radius: 40px;
+    
   }
   
   .pagination-container .page-item.active .page-link {
     background-color: #005590; 
     border-color: #005590; 
     color: #ffffff;
+   
   }
   
   .pagination-container .page-link:hover {
@@ -375,82 +387,117 @@
     
 }
 
-
 @media (max-width: 768px) {
-    .patientlist-box{
-        margin-top: 20px;
-        margin-bottom: 20px;
-        width: 80%;
-    }
+    .patientlist-box {
+       margin: 20px auto;
+       width: 70%;
+       height: fit-content;
+       padding-left: 0px;
+   }
 
-    .patientlist-header h1 {
-        font-size: 1.5em;
-    }
-    .dropdownbranch {
-        font-size: 12px;
-        width: 80%; 
+   .patientlist-header h1 {
+       font-size: 18px;
+       margin-right: 15px;
+   }
+   .dropdownbranch {
+       font-size: 12px;
+       width: 70%; 
+   }
 
-    
-    }
-    .navbar-patientlist-tabs {
-        font-size: 16px;
-        padding: 15px;
-        display: flex;
-        flex-direction: row;
-    }
-    .title-buttons {
-        display: flex;         
-        gap: 10px; 
-        top: -10px;
-        flex-direction: row;
-        justify-content: end;
-        margin-top: 5px;
-    }
-    
-    .addpatientbutton {
-        width: 150px;  
-        height: 50px; 
-        font-size: 16px;  
-    }
-    
-    .exportbutton {
-        width: 150px;  
-        height: 50px; 
-        font-size: 16px; 
-    }
-    
-    .allpatients-container, .transferees-container, .pending-container {
-        margin-top: 20px; 
-        margin-left: 10px;
-        margin-right: 20px;
-        overflow-x: auto;
-        
-    }
-    .all-patients-table, .transferees-table, .pending-table{
-        margin-top: 30px;
-        font-size: 12px; 
-        margin-left: 10px;
-        margin-right: 20px; 
-    }
-
-    .patientlist-container {
-        height: 85%;
-        background-color: #ffffff; 
-        border-radius: 15px;
-        box-shadow: 0px 4px 50px 0px rgba(0, 0, 0, 0.09);
-        margin-top: 20px;
-    }
-
-    .allpatients-actionbuttons .icon {
-        font-size: 1em;
-        margin-right: 5px; 
-    }
-
-    .acceptbtn, .reviewbtn {
-        font-size: 12px; 
-    
-    }
-    .declinebtn {
-        font-size: 12px; 
-    }
+   .dropdownbranch-item{
+    width: 70%;
 }
+   .navbar-patientlist-tabs {
+       font-size: 16px;
+       padding: 15px;
+       display: flex;
+       flex-direction: row;
+   }
+   .addpatientbutton {
+    width: 25vh;  
+    height: 30px; 
+    font-size: 14px;
+    font-weight: 400;
+    margin-right: 10px;
+    }
+    .exportbutton {
+        width: 25vh;  
+        height: 30px; 
+        font-size: 14px;
+        font-weight: 400;
+        margin-right: 10px;
+    }
+
+   .title-buttons {
+       display: flex;         
+       gap: 10px; 
+       top: -10px;
+       flex-direction: row;
+       justify-content: end;
+       margin-top: 5px;
+   }
+   
+
+   .allpatients-container, .transferees-container, .pending-container {
+       margin: 20px 10px 0 10px;
+       overflow-x: auto;
+   }
+   
+   .all-patients-table, .transferees-table, .pending-table{
+       margin: 10px 20px 10px 10px;
+       font-size: 12px;
+       height: 85%;
+       
+   }
+   .allpatients-actionbuttons {
+    width: 20px;
+    
+   }
+
+   .allpatients-actionbuttons .icon {
+       font-size: 1em;
+       padding-right: 0;
+    
+   }
+
+   .acceptbtn, .reviewbtn {
+       font-size: 12px; 
+   
+   }
+   .declinebtn {
+       font-size: 12px; 
+   }
+   .pagination-container .page-link {
+    font-size: 12px; 
+    
+  }
+   
+}
+@media (max-width: 999px) {
+    .patientlist-box {
+       margin: 20px auto;
+       width: 90%;
+       height: fit-content;
+       padding-left: 0px;
+   }
+
+   .patientlist-header h1 {
+       font-size: 18px;
+       margin-right: 15px;
+   }
+   .dropdownbranch {
+       font-size: 12px;
+       width: 70%; 
+   }
+
+   .dropdownbranch-item{
+    width: 70%;
+}
+   .navbar-patientlist-tabs {
+       font-size: 16px;
+       padding: 15px;
+       display: flex;
+       flex-direction: row;
+   }
+}
+

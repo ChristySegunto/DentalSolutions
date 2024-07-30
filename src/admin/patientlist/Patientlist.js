@@ -74,7 +74,8 @@ const Patientlist = () => {
     const [currentPageAllPatients, setCurrentPageAllPatients] = useState(1);
     const [currentPageTransferees, setCurrentPageTransferees] = useState(1);
     const [currentPagePending, setCurrentPagePending] = useState(1);
-    const patientsPerPage = 10;
+    const patientsPerPage = 8;
+    const patientsPendingPerPage = 6;
 
     const [transfereePatients, setTransfereePatients] = useState([]);
 
@@ -612,6 +613,7 @@ const handleDeclineSuccessShow = async () => {
                     declinetransferee_reason: declineReason,
                     declined_date: getCurrentDate(),
                     declined_from: toBranch,
+                    notified: false,
                     decline_by: fullName,
                 },
             ]);
@@ -793,47 +795,45 @@ const handleDeclineSuccessShow = async () => {
         // Create worksheet
         const worksheet = XLSX.utils.json_to_sheet([]);
     
-        // Add company name to cell A1 with styling
+        
         const companyNameCell = { v: companyName, t: 's', s: { font: { bold: true, sz: 16 }, alignment: { horizontal: 'center' } } };
         const companyNameCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 });
         worksheet[companyNameCellRef] = companyNameCell;
     
-        // Add branch information to cell A2 with styling
         const branchInfoCell = { v: branchInfo, t: 's', s: { font: { bold: true, sz: 12 }, alignment: { horizontal: 'center' } } };
         const branchInfoCellRef = XLSX.utils.encode_cell({ r: 1, c: 0 });
         worksheet[branchInfoCellRef] = branchInfoCell;
     
-        // Merge cells for company name and branch info
         const mergeCompany = { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } };
         const mergeBranch = { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } };
         if (!worksheet['!merges']) worksheet['!merges'] = [];
         worksheet['!merges'].push(mergeCompany, mergeBranch);
     
-        // Add headers
+       
         const headers = getExcelHeaders(activeTab);
         XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A3" });
     
-        // Add data rows
+      
         const dataRows = tableData.map(patient => getExcelDataRow(patient, activeTab));
         XLSX.utils.sheet_add_json(worksheet, dataRows, { origin: "A4", skipHeader: true });
     
-        // Auto-size columns
+       
         const columnsWidth = headers.map((header, index) => ({
             wch: Math.max(header.length, ...dataRows.map(row => String(Object.values(row)[index]).length))
         }));
         worksheet['!cols'] = columnsWidth;
     
-        // Create workbook and append worksheet
+       
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     
-        // Convert workbook to Excel buffer
+        
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     
-        // Convert Excel buffer to Blob
+       
         const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
     
-        // Save Blob as Excel file
+        
         saveAs(data, `${sheetName}.xlsx`);
     };
     
@@ -951,10 +951,16 @@ const handleDeclineSuccessShow = async () => {
                 const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
                 return patients.slice(indexOfFirstPatient, indexOfLastPatient);
               };
+
+              const paginatepending = (patients, currentPage) => {
+                const indexOfLastPatient = currentPage * patientsPendingPerPage;
+                const indexOfFirstPatient = indexOfLastPatient - patientsPendingPerPage;
+                return patients.slice(indexOfFirstPatient, indexOfLastPatient);
+              };
               
               const paginatedAllPatients = paginate(filteredPatients, currentPageAllPatients);
               const paginatedTransferees = paginate(filteredTransfereePatients, currentPageTransferees);
-              const paginatedPendingPatients = paginate(filteredPendingPatients, currentPagePending);
+              const paginatedPendingPatients = paginatepending(filteredPendingPatients, currentPagePending);
 
               console.log('paginatedTransferees:', paginatedTransferees);
 
@@ -962,7 +968,7 @@ const handleDeclineSuccessShow = async () => {
     return (
     
         <div className="patientlist-box container-fluid">
-            <div className="patientlist-header d-flex align-items-center">
+            <div className="patientlist-header ">
                 <h1> PATIENT LIST </h1>
 
                 <Dropdown onSelect={handleSelect}>
@@ -1401,7 +1407,7 @@ const handleDeclineSuccessShow = async () => {
                         </Table>
                         <Pagination className="pagination-container">
                             <Pagination.Prev onClick={() => currentPagePending > 1 && handlePageChange('pending', currentPagePending - 1)} />
-                            {[...Array(Math.ceil(filteredPendingPatients.length / patientsPerPage))].map((_, index) => (
+                            {[...Array(Math.ceil(filteredPendingPatients.length / patientsPendingPerPage))].map((_, index) => (
                                 <Pagination.Item
                                     key={index + 1}
                                     active={index + 1 === currentPagePending}
@@ -1410,7 +1416,7 @@ const handleDeclineSuccessShow = async () => {
                                     {index + 1}
                                 </Pagination.Item>
                             ))}
-                            <Pagination.Next onClick={() => currentPagePending < Math.ceil(filteredPendingPatients.length / patientsPerPage) && handlePageChange('pending', currentPagePending + 1)} />
+                            <Pagination.Next onClick={() => currentPagePending < Math.ceil(filteredPendingPatients.length / patientsPendingPerPage) && handlePageChange('pending', currentPagePending + 1)} />
                         </Pagination>
                     </div>
                 )}
