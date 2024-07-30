@@ -167,9 +167,40 @@
     border-color: #a3b0ba; /* Checked border color */
 }
 
-.patientconstenttext{
-    margin-bottom: 0;
-}
+.consent-text {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    padding-bottom: 3px;
+  }
+  
+  .consent-text::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #0087ca;
+    transform-origin: bottom right;
+    transition: transform 0.25s ease-out;
+  }
+  
+  .consent-text:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+  }
+
+  .consent-text {
+    color: #333;
+    transition: color 0.3s ease;
+  }
+  
+  .consent-text:hover {
+    color: #0087ca;
+  }
+  
 .btn1{
     display: flex;
     justify-content: flex-end;

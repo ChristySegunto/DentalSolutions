@@ -1,42 +1,41 @@
 import React, { useState, useEffect } from "react";
 import './Addpatient.css'
+import { Form } from 'react-bootstrap';
 
-
-import { Modal, Button, Form, Col } from 'react-bootstrap';
-
-const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    
+const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
     const [accountInfoData, setAccountInfoData] = useState({
-            username: accountdata.username || '',
-            password: accountdata.password || '',
-            confirmPassword: accountdata.confirmPassword || ''
-        });
+        username: accountdata.username || '',
+        password: accountdata.password || '',
+        confirmPassword: accountdata.confirmPassword || ''
+    });
 
+    const [errors, setErrors] = useState({
+        username: '',
+        password: '',
+        confirmPassword: ''
+    });
 
-    const handleConfirmPasswordChange = (e) => {
-        setConfirmPassword(e.target.value);
-        // Clear password error when user starts typing
-        if (passwordError) {
-            setPasswordError('');
-        }
-    };
-
-    const validatePassword = (e) => {
-        if (accountInfoData.password !== accountInfoData.confirmPassword) {
-            setPasswordError('Passwords do not match');
-        } else {
-            setPasswordError('');
-        }
-    };
+    const [touched, setTouched] = useState({
+        username: false,
+        password: false,
+        confirmPassword: false
+    });
 
     useEffect(() => {
-        // Update parent component when formData changes
         onUpdateAccountInfoData(accountInfoData);
     }, [accountInfoData]);
+
+    const validateUsername = (username) => {
+        if (!username) return '';
+        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+        return usernameRegex.test(username) ? '' : 'Username should be 3-20 characters long and can only contain letters, numbers, and underscores.';
+    };
+
+    const validatePassword = (password) => {
+        if (!password) return '';
+        const passwordRegex = /^[A-Z][a-zA-Z]{0,29}\d{1,10}\*$/;
+        return passwordRegex.test(password) ? '' : 'Password must start with an uppercase letter, followed by up to 29 letters, then 1-10 numbers, and end with an asterisk.';
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -44,11 +43,28 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
             ...prevInfo,
             [name]: value
         }));
+
+        setTouched(prevTouched => ({
+            ...prevTouched,
+            [name]: true
+        }));
+
+        let error = '';
+        if (name === 'username') {
+            error = validateUsername(value);
+        } else if (name === 'password') {
+            error = validatePassword(value);
+        } else if (name === 'confirmPassword') {
+            error = value !== accountInfoData.password ? 'Passwords do not match' : '';
+        }
+
+        setErrors(prevErrors => ({
+            ...prevErrors,
+            [name]: error
+        }));
     };
 
     return (
-        <>
-        
         <div className="accountinfo">
             <h2>ACCOUNT INFORMATION</h2>
             <div className="account">
@@ -61,6 +77,7 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
                         value={accountInfoData.username} 
                         onChange={handleChange}
                     />
+                    {touched.username && accountInfoData.username && errors.username && <Form.Text className="text-danger">{errors.username}</Form.Text>}
                 </Form.Group>
 
                 <Form.Group className="col-lg-8 col-md-8 mb-3" controlId="formBasicPassword">
@@ -72,6 +89,7 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
                         value={accountInfoData.password} 
                         onChange={handleChange}
                     />
+                    {touched.password && accountInfoData.password && errors.password && <Form.Text className="text-danger">{errors.password}</Form.Text>}
                 </Form.Group>
 
                 <Form.Group className="col-lg-8 col-md-8 mb-4" controlId="formBasicConfirmPassword">
@@ -82,21 +100,11 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
                         name="confirmPassword"
                         value={accountInfoData.confirmPassword} 
                         onChange={handleChange}
-                        onBlur={validatePassword} // Validate on blur
                     />
-                    
-                    {passwordError && <Form.Text className="text-danger">{passwordError}</Form.Text>}
-
+                    {touched.confirmPassword && accountInfoData.confirmPassword && errors.confirmPassword && <Form.Text className="text-danger">{errors.confirmPassword}</Form.Text>}
                 </Form.Group>
             </div>
-
-            
         </div>
-
-        
-
-        </>
-        
     )
 }
 

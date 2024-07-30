@@ -154,14 +154,25 @@ const Addpatient = () => {
         }
     };
 
-    const  validateAccountInfoData = (data) => {
-        // Check if all required fields have values
-        return (
-            data.username !== '' &&
-            data.password !== '' &&
-            data.confirmPassword !== ''
-        );
+    const validateAccountInfoData = (data) => {
+        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+        const passwordRegex = /^[A-Z][a-zA-Z]{0,29}\d{1,10}\*$/;
+    
+        if (!usernameRegex.test(data.username)) {
+            return "Invalid username format. Username should be 3-20 characters long and can only contain letters, numbers, and underscores.";
+        }
+    
+        if (!passwordRegex.test(data.password)) {
+            return "Invalid password format. Password must start with an uppercase letter, followed by up to 29 letters, then 1-10 numbers, and end with an asterisk.";
+        }
+    
+        if (data.password !== data.confirmPassword) {
+            return "Passwords do not match.";
+        }
+    
+        return null;
     };
+    
 
     const validatePatientData = (data) => {
         return (
@@ -177,14 +188,13 @@ const Addpatient = () => {
     
 
     const calculateAge = (birthdate) => {
-        const birthDate = new Date(birthdate);
         const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        let age = today.getFullYear() - birthdate.getFullYear();
+        const monthDifference = today.getMonth() - birthdate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
             age--;
         }
-        return age;
+        return Math.max(0, age); // Ensure age is not negative
     };
 
     const handleUpdatePatientData = (data) => {
@@ -203,6 +213,26 @@ const Addpatient = () => {
         setAccountInfoData(data);
     };
     
+   const isValidName = (name) => /^[a-zA-Z\s]*$/.test(name);
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
+
+const validateStep2 = (data) => {
+    if (!isValidName(data.patient_fname) || !isValidName(data.patient_mname) || !isValidName(data.patient_lname)) {
+        return "Names should only contain letters and spaces.";
+    }
+    if (data.patient_address.trim() === '') {
+        return "Address cannot be empty.";
+    }
+    if (data.patient_email && !isValidEmail(data.patient_email)) {
+        return "Invalid email format.";
+    }
+    if (!isValidPhoneNumber(data.patient_contact)) {
+        return "Phone number should start with '09' followed by 9 digits.";
+    }
+    return null;
+};
+
     const handleNext = () => {
         if (currentStep === 1) {
             if (!selectedBranch || !consentChecked) {
@@ -214,7 +244,12 @@ const Addpatient = () => {
                 setShowModal(false);
             }
         } else if (currentStep === 2) {
-            if (!validatePatientData(patientData)) {
+            const validationError = validateStep2(patientData);
+            if (validationError) {
+                setModalMessage(validationError);
+                setModalHeader("Invalid Input");
+                setShowModal(true);
+            } else if (!validatePatientData(patientData)) {
                 setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
                 setModalHeader("Complete Required Information");
                 setShowModal(true);
@@ -231,20 +266,18 @@ const Addpatient = () => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
-        // } else if (currentStep === 4) {
-        //     if (!validateAccountInfoData(accountInfoData)) {
-        //         setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
-        //         setModalHeader("Complete Required Information");
-        //         setShowModal(true);
-        //     } else if (!validatePassword(accountInfoData)) {
-        //         setModalMessage("Password and confirm password do not match. Please try again.");
-        //         setModalHeader("Password Not Matched");
-        //         setShowModal(true);
-        //     } else {
-        //         setCurrentStep((prevStep) => prevStep + 1);
-        //         setShowModal(false);
-        //     }
+        } else if (currentStep === 4) {
+            const validationError = validateAccountInfoData(accountInfoData);
+            if (validationError) {
+                setModalMessage(validationError);
+                setModalHeader("Invalid Input");
+                setShowModal(true);
+            } else {
+                setCurrentStep((prevStep) => prevStep + 1);
+                setShowModal(false);
+            }
         }
+        
     };
 
 
@@ -263,11 +296,13 @@ const Addpatient = () => {
     };
 
     const handleSubmit = async () => {
-        if (!validateAccountInfoData(accountInfoData)) {
-            setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
-            setModalHeader("Complete Required Information");
+        const validationError = validateAccountInfoData(accountInfoData);
+        if (validationError) {
+            setModalMessage(validationError);
+            setModalHeader("Invalid Input");
             setShowModal(true);
             return;
+    
         } else if (!validatePassword(accountInfoData)) {
             setModalMessage("Password and confirm password do not match. Please try again.");
             setModalHeader("Password Not Matched");
@@ -553,7 +588,7 @@ const Addpatient = () => {
                                     checked={consentChecked}
                                     onChange={handleCheckboxChange}
                                 />
-                                <p className='patientconsenttext'>I have read and understood the above information. I consent to the collection and use of my personal information, dental history, medical history, and facial recognition as described. I acknowledge that I have been informed of my rights under the Republic Act 10173 Data Privacy Act of 2012.</p>
+                                <p className='consent-text'>I have read and understood the above information. I consent to the collection and use of my personal information, dental history, medical history, and facial recognition as described. I acknowledge that I have been informed of my rights under the Republic Act 10173 Data Privacy Act of 2012.</p>
                                 </label>
                                 </div>
                             </div>

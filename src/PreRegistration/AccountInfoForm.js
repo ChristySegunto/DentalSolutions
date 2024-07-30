@@ -1,40 +1,30 @@
 import React, { useState, useEffect } from "react";
 import './PreRegistration.css'
-
-
 import { Form } from 'react-bootstrap';
 
-const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    
+const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
     const [accountInfoData, setAccountInfoData] = useState({
-            username: accountdata.username || '',
-            password: accountdata.password || '',
-            confirmPassword: accountdata.confirmPassword || ''
-        });
+        username: accountdata.username || '',
+        password: accountdata.password || '',
+        confirmPassword: accountdata.confirmPassword || ''
+    });
 
-
-    const handleConfirmPasswordChange = (e) => {
-        setConfirmPassword(e.target.value);
-        // Clear password error when user starts typing
-        if (passwordError) {
-            setPasswordError('');
-        }
-    };
-
-    const validatePassword = (e) => {
-        if (accountInfoData.password !== accountInfoData.confirmPassword) {
-            setPasswordError('Passwords do not match');
-        } else {
-            setPasswordError('');
-        }
-    };
+    const [errors, setErrors] = useState({
+        username: '',
+        password: '',
+        confirmPassword: ''
+    });
 
     useEffect(() => {
-        // Update parent component when formData changes
         onUpdateAccountInfoData(accountInfoData);
-    }, [accountInfoData]);
+    }, [accountInfoData, onUpdateAccountInfoData]);
+
+    const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
+
+    const isValidPassword = (password) => {
+        const passwordRegex = /^[\p{Lu}][\p{L}]{0,28}[0-9]{1,10}\*$/u;
+        return passwordRegex.test(password);
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -42,11 +32,47 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
             ...prevInfo,
             [name]: value
         }));
+
+        // Clear error when input is empty
+        if (value === '') {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                [name]: ''
+            }));
+            return;
+        }
+
+        // Validate on change
+        if (name === 'username') {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                username: value && !isValidUsername(value) 
+                    ? 'Username can only contain letters (including accented characters), numbers, underscores, and hyphens.' 
+                    : ''
+            }));
+        } else if (name === 'password') {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                password: value && !isValidPassword(value) 
+                    ? 'Password must start with an uppercase letter, followed by up to 28 letters (including accented characters), then 1-10 numbers, and end with an asterisk.' 
+                    : ''
+            }));
+            // Also check confirm password when password changes
+            if (accountInfoData.confirmPassword) {
+                setErrors(prevErrors => ({
+                    ...prevErrors,
+                    confirmPassword: value !== accountInfoData.confirmPassword ? 'Passwords do not match.' : ''
+                }));
+            }
+        } else if (name === 'confirmPassword') {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                confirmPassword: value && value !== accountInfoData.password ? 'Passwords do not match.' : ''
+            }));
+        }
     };
 
     return (
-        <>
-        
         <div className="accountinfo">
             <h2>ACCOUNT INFORMATION</h2>
             <div className="account">
@@ -59,6 +85,7 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
                         value={accountInfoData.username} 
                         onChange={handleChange}
                     />
+                    {errors.username && <Form.Text className="text-danger">{errors.username}</Form.Text>}
                 </Form.Group>
 
                 <Form.Group className="col-lg-8 col-md-8 mb-3" controlId="formBasicPassword">
@@ -70,6 +97,7 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
                         value={accountInfoData.password} 
                         onChange={handleChange}
                     />
+                    {errors.password && <Form.Text className="text-danger">{errors.password}</Form.Text>}
                 </Form.Group>
 
                 <Form.Group className="col-lg-8 col-md-8 mb-4" controlId="formBasicConfirmPassword">
@@ -80,22 +108,12 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {;
                         name="confirmPassword"
                         value={accountInfoData.confirmPassword} 
                         onChange={handleChange}
-                        onBlur={validatePassword} // Validate on blur
                     />
-                    
-                    {passwordError && <Form.Text className="text-danger">{passwordError}</Form.Text>}
-
+                    {errors.confirmPassword && <Form.Text className="text-danger">{errors.confirmPassword}</Form.Text>}
                 </Form.Group>
             </div>
-
-            
         </div>
-
-        
-
-        </>
-        
-    )
+    );
 }
 
 export default AccountInfoForm;

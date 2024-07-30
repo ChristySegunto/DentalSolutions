@@ -338,11 +338,11 @@ const DentalAndMedForm = ({ patient_gender, dentalAndMedData = {}, onUpdateDenta
             <div className='physiciandetail row mb-3'>
                 <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Office Address</Form.Label>
-                    <Form.Control type="text" placeholder="Enter name of physician" name="patient_physicianaddress" value={formData.patient_physicianaddress} onChange={handleChange}/>
+                    <Form.Control type="text" placeholder="Enter Office Address" name="patient_physicianaddress" value={formData.patient_physicianaddress} onChange={handleChange}/>
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Office Number</Form.Label>
-                    <Form.Control type="text" placeholder="Enter specialty" name="patient_physiciannumber" value={formData.patient_physiciannumber} onChange={handleChange}/>
+                    <Form.Control type="text" placeholder="Enter Office Number" name="patient_physiciannumber" value={formData.patient_physiciannumber} onChange={handleChange}/>
                 </Form.Group>
             </div>
 
