@@ -115,6 +115,11 @@ const Prereg = () => {
         confirmPassword: ''
     });
 
+    const [accountErrors, setAccountErrors] = useState({
+        username: '',
+        password: '',
+        confirmPassword: ''
+    });
 
     const validatePassword = (data) =>{
         return(
@@ -160,56 +165,37 @@ const Prereg = () => {
     };
     
     const validateAccountInfoData = (data) => {
-        if (!isValidUsername(data.username)) {
-            setModalMessage("Username can only contain letters (including accented characters), numbers, underscores, and hyphens.");
-            setModalHeader("Invalid Username");
-            setShowModal(true);
-            return false;
+        let errors = {};
+        if (data.username && !isValidUsername(data.username)) {
+            errors.username = "Username can only contain letters, numbers, underscores, and hyphens.";
         }
         
-        if (!isValidPassword(data.password)) {
-            setModalMessage("Password must start with an uppercase letter, followed by up to 28 letters (including accented characters), then 1-10 numbers.");
-            setModalHeader("Invalid Password");
-            setShowModal(true);
-            return false;
+        if (data.password) {
+            if (!isValidPassword(data.password)) {
+                errors.password = "Password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long.";
+            }
+            
+            if (data.password !== data.confirmPassword) {
+                errors.confirmPassword = "Passwords do not match.";
+            }
         }
         
-        if (data.password !== data.confirmPassword) {
-            setModalMessage("Passwords do not match.");
-            setModalHeader("Password Mismatch");
-            setShowModal(true);
-            return false;
-        }
-        
-        return true;
+        setAccountErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
+
     const validatePatientData = (data) => {
-        // Check if all required fields have values
-        if (patientData.patient_age < 18) {
-            return (
-                data.patient_fname.trim() !== '' &&
-                data.patient_lname.trim() !== '' &&
-                data.patient_age !== '' &&
-                data.patient_gender.trim() !== '' &&
-                data.patient_address.trim() !== '' &&
-                data.patient_contact.trim() !== '' &&
-                data.guardian_name.trim() !== '' &&
-                data.guardian_relationship.trim() !== '' &&
-                data.guardian_number.trim() !== ''
-            );
-        } else {
-            return (
-                data.patient_fname.trim() !== '' &&
-                data.patient_lname.trim() !== '' &&
-                data.patient_age !== '' &&
-                data.patient_gender.trim() !== '' &&
-                data.patient_address.trim() !== '' &&
-                data.patient_contact.trim() !== ''
-            );
-        }
-        
+        return (
+            data.patient_fname.trim() !== '' &&
+            data.patient_lname.trim() !== '' &&
+            data.patient_age !== '' &&
+            data.patient_gender.trim() !== '' &&
+            data.patient_address.trim() !== '' &&
+            data.patient_contact.trim() !== ''
+        );
     };
+
 
     
 
@@ -239,8 +225,8 @@ const Prereg = () => {
         setAccountInfoData(data);
     };
     
-    const isValidName = (name) => /^[a-zA-Z\s]*$/.test(name);
-    const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidName = (name) => /^[A-Za-zÀ-ÿ\s'-]*$/.test(name);
+    const isValidEmail = (email) => /^[A-Za-z0-9À-ÿ\s.,#'-]*$/.test(email);
     const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
     
     const validateStep2 = (data) => {
@@ -292,6 +278,17 @@ const Prereg = () => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
+
+          }  else  if (currentStep === 4) {
+                if (!validateAccountInfoData(accountInfoData)) {
+                    let errorMessage = Object.values(accountErrors).join('\n');
+                    setModalMessage(errorMessage);
+                    setModalHeader("Invalid Input");
+                    setShowModal(true);
+                } else {
+                    setCurrentStep((prevStep) => prevStep + 1);
+                    setShowModal(false);
+                }
         } 
     };
 
@@ -311,16 +308,22 @@ const Prereg = () => {
     };
 
     const handleSubmit = async () => {
-        if (currentStep === 4) {
-            if (!validateAccountInfoData(accountInfoData)) {
-                setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
-                setModalHeader("Complete Required Information");
+        if (currentStep === 4) { 
+            if (!validateAccountInfoData(accountInfoData) || !validatePassword(accountInfoData)) {
+                let errorMessage = Object.values(accountErrors).join('\n');
+                setModalMessage(errorMessage);
+                setModalHeader("Invalid Input");
                 setShowModal(true);
+                return;
+
             } else if (!validatePassword(accountInfoData)) {
-                setModalMessage("Password and confirm password do not match. Please try again.");
-                setModalHeader("Password Not Matched");
-                setShowModal(true);
-            } else {
+            setModalMessage("Password and confirm password do not match. Please try again.");
+            setModalHeader("Password Not Matched");
+            setShowModal(true);
+            return;
+
+        }
+
                 const hashedPassword = CryptoJS.SHA256(accountInfoData.password).toString();
 
                 const { data: existingUsers, error: userQueryError } = await supabase
@@ -497,9 +500,6 @@ const Prereg = () => {
                 
             }
         }
-    };
-
-
 
 
     return (
