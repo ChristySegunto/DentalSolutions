@@ -155,7 +155,7 @@ const Prereg = () => {
     const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
 
     const isValidPassword = (password) => {
-        const passwordRegex = /^[\p{Lu}][\p{L}]{0,28}[0-9]{1,10}\*$/u;
+        const passwordRegex = /^[\p{Lu}][\p{L}]{0,28}[0-9]{1,10}\$/u;
         return passwordRegex.test(password);
     };
     
@@ -168,7 +168,7 @@ const Prereg = () => {
         }
         
         if (!isValidPassword(data.password)) {
-            setModalMessage("Password must start with an uppercase letter, followed by up to 28 letters (including accented characters), then 1-10 numbers, and end with an asterisk.");
+            setModalMessage("Password must start with an uppercase letter, followed by up to 28 letters (including accented characters), then 1-10 numbers.");
             setModalHeader("Invalid Password");
             setShowModal(true);
             return false;
