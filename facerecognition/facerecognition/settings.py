@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-v8*zjl6vo2k0uj18kzj0g74u)gndmxh=hllk8(!e_eb3yelo7!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://dentalsolutionsmain.xyz', 'https://www.dentalsolutionsmain.xyz', 'dentalsolutionsmain.xyz']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -53,8 +53,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://dentalsolutionsmain.xyz",
-    "https://www.dentalsolutionsmain.xyz",
+    "http://localhost:3000",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
