@@ -160,7 +160,7 @@ const Prereg = () => {
     const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
 
     const isValidPassword = (password) => {
-        const passwordRegex = /^[\p{Lu}][\p{L}]{0,28}[0-9]{1,10}\$/u;
+        const passwordRegex = /^[A-Z][a-zA-Z]{0,28}[0-9]{1,10}$/;
         return passwordRegex.test(password);
     };
     
@@ -172,7 +172,7 @@ const Prereg = () => {
         
         if (data.password) {
             if (!isValidPassword(data.password)) {
-                errors.password = "Password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long.";
+                errors.password = "Password must start with an uppercase letter, followed by up to 28 letters, then 1-10 numbers.";
             }
             
             if (data.password !== data.confirmPassword) {
