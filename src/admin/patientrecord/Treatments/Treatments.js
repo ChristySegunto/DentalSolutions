@@ -373,7 +373,7 @@ const Treatments = () => {
 
     return (
         <>
-            <div className="personalinfo-container">
+            <div className="personalinfo-container row">
                 <div className="avatar-col col-12 col-md-2 order-md-1 order-1 d-flex justify-content-center">
                     <Avatar
                         src={imageSource}
