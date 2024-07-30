@@ -168,7 +168,7 @@ const Verifypatient = () => {
             const imageData = canvas.toDataURL('image/jpeg');
 
             try {
-                const response = await axios.post('http://localhost:8000/api/compare-face/', { image: imageData });
+                const response = await axios.post('https://dentalsolutionsmain.xyz/api/compare-face/', { image: imageData });
                 if (response.data.match) {
                     setPatientUsername(response.data.patient_username || 'Unknown'); // Set patient username from response
                     setModalTitle('Patient Exist');
