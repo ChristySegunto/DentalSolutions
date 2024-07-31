@@ -24,3 +24,8 @@ yarn-error.log*
 
 # backend
 venv/
+*.log
+*.sqlite3
+*.pyc
+__pycache__/
+/staticfiles/

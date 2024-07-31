@@ -36,10 +36,11 @@ const Verifypatient = () => {
             alert('getUserMedia is not supported by your browser. Please use a different browser.');
             return;
         }
-    
+
         loadModels();
         handleScan();
-    
+
+        // Cleanup function to stop the video stream when the component unmounts
         return () => {
             if (streamRef.current) {
                 const tracks = streamRef.current.getTracks();
@@ -167,7 +168,7 @@ const Verifypatient = () => {
             const imageData = canvas.toDataURL('image/jpeg');
 
             try {
-                const response = await axios.post('http://localhost:8000/api/compare-face/', { image: imageData });
+                const response = await axios.post('https://dentalsolutionsmain.xyz/api/compare-face/', { image: imageData });
                 if (response.data.match) {
                     setPatientUsername(response.data.patient_username || 'Unknown'); // Set patient username from response
                     setModalTitle('Patient Exist');
