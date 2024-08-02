@@ -67,43 +67,70 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         onUpdatePatientData(patientInfo);
     }, [patientInfo, onUpdatePatientData]);
 
+    const [errors, setErrors] = useState({
+        patient_fname: '',
+        patient_mname: '',
+        patient_lname: '',
+        patient_address: '',
+        patient_email: '',
+        patient_contact: ''
+    });
+
+    const maxLengths = {
+        patient_fname: 100,
+        patient_mname: 30,
+        patient_lname: 30,
+        patient_address: 50,
+        patient_email: 30,
+        patient_contact: 11
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
         const nameRegex = /^[A-Za-zÀ-ÿ\s'-]*$/;
         const addressRegex = /^[A-Za-z0-9À-ÿ\s.,#'-]*$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^09\d{9}$/;
 
         let updatedValue = value;
         let errorMessage = '';
 
-        switch (name) {
-            case 'patient_fname':
-            case 'patient_mname':
-            case 'patient_lname':
-                if (!nameRegex.test(value)) {
-                    errorMessage = `Please enter a valid name.`;
-                    updatedValue = patientInfo[name];
-                    setModalMessage(errorMessage);
-                    
-                }
-                break;
-            case 'patient_address':
-                if (!addressRegex.test(value)) {
-                    errorMessage = 'Please enter a valid address.';
-                    updatedValue = patientInfo[name];
-                    setModalMessage(errorMessage);
-
-                }
-                break;
-            case 'patient_email':
-                if (value && !emailRegex.test(value)) {
-                    errorMessage = 'Please enter a valid email address.';
-                }
-                break;
-            default:
-                break;
+        // Check max length
+        if (value.length > maxLengths[name]) {
+            updatedValue = value.slice(0, maxLengths[name]);
+            errorMessage = `Maximum ${maxLengths[name]} characters allowed.`;
+        } else {
+            switch (name) {
+                case 'patient_fname':
+                case 'patient_mname':
+                case 'patient_lname':
+                    if (!nameRegex.test(value)) {
+                        errorMessage = 'Please enter a valid name.';
+                    }
+                    break;
+                case 'patient_address':
+                    if (!addressRegex.test(value)) {
+                        errorMessage = 'Please enter a valid address.';
+                    }
+                    break;
+                    case 'patient_email':
+                        if (value.length === 30) {
+                            errorMessage = 'Maximum character limit reached (30).';
+                        } else if (value && !isValidEmail(value)) {
+                            errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
+                        }
+                        break;
+                case 'patient_contact':
+                    if (!phoneRegex.test(value)) {
+                        errorMessage = 'Please enter a valid phone number (e.g., 09123456789).';
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+
 
         setPatientInfo(prevInfo => ({
             ...prevInfo,
@@ -129,6 +156,12 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
             default:
                 break;
         }
+    };
+    const isValidEmail = (email) => {
+        // This regex ensures the email follows the standard format
+        // and ends with a common domain (.com, .org, .net, etc.)
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|co|io|ai|me)$/;
+        return emailRegex.test(email);
     };
 
   const handleDateChange = (date) => {
@@ -267,17 +300,17 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Email Address</Form.Label>
                     <Form.Control 
-                        type="email" 
-                        name="patient_email" 
-                        placeholder="Enter email" 
-                        value={patientInfo.patient_email} 
-                        onChange={handleChange} 
-                        isInvalid={!!emailError}  
-                        required 
-                    />
-                    <Form.Control.Feedback type="invalid">
-                        {emailError}
-                    </Form.Control.Feedback>
+        type="email" 
+        name="patient_email" 
+        placeholder="Enter email" 
+        value={patientInfo.patient_email} 
+        onChange={handleChange} 
+        isInvalid={!!emailError}  
+        required 
+    />
+    <Form.Control.Feedback type="invalid">
+        {emailError}
+    </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Contact Number<span className="required">*</span></Form.Label>
