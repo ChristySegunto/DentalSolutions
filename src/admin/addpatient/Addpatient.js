@@ -30,6 +30,12 @@ const Addpatient = () => {
         navigate('/login');
     };
 
+    const [personalInfoValidation, setPersonalInfoValidation] = useState({ isValid: true, errorMessage: '' });
+
+    const handlePersonalInfoValidation = (isValid, errorMessage) => {
+        setPersonalInfoValidation({ isValid, errorMessage });
+    };
+
     const [patientData, setPatientData] = useState({
         patient_fname: '',
         patient_mname: '',
@@ -228,7 +234,32 @@ const Addpatient = () => {
     };
     
     const isValidName = (name) => /^[A-Za-zÀ-ÿ\s'-]*$/.test(name);
-    const isValidEmail = (email) => /^[A-Za-z0-9À-ÿ\s.,#'-]*$/.test(email);
+    const isValidEmail = (email) => {
+        // This regex ensures the email follows the standard format
+        // and ends with a single, common domain extension
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        
+        // Additional checks for common typos
+        const invalidPatterns = [
+            /\.{2,}/, // Catches multiple dots anywhere in the email
+            /@.*@/, // Catches multiple @ symbols
+            /\s/, // Catches any whitespace
+            /\.com.*\./, // Catches .com followed by another dot
+            /[^\w.@-]/ // Catches any characters that are not alphanumeric, dot, @, or hyphen
+        ];
+    
+        if (!emailRegex.test(email)) {
+            return false;
+        }
+    
+        for (let pattern of invalidPatterns) {
+            if (pattern.test(email)) {
+                return false;
+            }
+        }
+    
+        return true;
+    };
     const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
 
 const validateStep2 = (data) => {
@@ -237,9 +268,6 @@ const validateStep2 = (data) => {
     }
     if (data.patient_address.trim() === '') {
         return "Address cannot be empty.";
-    }
-    if (data.patient_email && !isValidEmail(data.patient_email)) {
-        return "Invalid email format.";
     }
     if (!isValidPhoneNumber(data.patient_contact)) {
         return "Phone number should start with '09' followed by 9 digits.";
@@ -257,20 +285,31 @@ const validateStep2 = (data) => {
                 setCurrentStep((prevStep) => prevStep + 1);
                 setShowModal(false);
             }
-        } else if (currentStep === 2) {
-            const validationError = validateStep2(patientData);
-            if (validationError) {
-                setModalMessage(validationError);
+        }    else if (currentStep === 2) {
+            if (!personalInfoValidation.isValid) {
+                setModalMessage(personalInfoValidation.errorMessage);
                 setModalHeader("Invalid Input");
                 setShowModal(true);
-            } else if (!validatePatientData(patientData)) {
-                setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
-                setModalHeader("Complete Required Information");
-                setShowModal(true);
             } else {
-                setCurrentStep((prevStep) => prevStep + 1);
-                setShowModal(false);
+                const validationError = validateStep2(patientData);
+                if (validationError) {
+                    setModalMessage(validationError);
+                    setModalHeader("Invalid Input");
+                    setShowModal(true);
+                } else if (!validatePatientData(patientData)) {
+                    setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
+                    setModalHeader("Complete Required Information");
+                    setShowModal(true);
+                } else if (patientData.patient_email && !isValidEmail(patientData.patient_email)) {
+                    setModalMessage("Please enter a valid email address (e.g., user@example.com).");
+                    setModalHeader("Invalid Email");
+                    setShowModal(true);
+                } else {
+                    setCurrentStep((prevStep) => prevStep + 1);
+                    setShowModal(false);
+                }
             }
+        
         } else if (currentStep === 3) {
             if (!validateDentalAndMedData(dentalAndMedData)) {
                 setModalMessage("Please fill out the required information to proceed. All fields marked with an asterisk (*) are required.");
