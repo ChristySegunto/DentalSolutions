@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './PatientlistAllbranch.css'
 import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaSort, FaSortAlphaDown, FaSortAlphaUp, FaCalendarAlt, FaBuilding } from 'react-icons/fa';
 import { useAuth } from './../../settings/AuthContext';
 import supabase from "../../settings/supabase";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,10 @@ const PatientlistAllbranch = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [patientsPerPage] = useState(7);
 
+    const [sortName, setSortName] = useState('');
+    const [sortDate, setSortDate] = useState('');
+    const [sortBranch, setSortBranch] = useState('');
+    const [branches, setBranches] = useState([]);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
@@ -297,6 +302,70 @@ const PatientlistAllbranch = () => {
         // Save Blob as Excel file
         saveAs(data, `${sheetName} - ${branchInfo}.xlsx`);
     };
+
+    useEffect(() => {
+        // Fetch unique branches from patients
+        const uniqueBranches = [...new Set(patients.map(patient => patient.patient_branch))];
+        setBranches(uniqueBranches);
+    }, [patients]);
+
+    const handleSort = (type, option) => {
+        console.log(`Sorting ${type} by ${option}`);
+        if (type === 'name') {
+            setSortName(option);
+        } else if (type === 'date') {
+            setSortDate(option);
+        } else if (type === 'branch') {
+            setSortBranch(option);
+        }
+    };
+
+    useEffect(() => {
+        console.log('Sorting effect triggered');
+        console.log('Current sortName:', sortName);
+        console.log('Current sortDate:', sortDate);
+        console.log('Current sortBranch:', sortBranch);
+
+        let sortedPatients = [...patients]; // Start with the original list
+
+        // Filter by branch if a specific branch is selected
+        if (sortBranch && sortBranch !== 'default') {
+            sortedPatients = sortedPatients.filter(patient => patient.patient_branch === sortBranch);
+        }
+
+        sortedPatients.sort((a, b) => {
+            // First, compare by name
+            let nameComparison = 0;
+            if (sortName === 'a-z') {
+                nameComparison = `${a.patient_fname} ${a.patient_lname}`.localeCompare(`${b.patient_fname} ${b.patient_lname}`);
+            } else if (sortName === 'z-a') {
+                nameComparison = `${b.patient_fname} ${b.patient_lname}`.localeCompare(`${a.patient_fname} ${a.patient_lname}`);
+            }
+
+            // If names are different, return the name comparison result
+            if (nameComparison !== 0) {
+                return nameComparison;
+            }
+
+            // If names are equal or no name sorting is applied, compare by date
+            if (sortDate) {
+                const dateA = new Date(a.created_at);
+                const dateB = new Date(b.created_at);
+                if (sortDate === 'latest') {
+                    return dateB - dateA;
+                } else if (sortDate === 'oldest') {
+                    return dateA - dateB;
+                }
+            }
+
+            // If no sorting is applied, maintain original order
+            return 0;
+        });
+
+        console.log('Sorted patients:', sortedPatients);
+        setFilteredAllPatients(sortedPatients);
+        setCurrentPage(1);
+    }, [sortName, sortDate, sortBranch, patients]); // Dependencies for the effect
     
     return (
             <div className="patientlist-allbranch-box container-fluid">
@@ -327,6 +396,7 @@ const PatientlistAllbranch = () => {
           </Nav.Link>
         </Nav.Item>
         <div className="ms-auto title-buttons">
+       
         <Dropdown onSelect={handleExport}>
                                 <Dropdown.Toggle className="exportbutton" id="dropdown-basic">
                                     Export
@@ -348,12 +418,69 @@ const PatientlistAllbranch = () => {
                         onChange={handleInputChange}
                     />
                     <Button className="searchbutton" type="submit">Search</Button>
+<div className="d-flex align-items-center ms-2">
+                    <Dropdown className="me-2">
+        <Dropdown.Toggle className="sort-dropdown" id="dropdown-sort-branch">
+            <FaBuilding />
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+            <Dropdown.Item onClick={() => handleSort('branch', 'default')}>
+                Default (All Branches)
+            </Dropdown.Item>
+            {branches.map(branch => (
+                <Dropdown.Item key={branch} onClick={() => handleSort('branch', branch)}>
+                    {branch}
+                </Dropdown.Item>
+            ))}
+        </Dropdown.Menu>
+    </Dropdown>
+    
+    <Dropdown className="me-2">
+        <Dropdown.Toggle className="sort-dropdown" id="dropdown-basic">
+            <FaSort />
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+            <Dropdown.Item onClick={() => handleSort('name', '')}>
+                Default
+            </Dropdown.Item>
+            <Dropdown.Item onClick={() => handleSort('name', 'a-z')}>
+                <FaSortAlphaDown /> A-Z
+            </Dropdown.Item>
+            <Dropdown.Item onClick={() => handleSort('name', 'z-a')}>
+                <FaSortAlphaUp /> Z-A
+            </Dropdown.Item>
+        </Dropdown.Menu>
+    </Dropdown>
+    
+    <Dropdown className="me-2">
+        <Dropdown.Toggle className="sort-dropdown" id="dropdown-sort-date">
+            <FaCalendarAlt />
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+            <Dropdown.Item onClick={() => handleSort('date', '')}>
+                Default
+            </Dropdown.Item>
+            <Dropdown.Item onClick={() => handleSort('date', 'latest')}>
+                Latest - Oldest
+            </Dropdown.Item>
+            <Dropdown.Item onClick={() => handleSort('date', 'oldest')}>
+                Oldest - Latest
+            </Dropdown.Item>
+        </Dropdown.Menu>
+    </Dropdown>
+    </div>
                 </Form>
+
+                
       <div className="allbranch-allpatients-container">
       <Table hover className="all-patients-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                <th>
+                                    Name 
+                                    {sortName && <small> ({sortName === 'a-z' ? 'A-Z' : 'Z-A'})</small>}
+                                    {sortDate && <small>, {sortDate === 'latest' ? 'Latest' : 'Oldest'}</small>}
+                                </th>
                                     <th><center>Contact Number</center></th>
                                     <th>Email</th>
                                     <th><center>Branch</center></th>

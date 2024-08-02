@@ -32,3 +32,30 @@
     margin-right: 20px;
     width: 92%;  
 }
+
+.sortbutton {
+    background-color: #007bff;
+    border: none;
+    padding: 8px 16px;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.sortbutton:hover {
+    background-color: #0056b3;
+}
+
+.sort-dropdown {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #495057;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.sort-dropdown:hover, .sort-dropdown:focus {
+    background-color: #e9ecef;
+    color: #212529;
+}
