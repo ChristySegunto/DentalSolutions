@@ -95,7 +95,7 @@ const Treatments = () => {
                     throw error;
                 }
 
-                const sortedData = (data || []).sort((a, b) => new Date(a.treatment_date) - new Date(b.treatment_date));
+                const sortedData = (data || []).sort((a, b) => new Date(b.treatment_date) - new Date(a.treatment_date));
 
                 setTreatments(sortedData || []);
 

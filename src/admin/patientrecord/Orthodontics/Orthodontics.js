@@ -107,7 +107,7 @@ const Orthodontics = () => {
                 }
     
                 // Sort data by date in descending order
-                const sortedData = (data || []).sort((a, b) => new Date(a.ortho_date) - new Date(b.ortho_date));
+                const sortedData = (data || []).sort((a, b) => new Date(b.ortho_date) - new Date(a.ortho_date));
                 setOrthodontics(sortedData);
 
                 // setOrthodontics(data || []); // Ensure data is an array or set to empty array if null
