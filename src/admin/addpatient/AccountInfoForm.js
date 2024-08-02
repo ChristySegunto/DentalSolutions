@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './Addpatient.css'
-import { Form } from 'react-bootstrap';
+import { Form, InputGroup } from 'react-bootstrap';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
     const [accountInfoData, setAccountInfoData] = useState({
@@ -15,11 +16,17 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
         confirmPassword: ''
     });
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+
     useEffect(() => {
         onUpdateAccountInfoData(accountInfoData);
     }, [accountInfoData, onUpdateAccountInfoData]);
 
-    const isValidUsername = (username) => /^[\p{L}\p{N}_-]+$/u.test(username);
+    const isValidUsername = (username) => {
+        return /^[\p{L}\p{N}_-]{6,}$/u.test(username);
+    };
 
     const isValidPassword = (password) => {
         const passwordRegex = /^[A-Z][a-zA-Z]{0,28}[0-9]{1,10}$/;
@@ -32,6 +39,12 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
             ...prevInfo,
             [name]: value
         }));
+
+        if (name === 'password') {
+            setShowPassword(false);
+        } else if (name === 'confirmPassword') {
+            setShowConfirmPassword(false);
+        }
 
         // Clear error when input is empty
         if (value === '') {
@@ -47,7 +60,7 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
             setErrors(prevErrors => ({
                 ...prevErrors,
                 username: value && !isValidUsername(value) 
-                    ? 'Username can only contain letters, numbers, underscores, and hyphens.' 
+                    ? 'Username must be at least 6 characters long and can only contain letters (including accented characters), numbers, underscores, and hyphens.' 
                     : ''
             }));
         } else if (name === 'password') {
@@ -71,6 +84,15 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
             }));
         }
     };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+    
     return (
         <div className="accountinfo">
             <h2>ACCOUNT INFORMATION</h2>
@@ -89,25 +111,45 @@ const AccountInfoForm = ({ accountdata = {}, onUpdateAccountInfoData }) => {
 
                 <Form.Group className="col-lg-8 col-md-8 mb-3" controlId="formBasicPassword">
                     <Form.Label>Create a password<span className="required">*</span></Form.Label>
-                    <Form.Control 
-                        type="password" 
-                        placeholder="Enter password"
-                        name="password"
-                        value={accountInfoData.password} 
-                        onChange={handleChange}
-                    />
+                    <InputGroup>
+                        <Form.Control 
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter password"
+                            name="password"
+                            value={accountInfoData.password} 
+                            onChange={handleChange}
+                        />
+                        {accountInfoData.password && (
+                            <InputGroup.Text 
+                                onClick={togglePasswordVisibility}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </InputGroup.Text>
+                        )}
+                    </InputGroup>
                     {errors.password && <Form.Text className="text-danger">{errors.password}</Form.Text>}
                 </Form.Group>
 
                 <Form.Group className="col-lg-8 col-md-8 mb-4" controlId="formBasicConfirmPassword">
                     <Form.Label>Confirm password<span className="required">*</span></Form.Label>
-                    <Form.Control 
-                        type="password" 
-                        placeholder="Confirm password" 
-                        name="confirmPassword"
-                        value={accountInfoData.confirmPassword} 
-                        onChange={handleChange}
-                    />
+                    <InputGroup>
+                        <Form.Control 
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm password" 
+                            name="confirmPassword"
+                            value={accountInfoData.confirmPassword} 
+                            onChange={handleChange}
+                        />
+                        {accountInfoData.confirmPassword && (
+                            <InputGroup.Text 
+                                onClick={toggleConfirmPasswordVisibility}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                            </InputGroup.Text>
+                        )}
+                    </InputGroup>
                     {errors.confirmPassword && <Form.Text className="text-danger">{errors.confirmPassword}</Form.Text>}
                 </Form.Group>
             </div>
