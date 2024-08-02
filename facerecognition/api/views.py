@@ -81,6 +81,42 @@ def capture_images(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+# def get_face_embedding(image):
+#     # Convert image to RGB
+#     image = image.convert('RGB')
+#     # Resize to 160x160 (required input size for FaceNet)
+#     image = image.resize((160, 160))
+#     # Convert to numpy array
+#     image_array = np.array(image)
+    
+#     # Initialize MTCNN for face detection
+#     mtcnn = MTCNN()
+
+#     # Detect faces
+#     boxes, _ = mtcnn.detect(image_array)
+
+#     # Initialize an empty list for embeddings
+#     embeddings = []
+
+#     if boxes is not None:
+#         for box in boxes:
+#             # Extract face
+#             x1, y1, x2, y2 = map(int, box)
+#             face = image_array[y1:y2, x1:x2]
+#             face = cv2.resize(face, (160, 160))
+
+#             # Convert face to tensor and get embedding
+#             face_tensor = np.moveaxis(face, -1, 0) / 255.0  # Normalize to [0, 1]
+#             face_tensor = torch.tensor(face_tensor, dtype=torch.float32)
+#             embedding = model(face_tensor.unsqueeze(0)).detach().numpy().flatten()
+#             embeddings.append(embedding)
+
+#     # Return embeddings for the first detected face or None if no face is detected
+#     if embeddings:
+#         return embeddings[0]
+#     else:
+#         return None
+
 def get_face_embedding(image):
     # Convert image to RGB
     image = image.convert('RGB')
@@ -88,34 +124,14 @@ def get_face_embedding(image):
     image = image.resize((160, 160))
     # Convert to numpy array
     image_array = np.array(image)
-    
-    # Initialize MTCNN for face detection
-    mtcnn = MTCNN()
-
-    # Detect faces
-    boxes, _ = mtcnn.detect(image_array)
-
-    # Initialize an empty list for embeddings
-    embeddings = []
-
-    if boxes is not None:
-        for box in boxes:
-            # Extract face
-            x1, y1, x2, y2 = map(int, box)
-            face = image_array[y1:y2, x1:x2]
-            face = cv2.resize(face, (160, 160))
-
-            # Convert face to tensor and get embedding
-            face_tensor = np.moveaxis(face, -1, 0) / 255.0  # Normalize to [0, 1]
-            face_tensor = torch.tensor(face_tensor, dtype=torch.float32)
-            embedding = model(face_tensor.unsqueeze(0)).detach().numpy().flatten()
-            embeddings.append(embedding)
-
-    # Return embeddings for the first detected face or None if no face is detected
-    if embeddings:
-        return embeddings[0]
-    else:
-        return None
+    # Normalize the image
+    image_array = (image_array - 127.5) / 128.0
+    # Convert to tensor
+    image_tensor = torch.tensor(image_array).permute(2, 0, 1).unsqueeze(0).float()
+    # Get the embedding
+    with torch.no_grad():
+        embedding = model(image_tensor).numpy().flatten()
+    return embedding
 
 @csrf_exempt
 def compare_face(request):
@@ -153,7 +169,7 @@ def compare_face(request):
 
                             # Compare the embeddings
                             distance = np.linalg.norm(known_embedding - unknown_face_embedding)
-                            if distance < 1.0:  # You can adjust the threshold as needed
+                            if distance < 0.7:  # You can adjust the threshold as needed
                                 match = True
                                 matched_patient = patient_folder
                                 break

@@ -192,7 +192,7 @@ const DashboardAllBranch = () => {
     useEffect(() => {
         const fetchTreatmentTrends = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/predict-treatment-trends/');
+                const response = await fetch('https://api-dentalsolutions.ngrok.app/api/predict-treatment-trends/');
                 if (!response.ok) {
                     const text = await response.text(); // Get the response as text
                     console.log('Raw response:', text); // Log the raw response

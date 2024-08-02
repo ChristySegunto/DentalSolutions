@@ -152,7 +152,7 @@ const Scanfaceforpending = () => {
         formData.append('image', blob, `${patient_username}_capture${capturedImages + 1}.png`);
 
         try {
-            const response = await axios.post('https://dentalsolutionsmain.xyz/api/capture-images/', formData, {
+            const response = await axios.post('https://api-dentalsolutions.ngrok.app/api/capture-images/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

@@ -1,0 +1,11 @@
+version: "2"
+authtoken: "2jyJEh93Cu4xyWZbu6M6bSClH3X_3ZUgAey3s2rot6SNWeqTQ"
+tunnels:
+  frontend:
+    proto: http
+    addr: 3000
+    hostname: dentalsolutions.ngrok.app
+  backend:
+    proto: http
+    addr: 8000
+    hostname: api-dentalsolutions.ngrok.app

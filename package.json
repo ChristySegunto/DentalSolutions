@@ -2,7 +2,6 @@
   "name": "dental-solutions",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://dentalsolutions-058c23c0aeba.herokuapp.com",
   "dependencies": {
     "@emailjs/nodejs": "^4.0.4",
     "@files-ui/react": "^1.2.4",

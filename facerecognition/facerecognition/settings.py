@@ -26,8 +26,17 @@ SECRET_KEY = 'django-insecure-v8*zjl6vo2k0uj18kzj0g74u)gndmxh=hllk8(!e_eb3yelo7!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'dentalsolutions.ngrok.app',
+    'api-dentalsolutions.ngrok.app'    
+    ]
 
+CSRF_TRUSTED_ORIGIN = [
+    'https://api-dentalsolutions.ngrok.app'
+]
 
 # Application definition
 
@@ -54,8 +63,13 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:3000", 
+    "https://dentalsolutions.ngrok.app",
+    "https://api-dentalsolutions.ngrok.app"
+
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
