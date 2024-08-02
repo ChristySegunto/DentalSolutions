@@ -8,7 +8,7 @@ import { Modal, Button, Form, Col } from 'react-bootstrap';
 
 
 
-const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) => {
+const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onValidationResult }) => {
     const [patientInfo, setPatientInfo] = useState({
         patient_fname: patientData.patient_fname,
         patient_mname: patientData.patient_mname,
@@ -64,6 +64,13 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         onUpdatePatientData(patientInfo);
     }, [patientInfo, onUpdatePatientData]);
 
+    const isValidEmail = (email) => {
+        // This regex ensures the email follows the standard format
+        // and ends with a common domain (.com, .org, .net, etc.)
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|co|io|ai|me)$/;
+        return emailRegex.test(email);
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -79,23 +86,36 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
             case 'patient_mname':
             case 'patient_lname':
                 if (!nameRegex.test(value)) {
-                    errorMessage = `Please enter a valid name.`;
-                    updatedValue = patientInfo[name];
-                    setModalMessage(errorMessage);
-                    
+                    errorMessage = 'Only letters, spaces, hyphens, and apostrophes are allowed.';
+                    return; // Prevent invalid characters from being typed
+                }
+                if (value.length === 100) {
+                    errorMessage = 'Maximum character limit reached (100).';
                 }
                 break;
             case 'patient_address':
                 if (!addressRegex.test(value)) {
-                    errorMessage = 'Please enter a valid address.';
-                    updatedValue = patientInfo[name];
-                    setModalMessage(errorMessage);
-
+                    errorMessage = 'Invalid character entered.';
+                    return; // Prevent invalid characters from being typed
+                }
+                if (value.length === 50) {
+                    errorMessage = 'Maximum character limit reached (50).';
                 }
                 break;
-            case 'patient_email':
-                if (value && !emailRegex.test(value)) {
-                    errorMessage = 'Please enter a valid email address.';
+                case 'patient_email':
+        if (value.length === 30) {
+            errorMessage = 'Maximum character limit reached (30).';
+        } else if (value && !isValidEmail(value)) {
+            errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
+        }
+        break;
+            case 'patient_contact':
+                if (!/^\d*$/.test(value)) {
+                    errorMessage = 'Only numbers are allowed.';
+                    return;
+                }
+                if (value.length === 11) {
+                    errorMessage = 'Maximum character limit reached (11).';
                 }
                 break;
             default:
@@ -107,6 +127,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
             [name]: updatedValue
         }));
 
+        // Set error messages
         switch (name) {
             case 'patient_fname':
                 setFNameError(errorMessage);
@@ -122,6 +143,9 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                 break;
             case 'patient_email':
                 setEmailError(errorMessage);
+                break;
+            case 'patient_contact':
+                setContactError(errorMessage);
                 break;
             default:
                 break;
@@ -157,6 +181,45 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
     
         setShowGuardianForm(age < 18);
     };
+
+    const validateForm = () => {
+        let isValid = true;
+        let errorMessages = [];
+
+        if (patientInfo.patient_fname.length > 100) {
+            errorMessages.push("First name exceeds 100 characters");
+            isValid = false;
+        }
+        if (patientInfo.patient_mname.length > 30) {
+            errorMessages.push("Middle name exceeds 30 characters");
+            isValid = false;
+        }
+        if (patientInfo.patient_lname.length > 30) {
+            errorMessages.push("Last name exceeds 30 characters");
+            isValid = false;
+        }
+        if (patientInfo.patient_address.length > 50) {
+            errorMessages.push("Address exceeds 50 characters");
+            isValid = false;
+        }
+        if (patientInfo.patient_email.length > 30) {
+            errorMessages.push("Email exceeds 30 characters");
+            isValid = false;
+        }
+        if (patientInfo.patient_email && !isValidEmail(patientInfo.patient_email)) {
+            errorMessages.push("Please enter a valid email address (e.g., user@example.com)");
+            isValid = false;
+        }
+
+        if (!isValid) {
+            setModalMessage(errorMessages.join("\n"));
+            setShowModal(true);
+        }
+
+        onValidationResult(isValid, errorMessages.join("\n"));
+        return isValid;
+    };
+
     return (
         <div className="personalinfo">
             <div className='fullName row'>
@@ -169,6 +232,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         isInvalid={!!fnameError} 
                         value={patientInfo.patient_fname} 
                         onChange={handleChange} 
+                        maxLength={100}
                         required 
                     />
                     <Form.Control.Feedback type="invalid">{fnameError}</Form.Control.Feedback>
@@ -182,6 +246,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         isInvalid={!!mnameError} 
                         value={patientInfo.patient_mname} 
                         onChange={handleChange} 
+                        maxLength={30}
                     />
                     <Form.Control.Feedback type="invalid">{mnameError}</Form.Control.Feedback>
                 </Form.Group>
@@ -195,6 +260,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         value={patientInfo.patient_lname} 
                         onChange={handleChange} 
                         required 
+                        maxLength={30}
                     />
                     <Form.Control.Feedback type="invalid">{lnameError}</Form.Control.Feedback>
                 </Form.Group>
@@ -252,6 +318,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         isInvalid={!!addressError}
                         value={patientInfo.patient_address} 
                         onChange={handleChange} 
+                        maxLength={50}
                         required 
                     />
                     <Form.Control.Feedback type="invalid">{addressError}</Form.Control.Feedback>
@@ -267,8 +334,8 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         placeholder="Enter email" 
                         value={patientInfo.patient_email} 
                         onChange={handleChange} 
-                        isInvalid={!!emailError}  
-                        required 
+                        isInvalid={!!emailError}
+                        maxLength={30}
                     />
                     <Form.Control.Feedback type="invalid">
                         {emailError}
@@ -310,6 +377,18 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                     </div>
                 </>
             )}
+
+<Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>Error</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{modalMessage}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
         </div>
     )
