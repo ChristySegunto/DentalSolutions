@@ -158,7 +158,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         const age = calculateAge(utcDate);
         
         if (age < 1) {
-            setModalMessage("Patient must be at least 1 year old. Ano may ngipin agad?");
+            setModalMessage("Patient must be at least 1 year old.");
             setShowModal(true);
             return;
         }
