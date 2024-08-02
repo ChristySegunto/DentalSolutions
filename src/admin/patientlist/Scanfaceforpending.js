@@ -6,7 +6,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import supabase from './../../settings/supabase';
 import './Scanfaceforpending.css';
 import * as faceapi from 'face-api.js';
-import { addISOWeekYears } from 'date-fns';
 
 const Scanfaceforpending = () => {
     const { patient_id } = useParams();
