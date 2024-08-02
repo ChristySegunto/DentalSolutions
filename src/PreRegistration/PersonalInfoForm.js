@@ -28,14 +28,14 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
     const [fnameError, setFNameError] = useState('');
     const [mnameError, setMNameError] = useState('');
     const [lnameError, setLNameError] = useState('');
-
+ const [addressError, setAddressError] = useState('');
 
     const [showGuardianForm, setShowGuardianForm] = useState(false);
 
     const [showModal, setShowModal] = useState(false);
-const [modalMessage, setModalMessage] = useState("");
+    const [modalMessage, setModalMessage] = useState("");
 
-const handleCloseModal = () => setShowModal(false);
+    const handleCloseModal = () => setShowModal(false);
 
     useEffect(() => {
         // Update parent component when patientInfo changes
@@ -63,85 +63,71 @@ const handleCloseModal = () => setShowModal(false);
         }
     }, [patientInfo.patient_birthdate]);
 
+    useEffect(() => {
+        onUpdatePatientData(patientInfo);
+    }, [patientInfo, onUpdatePatientData]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        if (name === 'patient_fname') {
-            const lettersRegex = /^[A-Za-z\s]*$/;
+        const nameRegex = /^[A-Za-zÀ-ÿ\s'-]*$/;
+        const addressRegex = /^[A-Za-z0-9À-ÿ\s.,#'-]*$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            if (lettersRegex.test(value)) {
-                setFNameError('');
-            } else {
-                setFNameError('Please enter a valid first name.');
-            }
+        let updatedValue = value;
+        let errorMessage = '';
 
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                [name]: value
-            }));
-
-        } else if (name === 'patient_mname') {
-            const lettersRegex = /^[A-Za-z\s]*$/;
-
-            if (lettersRegex.test(value)) {
-                setMNameError('');
-            } else {
-                setMNameError('Please enter a valid middle name.');
-            }
-
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                [name]: value
-            }));
-        } else if (name === 'patient_lname') {
-            const lettersRegex = /^[A-Za-z\s]*$/;
-
-            if (lettersRegex.test(value)) {
-                setLNameError('');
-            } else {
-                setLNameError('Please enter a valid last name.');
-            }
-
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                [name]: value
-            }));
-        } else if (name === 'patient_contact') { // Allow only numbers in the contact field
-            // Regex for validating cellphone numbers
-            const cellphoneRegex = /^[0-9]{11}$/;
-
-
-                if (cellphoneRegex.test(value)) {
-                    setContactError('');
-                } else {
-                    setContactError('Please enter a valid 11-digit cellphone number.');
+        switch (name) {
+            case 'patient_fname':
+            case 'patient_mname':
+            case 'patient_lname':
+                if (!nameRegex.test(value)) {
+                    errorMessage = `Please enter a valid name.`;
+                    updatedValue = patientInfo[name];
+                    setModalMessage(errorMessage);
+                    
                 }
+                break;
+            case 'patient_address':
+                if (!addressRegex.test(value)) {
+                    errorMessage = 'Please enter a valid address.';
+                    updatedValue = patientInfo[name];
+                    setModalMessage(errorMessage);
 
-                setPatientInfo(prevInfo => ({
-                    ...prevInfo,
-                    [name]: value
-                }));
+                }
+                break;
+            case 'patient_email':
+                if (value && !emailRegex.test(value)) {
+                    errorMessage = 'Please enter a valid email address.';
+                }
+                break;
+            default:
+                break;
+        }
 
-        } else if (name === 'patient_email') {
-            // Regex for validating email addresses
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        setPatientInfo(prevInfo => ({
+            ...prevInfo,
+            [name]: updatedValue
+        }));
 
-            if (emailRegex.test(value)) {
-                setEmailError('');
-            } else {
-                setEmailError('Please enter a valid email address.');
-            }
-
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                [name]: value
-            }));
-
-        } else {
-            setPatientInfo(prevInfo => ({
-                ...prevInfo,
-                [name]: value
-            }));
+        switch (name) {
+            case 'patient_fname':
+                setFNameError(errorMessage);
+                break;
+            case 'patient_mname':
+                setMNameError(errorMessage);
+                break;
+            case 'patient_lname':
+                setLNameError(errorMessage);
+                break;
+            case 'patient_address':
+                setAddressError(errorMessage);
+                break;
+            case 'patient_email':
+                setEmailError(errorMessage);
+                break;
+            default:
+                break;
         }
     };
 
@@ -180,17 +166,40 @@ const handleCloseModal = () => setShowModal(false);
             <div className='fullName row'>
                 <Form.Group className="col-lg-4 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">First Name<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_fname" placeholder="Enter first name" isInvalid={!!fnameError} value={patientInfo.patient_fname} onChange={handleChange} required />
+                    <Form.Control 
+                        type="text" 
+                        name="patient_fname" 
+                        placeholder="Enter first name" 
+                        isInvalid={!!fnameError} 
+                        value={patientInfo.patient_fname} 
+                        onChange={handleChange} 
+                        required 
+                    />
                     <Form.Control.Feedback type="invalid">{fnameError}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-4 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Middle Name</Form.Label>
-                    <Form.Control type="text" name="patient_mname" placeholder="Enter middle name" isInvalid={!!mnameError} value={patientInfo.patient_mname} onChange={handleChange} />
+                    <Form.Control 
+                        type="text" 
+                        name="patient_mname" 
+                        placeholder="Enter middle name" 
+                        isInvalid={!!mnameError} 
+                        value={patientInfo.patient_mname} 
+                        onChange={handleChange} 
+                    />
                     <Form.Control.Feedback type="invalid">{mnameError}</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-4 col-md-6 mb-3" controlId="formBasicName">
                     <Form.Label className="form-label-custom">Last Name<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_lname" placeholder="Enter last name" isInvalid={!!lnameError} value={patientInfo.patient_lname} onChange={handleChange} required />
+                    <Form.Control 
+                        type="text" 
+                        name="patient_lname" 
+                        placeholder="Enter last name" 
+                        isInvalid={!!lnameError} 
+                        value={patientInfo.patient_lname} 
+                        onChange={handleChange} 
+                        required 
+                    />
                     <Form.Control.Feedback type="invalid">{lnameError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
@@ -241,14 +250,31 @@ const handleCloseModal = () => setShowModal(false);
             <div className='address row'>
                 <Form.Group className="col-lg-12 mb-3" controlId="formBasicAddress">
                     <Form.Label className="form-label-custom">Address<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_address" placeholder="Enter address" value={patientInfo.patient_address} onChange={handleChange} required />
+                    <Form.Control 
+                        type="text" 
+                        name="patient_address" 
+                        placeholder="Enter address" 
+                        isInvalid={!!addressError}
+                        value={patientInfo.patient_address} 
+                        onChange={handleChange} 
+                        required 
+                    />
+                    <Form.Control.Feedback type="invalid">{addressError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
 
             <div className='contactEmail row'>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Email Address</Form.Label>
-                    <Form.Control type="email" name="patient_email" placeholder="Enter email" value={patientInfo.patient_email} onChange={handleChange} isInvalid={!!emailError}  required />
+                    <Form.Control 
+                        type="email" 
+                        name="patient_email" 
+                        placeholder="Enter email" 
+                        value={patientInfo.patient_email} 
+                        onChange={handleChange} 
+                        isInvalid={!!emailError}  
+                        required 
+                    />
                     <Form.Control.Feedback type="invalid">
                         {emailError}
                     </Form.Control.Feedback>
@@ -285,12 +311,26 @@ const handleCloseModal = () => setShowModal(false);
                             <Form.Label className="form-label-custom">Parent/Guardian Contact Number<span className="required">*</span></Form.Label>
                             <Form.Control type="text" name="guardian_number" placeholder="Enter guardian's contact number" value={patientInfo.guardian_number} onChange={handleChange} required />
                         </Form.Group>
+
+                        <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>Invalid Input</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{modalMessage}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
                     </div>
                 </>
             )}
 
         </div>
     )
-}
+
+};
 
 export default PersonalInfoForm;
