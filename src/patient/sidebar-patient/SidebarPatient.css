@@ -4,7 +4,7 @@
 .sidebarpatient{
     display: flex;
     height: 95vh;
-    overflow: scroll initial;
+
     margin: 20px;
     
 }

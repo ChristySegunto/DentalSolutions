@@ -227,7 +227,7 @@
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     width: 96%;
-    height: 96%;
+    height: 98%;
     padding: 10px;
     margin-top: 5px;
     margin-bottom: 10px;
@@ -239,6 +239,8 @@
     color: #005590;
     padding: 10px;
 }
+
+
 
 .cases-status-report {
     display: flex;
@@ -337,10 +339,65 @@
 
 .recent-patients-table thead th {
     color: #005590;
+    
 }
 
 .recent-patients-table tbody tr td {
     color: #005590;
+}
+.patientstatus:hover, .orthocases:hover, .monthly-treatment:hover, .daily-treatment:hover{
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    text-decoration: underline 2px; 
+    color: #005590;
+}
+
+.dmodal-title {
+    font-weight: 600;
+    font-size: 25px;
+    color: #005590;
+    text-align: center;
+}
+
+.dmodal-body{
+    color: #005590;
+    font-size: 18px;
+}
+
+.dmodal-body h5{
+    color: #005590;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.patientstatus-table, .orthocases-table, .dailyreport-table, .monthlyreport-table {
+    font-size: 12px;
+
+}
+.patientstatus-table thead th, .orthocases-table thead th, .dailyreport-table thead th, .monthlyreport-table thead th{
+    font-size: 12px;
+    font-weight: 600;
+    color: #005590;
+    background-color: #d2eafc;
+    border-radius: 0;
+}
+
+.patientstatus-table tbody tr td, .orthocases-table tbody tr td, .dailyreport-table tbody tr td, .monthlyreport-table tbody tr td{
+    font-size: 12px;
+    font-weight: 500;
+    color: #005590;
+}
+
+.clickable-name {
+    cursor: pointer; 
+    color: #005590; 
+}
+
+.clickable-name:hover {
+    text-decoration: underline; 
+    font-weight: 600;
+    color: #003d7a; 
 }
 
 @media (max-width: 840px) {

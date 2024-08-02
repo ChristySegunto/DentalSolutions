@@ -5,6 +5,8 @@ import { useAuth } from './../../settings/AuthContext';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import CryptoJS from 'crypto-js';
+
 
 const Settings = () => {
     const { user } = useAuth();
@@ -181,62 +183,66 @@ const Settings = () => {
         setConfirmPassword(e.target.value);
     };
 
-    // Function to handle updating the password
     const handlePasswordUpdate = async () => {
         try {
             const userId = user.user_id;
-
+    
             // Validate the new password and confirmation
             if (newPassword !== confirmPassword) {
                 setConfirmPasswordError('New password and confirm password do not match');
                 return;
             }
-
-            // Check if the old password matches the current password stored in database
+    
+            // Check if the old password matches the current password stored in the database
             const { data: userData, error: userError } = await supabase
                 .from('user')
                 .select('password')
                 .eq('user_id', userId)
                 .single();
-
+    
             if (userError) {
                 throw userError;
             }
-
+    
             if (!userData) {
                 throw new Error('User data not found');
             }
-
+    
             const currentPassword = userData.password;
-
-            if (oldPassword !== currentPassword) {
+    
+            // Compare the old password with the stored hashed password
+            const hashedOldPassword = CryptoJS.SHA256(oldPassword).toString();
+            if (hashedOldPassword !== currentPassword) {
                 setPasswordError('Old password does not match');
                 return; // Exit function if old password doesn't match
             }
-
+    
+            // Hash the new password before storing it
+            const hashedNewPassword = CryptoJS.SHA256(newPassword).toString();
+    
             // Update the password in the user table
             const { error: updateError } = await supabase
                 .from('user')
-                .update({ password: newPassword })
+                .update({ password: hashedNewPassword })
                 .eq('user_id', userId);
-
+    
             if (updateError) {
                 throw updateError;
             }
-
+    
             // Fetch updated user details
             const { data: updatedUserData, error: fetchError } = await supabase
                 .from('user')
                 .select('role, email, password')
                 .eq('user_id', userId)
                 .single();
-
+    
             if (fetchError) {
                 throw fetchError;
             }
-
+    
             setUserDetails(updatedUserData);
-
+    
             // Close the modal and reset states
             setPasswordModalMessage('Password updated successfully.');
             setShowPasswordModal(false);
@@ -253,6 +259,7 @@ const Settings = () => {
             setError('Failed to update password');
         }
     };
+    
 
     // Render loading state while fetching data
     if (loading) {
@@ -362,7 +369,7 @@ const Settings = () => {
                                 <Form.Control 
                                     type="Password"
                                     className="custom-formcontrol" 
-                                    placeholder={userPassword} 
+                                    placeholder='*****'
                                     disabled 
                                 />
                                 <a 

@@ -15,6 +15,16 @@ import json
 from io import BytesIO
 from django.conf import settings  # Ensure your Django settings are imported
 
+import pandas as pd
+from django.http import JsonResponse
+from statsmodels.tsa.arima.model import ARIMA
+from .supabase_client import supabase  # Import Supabase client
+
+
+import logging
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize FaceNet model
 model = InceptionResnetV1(pretrained='vggface2').eval()
@@ -71,6 +81,42 @@ def capture_images(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+# def get_face_embedding(image):
+#     # Convert image to RGB
+#     image = image.convert('RGB')
+#     # Resize to 160x160 (required input size for FaceNet)
+#     image = image.resize((160, 160))
+#     # Convert to numpy array
+#     image_array = np.array(image)
+    
+#     # Initialize MTCNN for face detection
+#     mtcnn = MTCNN()
+
+#     # Detect faces
+#     boxes, _ = mtcnn.detect(image_array)
+
+#     # Initialize an empty list for embeddings
+#     embeddings = []
+
+#     if boxes is not None:
+#         for box in boxes:
+#             # Extract face
+#             x1, y1, x2, y2 = map(int, box)
+#             face = image_array[y1:y2, x1:x2]
+#             face = cv2.resize(face, (160, 160))
+
+#             # Convert face to tensor and get embedding
+#             face_tensor = np.moveaxis(face, -1, 0) / 255.0  # Normalize to [0, 1]
+#             face_tensor = torch.tensor(face_tensor, dtype=torch.float32)
+#             embedding = model(face_tensor.unsqueeze(0)).detach().numpy().flatten()
+#             embeddings.append(embedding)
+
+#     # Return embeddings for the first detected face or None if no face is detected
+#     if embeddings:
+#         return embeddings[0]
+#     else:
+#         return None
+
 def get_face_embedding(image):
     # Convert image to RGB
     image = image.convert('RGB')
@@ -123,7 +169,7 @@ def compare_face(request):
 
                             # Compare the embeddings
                             distance = np.linalg.norm(known_embedding - unknown_face_embedding)
-                            if distance < 1.0:  # You can adjust the threshold as needed
+                            if distance < 0.7:  # You can adjust the threshold as needed
                                 match = True
                                 matched_patient = patient_folder
                                 break
@@ -143,3 +189,62 @@ def compare_face(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@csrf_exempt
+def predict_treatment_trends(request):
+        categories = ['Oral Surgery', 'Periodontics', 'Prosthodontics', 'Restorative Dentistry', 'Others']
+        
+        # Fetch all patient data including branch
+        patient_response = supabase.table('patient').select('*').execute()
+        patients = patient_response.data
+        logger.info(f"Fetched {len(patients)} patients")
+
+        patient_branch_map = {patient['patient_id']: patient['patient_branch'] for patient in patients}
+        logger.info(f"Unique branches: {set(patient_branch_map.values())}")
+
+        # Create a mapping from branches to treatment counts
+        forecasts = {}
+
+        for branch in set(patient_branch_map.values()):
+            forecasts[branch] = {}
+            for category in categories:
+                # Fetch treatment data for the current category
+                response = supabase.table('patient_Treatments').select('*').eq('treatment', category).execute()
+                treatments = response.data
+                logger.info(f"Fetched {len(treatments)} treatments for category {category}")
+
+                # Filter treatments by patients belonging to the current branch
+                branch_treatments = [treatment for treatment in treatments if patient_branch_map.get(treatment['patient_id']) == branch]
+                logger.info(f"Filtered {len(branch_treatments)} treatments for branch {branch} and category {category}")
+
+                if not branch_treatments:
+                    forecasts[branch][category] = 0  # Set to 0 if no data available
+                    continue
+
+                df = pd.DataFrame(branch_treatments)
+                df['treatment_date'] = pd.to_datetime(df['treatment_date'])
+                df.set_index('treatment_date', inplace=True)
+                df = df.sort_index()
+
+                # Aggregate by day and count the treatments per day
+                df['count'] = 1  # Create a count column if not present
+                df = df.resample('M').sum()  # Group by month
+                df = df.sort_index()
+
+                try:
+                    model = ARIMA(df['count'], order=(5, 1, 0))
+                    model_fit = model.fit()
+                    forecast = model_fit.forecast(steps=1)
+                    forecast_value = round(forecast[0], 1)
+                    # Replace negative forecast values with 0
+                    forecasts[branch][category] = max(forecast_value, 0)
+                except Exception as e:
+                    logger.info(f"Error fitting ARIMA model for {branch}, {category}: {str(e)}")
+                    forecasts[branch][category] = 0
+
+        return JsonResponse(forecasts)
+
+
+
+

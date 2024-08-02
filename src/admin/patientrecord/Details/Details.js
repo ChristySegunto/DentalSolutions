@@ -403,6 +403,7 @@ const Details = () => {
         patient_lname: patient.patient_lname,
         transferred_by: fullName,
         transfer_date: new Date().toISOString(),
+        notified: false,
         transfer_reason: transferReason
     };
 

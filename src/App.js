@@ -12,6 +12,7 @@ import {
 
 import { AuthProvider } from './settings/AuthContext.js';
 import ProtectedRoute from './settings/ProtectedRoute.js';
+import RequireAuth from './settings/RequiredAuth.js';
 import LoginForm from './LoginForm/LoginForm.js'
 import PreRegistration from './PreRegistration/PreRegistration.js'
 import Dashboard from './admin/dashboard/dashboard.js'
@@ -52,60 +53,70 @@ const router =createBrowserRouter(
 			<Route
 				path="dashboard"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Dashboard />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="dashboardAllBranch" 
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<DashboardAllBranch />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="patientlist"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Patientlist />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="PatientlistAllbranch"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<PatientlistAllbranch />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="addpatient"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Addpatient />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
@@ -114,12 +125,14 @@ const router =createBrowserRouter(
 			<Route
 				path="verifypatient"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Verifypatient />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
@@ -128,12 +141,14 @@ const router =createBrowserRouter(
 			<Route
 				path="settings"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Settings />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
@@ -141,60 +156,70 @@ const router =createBrowserRouter(
 			<Route
 				path="/reviewpatient/:patient_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<ReviewPatient />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path='/scanfaceforpending/:patient_id'
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Scanfaceforpending />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Patientrecord />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
  
 			<Route
 				path="editdetails/:patient_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Editdetails />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id/editdetails"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Editdetails />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
@@ -202,120 +227,140 @@ const router =createBrowserRouter(
 			<Route
 				path="/patientrecord/:patient_id/addtreatment"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Addtreatment />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id/viewtreatment/:treatment_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Viewtreatment />
 						</div>  
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id/edittreatment/:treatment_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Edittreatment />
 						</div>  
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id/addprocedure"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Addprocedure />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id/viewprocedure/:orthodontics_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Viewprocedure />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="/patientrecord/:patient_id/editprocedure/:orthodontics_id"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="dentist|assistant">
 						<div className="dashboard-container">
 							<Sidebar />
 							<Editprocedure />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="home"
 				element={
+				<RequireAuth>
 				<ProtectedRoute role="patient">
 					<div className="dashboard-container">
 					<SidebarPatient />
 					<Home />
 					</div>
 				</ProtectedRoute>
+				</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="record"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="patient">
 						<div className="dashboard-container">
 							<SidebarPatient />
 							<Record />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="history"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="patient">
 						<div className="dashboard-container">
 							<SidebarPatient />
 							<History />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/>
 
 			<Route
 				path="patientsettings"
 				element={
+					<RequireAuth>
 					<ProtectedRoute role="patient">
 						<div className="dashboard-container">
 							<SidebarPatient />
 							<Patientsettings />
 						</div>
 					</ProtectedRoute>
+					</RequireAuth>
 				}
 			/> 
 

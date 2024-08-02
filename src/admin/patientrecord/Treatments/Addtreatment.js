@@ -615,14 +615,12 @@ useEffect(() => {
             const imgWidth = 40; 
             const imgHeight = img.height * imgWidth / img.width;
         
-        doc.setFont('helvetica');
+        doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
-        doc.text('Dental Solutions', 83.9, 19.9);
         doc.text('Dental Solutions', 84, 20);
-        doc.text('Dental Solutions', 84.1, 20.1);
-        doc.text('Dental Solutions', 84.2, 20.2);
-
         
+    
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(14);
         doc.text("Medical Prescription", 87, 26);
       

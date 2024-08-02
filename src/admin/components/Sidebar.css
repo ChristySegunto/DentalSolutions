@@ -4,9 +4,7 @@
 .sidebar{
     display: flex;
     height: 95vh;
-    overflow: scroll initial;
     margin: 20px;
-    
 }
 .custom-sidebar {
     background-image: linear-gradient(180deg, #005590 6%, #409EE0 88.5%) !important;
