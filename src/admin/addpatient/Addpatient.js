@@ -653,7 +653,7 @@ const validateStep2 = (data) => {
         
                         <div className='btns'>
                             <button className="btn btn-secondary mr-2" onClick={handlePrev}>Previous</button>
-                            <button className="nextbtn btn btn-primary" onClick={handleNext}>Next</button>
+                            <button className="nextbtn btn btn-primary" onClick={handleSubmit}>Next</button>
                         </div>
                     </div>
                     )}
