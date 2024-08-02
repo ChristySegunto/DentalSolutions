@@ -9,6 +9,9 @@ import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import { Modal } from 'react-bootstrap';
 
+import { InputGroup } from 'react-bootstrap';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
 //Firebase
 import supabase from './../settings/supabase';
 import { ModalBody } from "react-bootstrap";
@@ -30,6 +33,9 @@ const LoginForm = () => {
     const [countdown, setCountdown] = useState(null);
 
     const [usernameError, setUsernameError] = useState('');
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showIcon, setShowIcon] = useState(false);
 
     const validateUsername = (username) => {
         // Basic format check: letters, numbers, single underscore, single dot
@@ -57,6 +63,21 @@ const LoginForm = () => {
 
         return "";  // No error
     };
+
+    useEffect(() => {
+        setShowIcon(password.length > 0);
+        // Always hide password when there's new input
+        setShowPassword(false);
+    }, [password]);
+
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value);
+    };
+    
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
 
     const handleCredentialChange = (e) => {
         const value = e.target.value;
@@ -283,10 +304,23 @@ const LoginForm = () => {
 
                             <Form.Group className="mb-3 form-group" controlId="formBasicPassword">
                                 <Form.Label className="form-label">Password</Form.Label>
-                                <Form.Control className="form-control" type="password" size="lg"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+                                <InputGroup>
+                <Form.Control 
+                    className="form-control" 
+                    type={showPassword ? "text" : "password"} 
+                    size="lg"
+                    value={password}
+                    onChange={handlePasswordChange}
+                />
+                {showIcon && (
+                    <InputGroup.Text 
+                        onClick={togglePasswordVisibility}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </InputGroup.Text>
+                )}
+            </InputGroup>
                             </Form.Group>
 
                             {error && <p style={{ color: 'red', backgroundColor: '#ffffff' }}>{error}</p>}
