@@ -89,7 +89,7 @@ const TreatmentPatient = () => {
         fetchPatientDetails();
         fetchTreatmentDetails();
         
-    }, [treatments.treatment_id]);
+    }, [treatments.treatment_id, patient.patient_id]);
 
     useEffect(() => {
         if (location.state && location.state.activeTab) {

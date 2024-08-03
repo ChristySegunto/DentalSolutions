@@ -229,7 +229,7 @@ const LoginForm = () => {
 
                     setTimeout(() => {
                         navigate('/home');
-                    }, 3000);
+                    }, 1000);
                 }
             } else if (role === 'dentist' || role === 'assistant') {
                 setShowModal(true);
@@ -238,7 +238,7 @@ const LoginForm = () => {
 
                 setTimeout(() => {
                     navigate('/dashboard');
-                }, 3000);
+                }, 1000);
             }
         } catch (error) {
             console.error("Supabase error: ", error);

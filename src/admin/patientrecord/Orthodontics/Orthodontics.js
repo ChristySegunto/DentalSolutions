@@ -52,6 +52,9 @@ const Orthodontics = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(4);
 
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState('');
+    const [isConfirmed, setIsConfirmed] = useState(false);
 
 
     useEffect(() => {
@@ -104,7 +107,7 @@ const Orthodontics = () => {
                 }
     
                 // Sort data by date in descending order
-                const sortedData = (data || []).sort((a, b) => new Date(a.ortho_date) - new Date(b.ortho_date));
+                const sortedData = (data || []).sort((a, b) => new Date(b.ortho_date) - new Date(a.ortho_date));
                 setOrthodontics(sortedData);
 
                 // setOrthodontics(data || []); // Ensure data is an array or set to empty array if null
@@ -299,16 +302,66 @@ const Orthodontics = () => {
     };
 
     const getStatusClassName = () => {
-        if (patient.ortho_status === 'ON GOING') {
-            return 'ortho-status on-going';
+        if (!patient.ortho_status || patient.ortho_status.trim() === '') {
+            return 'no-history';
+        } else if (patient.ortho_status === 'ON GOING') {
+            return 'on-going';
         } else if (patient.ortho_status === 'COMPLETED') {
-            return 'ortho-status completed';
+            return 'completed';
         } else {
-            return 'ortho-status'; // Default class
+            return ''; // Default class
         }
     };
 
-    const isOrthoStatusEmpty = !patient.ortho_status || patient.ortho_status.trim() === '';
+    const handleUpdateOrthoStatus = () => {
+        if (patient.ortho_status === 'ON GOING') {
+            setSelectedStatus('COMPLETED');
+            setShowStatusModal(true);
+        } else {
+            setSelectedStatus('ON GOING');
+            updatePatientStatus('ON GOING');
+        }
+    };
+
+    const handleConfirmUpdate = async () => {
+        try {
+            await updatePatientStatus(selectedStatus);
+            setShowStatusModal(false);
+            setIsConfirmed(false);
+        } catch (error) {
+            console.error('Error updating patient status:', error);
+        }
+    };
+
+    const handleCloseModal = () => setShowStatusModal(false);
+
+    const updatePatientStatus = async (newStatus) => {
+        setPatient((prevPatient) => ({
+            ...prevPatient,
+            ortho_status: newStatus,
+        }));
+
+        try {
+            const { data, error } = await supabase
+                .from('patient') 
+                .update({
+                    ortho_status: newStatus,
+                  })
+                .eq('patient_id', patient.patient_id); 
+
+            if (error) {
+                throw error;
+            }
+
+            console.log('Status updated successfully:', data);
+            return { ok: true, data };
+        } catch (error) {
+            console.error('Error updating status:', error);
+            return { ok: false, error };
+        }
+    };
+
+
     
 {/*PAGINATION */}
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -319,9 +372,18 @@ const Orthodontics = () => {
     const goToFirstPage = () => setCurrentPage(1);
     const goToLastPage = () => setCurrentPage(Math.ceil(orthodontics.length / itemsPerPage));
 
+    useEffect(() => {
+        if (currentOrthodontics.length > 0 && patient.ortho_status !== 'COMPLETED') {
+            if (patient.ortho_status !== 'ON GOING') {
+                setSelectedStatus('ON GOING');
+                updatePatientStatus('ON GOING');
+            }
+        }
+    }, [currentOrthodontics, patient.ortho_status]);
+
     return (
         <>
-            <div className="personalinfo-container">
+            <div className="personalinfo-container row">
 
                 <div className="avatar-col col-12 col-md-2 order-md-1 order-1 d-flex justify-content-center">
                     <Avatar
@@ -377,8 +439,31 @@ const Orthodontics = () => {
                 <div className="treatment-header row">
                     <div className="col-lg-8 d-flex justify-content-start align-items-center ">
                         <h3>ORTHODONTICS</h3> 
-                        {!isOrthoStatusEmpty && (
-                            <p className={getStatusClassName()}> {patient.ortho_status} </p> )}          
+                        {!(!patient.ortho_status || patient.ortho_status.trim() === '') && (
+                <Button 
+                    onClick={handleUpdateOrthoStatus} 
+                    className={`custom-button ${getStatusClassName()}`}
+                    disabled={patient.ortho_status === 'COMPLETED'}
+                >
+                    {patient.ortho_status}
+                </Button>
+            )}
+
+             {/* Confirmation Modal */}
+             <Modal show={showStatusModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title className="custom-modal-title">Confirm Status Update</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="custom-modal-body">Are you sure you want to mark these Orthodontics Procedures as completed?</Modal.Body>
+                <Modal.Footer>
+                    <Button className="custom-modal-cancelbtn" onClick={handleCloseModal}>
+                        Cancel
+                    </Button>
+                    <Button className="custom-modal-confirmbtn" onClick={handleConfirmUpdate}>
+                        Confirm
+                    </Button>
+                </Modal.Footer>
+            </Modal> 
                             </div>
                         <div className="col-lg-4 d-flex justify-content-end">
                             <Dropdown onSelect={handleExport}>

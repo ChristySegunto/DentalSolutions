@@ -12,36 +12,53 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
     const canvasRef = useRef(null);
     const overlayCanvasRef = useRef(null);
 
+    const [loading, setLoading] = useState(true); // Loading state for models
+    const [modelsLoaded, setModelsLoaded] = useState(false);
+    const [mediaStream, setMediaStream] = useState(null);
+
     useEffect(() => {
         onCapturedImagesChange(capturedImages);
     }, [capturedImages, onCapturedImagesChange]);
 
     // Load face-api models
     const loadModels = async () => {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('models/tiny_face_detector');
-        await faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68');
-        await faceapi.nets.faceRecognitionNet.loadFromUri('models/face_recognition');
+        setLoading(true);
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models/tiny_face_detector');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face_landmark_68');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face_recognition');
+            setModelsLoaded(true); // Add this line
+        } catch (error) {
+            console.error('Error loading models:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        loadModels();
-        startVideo();
+        const initialize = async () => {
+            await loadModels();  // Ensure models are loaded
+            startVideo();        // Then start video
+        };
+        initialize();
     }, []);
 
-    useEffect(() => {
-        const intervalId = setInterval(detectFace, 100);
-        return () => clearInterval(intervalId);
-    }, []);
-
-    useEffect(() => {
-        drawOverlay();
-    }, [borderColor]);
+    
 
     const startVideo = () => {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
+                    videoRef.current.onloadedmetadata = () => {
+                        videoRef.current.play();
+                        canvasRef.current.width = videoRef.current.videoWidth;
+                        canvasRef.current.height = videoRef.current.videoHeight;
+                        overlayCanvasRef.current.width = videoRef.current.videoWidth;
+                        overlayCanvasRef.current.height = videoRef.current.videoHeight;
+                        drawOverlay();
+                    };
+                    setMediaStream(stream); // Store the stream reference
                 }
             })
             .catch((error) => {
@@ -49,6 +66,23 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                 alert('Failed to access camera. Please check if camera permissions are granted.');
             });
     };
+
+    // Call startVideo when component mounts
+    useEffect(() => {
+        startVideo();
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [mediaStream]);
+
+    useEffect(() => {
+        drawOverlay();
+    }, [borderColor]);
 
     const handleCaptureImage = async () => {
         if (!videoRef.current || capturedImages >= numImages) return;
@@ -64,7 +98,7 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
         formData.append('image', blob, `${patient_username}_capture${capturedImages + 1}.png`);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/capture-images/', formData, {
+            const response = await axios.post('https://api-dentalsolutions.ngrok.app/api/capture-images/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -135,7 +169,10 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
 
     const drawOverlay = () => {
         const canvas = overlayCanvasRef.current;
+        if (!canvas) return; // Ensure canvas is not null
+    
         const context = canvas.getContext('2d');
+        if (!context) return; // Ensure context is not null
 
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
@@ -161,11 +198,26 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
         context.stroke();
     };
 
+    useEffect(() => {
+        if (modelsLoaded) {
+            const intervalId = setInterval(detectFace, 100);
+            return () => clearInterval(intervalId);
+        }
+    }, [modelsLoaded]);
+
     return (
         <>
             <div className="scanface-custom mb-3">
                 <h2>SCAN FACE</h2>
                 <div className='divider'></div>
+
+                {loading ? (
+                    <div className="spinner-container row d-flex justify-content-center">
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <p className='text-center'>Loading models, please wait...</p>
+                </div>
+                ) : (
+                <>
                 <div className='d-flex justify-content-center'>
                     <div className="video-container" style={{ position: 'relative' }}>
                         <video ref={videoRef} autoPlay playsInline muted className="video-preview"></video>
@@ -173,6 +225,7 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                         <canvas ref={overlayCanvasRef} className="overlay-canvas" width="640" height="480"></canvas>
                     </div>
                 </div>
+                
                 
                 <div className='facedirectioncontainer d-flex justify-content-center'>
                     <div className='d-flex justify-content-center align-items-center'>
@@ -224,7 +277,8 @@ const Scanface = ({ patient_username, onCapturedImagesChange }) => {
                         Capture Image ({capturedImages}/{numImages})
                     </button>
                 </div>
-                
+                </>
+                )}
             </div>
 
 

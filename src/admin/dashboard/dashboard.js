@@ -7,7 +7,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { CDBContainer } from 'cdbreact';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Bootstrap components
 import Container from 'react-bootstrap/Container';
@@ -18,13 +18,14 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import Modal from 'react-bootstrap/Modal';
 
 
 // Icons
 import { FaBars } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const ICON_SIZE = 25;
 
@@ -74,6 +75,10 @@ const Dashboard = () => {
         ],
         loading: true,
     });
+    const [showDailyPatientsModal, setShowDailyPatientsModal] = useState(false);
+    const [dailyPatientsByTreatment, setDailyPatientsByTreatment] = useState({});
+
+
     
     const [monthlyTreatmentReport, setMonthlyTreatmentReport] = useState({
         labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
@@ -94,6 +99,9 @@ const Dashboard = () => {
         ],
         loading: true,
     });
+    const [showPatientsModal, setShowMonthlyPatientsModal] = useState(false);
+    const [monthlyPatients, setMonthlyPatients] = useState({});
+
 
     const [caseCounts, setCaseCounts] = useState({
         newCases: 0,
@@ -128,6 +136,18 @@ const Dashboard = () => {
         ],
     });
 
+    const [activePatientsDetails, setActivePatientsDetails] = useState([]);
+    const [inactivePatientsDetails, setInactivePatientsDetails] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleShowStatusModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
+
+    const [showOrthoModal, setShowOrthoModal] = useState(false);
+    const handleShowOrthoModal = () => setShowOrthoModal(true);
+    const handleCloseOrthoModal = () => setShowOrthoModal(false);
+    const [unfinishedCases, setUnfinishedCases] = useState([]);
+    const [finishedCases, setFinishedCases] = useState([]);
 
     useEffect(() => {
         const fetchProfileDetails = async () => {
@@ -322,124 +342,26 @@ useEffect(() => {
 }, [userDetails, profileDetails]);
 
 {/*TREATMENT REPORTS */}
-    // useEffect(() => {
-    //     const fetchDailyTreatmentCounts = async () => {
-    //         try {
-    //             console.log('Fetching daily treatment counts...');
+    async function fetchPatientDetails(patientIds) {
+        try {
+            if (patientIds.length === 0) return [];
 
-    //             const treatments = ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'];
-    //             const currentDate = new Date();
-    //             const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 0, 0, 0);
-    //             const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59);
+            const { data: patientDetails, error } = await supabase
+                .from('patient')
+                .select('patient_id, patient_fname, patient_lname, patient_contact')
+                .in('patient_id', patientIds)
+                .eq('verification_status', 'verified');
 
-    //             const fetchPromises = treatments.map(async (treatment) => {
-    //                 if (treatment === 'Orthodontic Treatment') {
-    //                     const orthoQuery = supabase
-    //                         .from('patient_Orthodontics')
-    //                         .select('patient_id')
-    //                         .gte('created_at', start.toISOString())
-    //                         .lte('created_at', end.toISOString());
+            if (error) {
+                throw error;
+            }
 
-    //                     const { data: orthoData, error: orthoError } = await orthoQuery;
-
-    //                     if (orthoError) {
-    //                         throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
-    //                     }
-
-    //                     const patientIds = orthoData.map((ortho) => ortho.patient_id);
-
-    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
-    //                         const { data: patientData, error: patientError } = await supabase
-    //                             .from('patient')
-    //                             .select('patient_branch')
-    //                             .eq('patient_id', patientId)
-    //                             .single();
-
-    //                         if (patientError) {
-    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-    //                         }
-
-    //                         return patientData.patient_branch;
-    //                     });
-
-    //                     const patientBranches = await Promise.all(patientBranchPromises);
-
-    //                     const userBranch = profileDetails.branch;
-    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
-
-    //                     return { treatment, count };
-    //                 } else {
-    //                     const treatmentsQuery = supabase
-    //                         .from('patient_Treatments')
-    //                         .select('patient_id')
-    //                         .eq('treatment', treatment)
-    //                         .gte('created_at', start.toISOString())
-    //                         .lte('created_at', end.toISOString());
-
-    //                     const { data: treatmentsData, error: treatmentsError } = await treatmentsQuery;
-
-    //                     if (treatmentsError) {
-    //                         throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
-    //                     }
-
-    //                     const patientIds = treatmentsData.map((treatment) => treatment.patient_id);
-
-    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
-    //                         const { data: patientData, error: patientError } = await supabase
-    //                             .from('patient')
-    //                             .select('patient_branch')
-    //                             .eq('patient_id', patientId)
-    //                             .single();
-
-    //                         if (patientError) {
-    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-    //                         }
-
-    //                         return patientData.patient_branch;
-    //                     });
-
-    //                     const patientBranches = await Promise.all(patientBranchPromises);
-
-    //                     const userBranch = profileDetails.branch;
-    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
-
-    //                     return { treatment, count };
-    //                 }
-    //             });
-
-    //             const counts = await Promise.all(fetchPromises);
-
-    //             const newData = counts.map(({ treatment, count }) => count);
-
-    //             const dailyTreatmentReportData = {
-    //                 labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
-    //                 datasets: [
-    //                     {
-    //                         label: 'Daily Treatment Counts',
-    //                         data: newData,
-    //                         backgroundColor: [
-    //                             '#7B43F3',
-    //                             '#FE0000',
-    //                             '#E65C4F',
-    //                             '#FDD037',
-    //                             '#68C66C',
-    //                             '#75E2FF',
-    //                         ],
-    //                         borderWidth: 1,
-    //                     },
-    //                 ],
-    //             };
-
-    //             setDailyTreatmentReport(dailyTreatmentReportData);
-    //             console.log('Daily Treatment Report:', dailyTreatmentReportData);
-    //         } catch (error) {
-    //             console.error('Error fetching daily treatment counts:', error.message);
-    //         }
-    //     };
-
-    //     fetchDailyTreatmentCounts();
-    // }, [profileDetails]);
-
+            return patientDetails;
+        } catch (error) {
+            console.error('Error fetching patient details:', error.message);
+            return [];
+        }
+    }
     useEffect(() => {
         const fetchDailyTreatmentCounts = async () => {
             try {
@@ -463,46 +385,48 @@ useEffect(() => {
                         throw new Error(`Error fetching patient branches: ${patientError.message}`);
                     }
     
-                    return patientData.map(patient => patient.patient_branch);
+                    return patientData;
                 };
     
                 const fetchPromises = treatments.map(async (treatment) => {
+                    let treatmentData;
                     if (treatment === 'Orthodontic Treatment') {
-                        const { data: orthoData, error: orthoError } = await supabase
+                        const { data, error } = await supabase
                             .from('patient_Orthodontics')
                             .select('patient_id')
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
     
-                        if (orthoError) {
-                            throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
+                        if (error) {
+                            throw new Error(`Error fetching orthodontic treatments: ${error.message}`);
                         }
-    
-                        const patientIds = orthoData.map(ortho => ortho.patient_id);
-                        const patientBranches = await fetchPatientBranches(patientIds);
-                        const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter(branch => branch === userBranch).length;
-    
-                        return { treatment, count };
+                        treatmentData = data;
                     } else {
-                        const { data: treatmentsData, error: treatmentsError } = await supabase
+                        const { data, error } = await supabase
                             .from('patient_Treatments')
                             .select('patient_id')
                             .eq('treatment', treatment)
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
     
-                        if (treatmentsError) {
-                            throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
+                        if (error) {
+                            throw new Error(`Error fetching treatments for ${treatment}: ${error.message}`);
                         }
-    
-                        const patientIds = treatmentsData.map(treatment => treatment.patient_id);
-                        const patientBranches = await fetchPatientBranches(patientIds);
-                        const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter(branch => branch === userBranch).length;
-    
-                        return { treatment, count };
+                        treatmentData = data;
                     }
+    
+                    const patientIds = treatmentData.map(item => item.patient_id);
+                    const patientData = await fetchPatientBranches(patientIds);
+                    const userBranch = profileDetails.branch;
+                    const filteredPatients = patientData.filter(patient => patient.patient_branch === userBranch);
+    
+                    const patientDetails = await fetchPatientDetails(filteredPatients.map(p => p.patient_id));
+    
+                    return {
+                        treatment,
+                        count: filteredPatients.length,
+                        patients: patientDetails
+                    };
                 });
     
                 const counts = await Promise.all(fetchPromises);
@@ -529,6 +453,13 @@ useEffect(() => {
                 };
     
                 setDailyTreatmentReport(dailyTreatmentReportData);
+    
+                const treatmentPatients = counts.reduce((acc, { treatment, patients }) => {
+                    acc[treatment] = patients;
+                    return acc;
+                }, {});
+                setDailyPatientsByTreatment(treatmentPatients);
+    
                 console.log('Daily Treatment Report:', dailyTreatmentReportData);
             } catch (error) {
                 console.error('Error fetching daily treatment counts:', error.message);
@@ -539,125 +470,54 @@ useEffect(() => {
             fetchDailyTreatmentCounts();
         }
     }, [profileDetails]);
-
-    // useEffect(() => {
-    //     const fetchMonthlyTreatmentCounts = async () => {
-    //         try {
-    //             console.log('Fetching monthly treatment counts...');
-
-    //             const treatments = ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'];
-    //             const currentDate = new Date();
-    //             const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    //             const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
-
-    //             const fetchPromises = treatments.map(async (treatment) => {
-    //                 if (treatment === 'Orthodontic Treatment') {
-    //                     const orthoQuery = supabase
-    //                         .from('patient_Orthodontics')
-    //                         .select('patient_id')
-    //                         .gte('created_at', start.toISOString())
-    //                         .lte('created_at', end.toISOString());
-
-    //                     const { data: orthoData, error: orthoError } = await orthoQuery;
-
-    //                     if (orthoError) {
-    //                         throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
-    //                     }
-
-    //                     const patientIds = orthoData.map((ortho) => ortho.patient_id);
-
-    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
-    //                         const { data: patientData, error: patientError } = await supabase
-    //                             .from('patient')
-    //                             .select('patient_branch')
-    //                             .eq('patient_id', patientId)
-    //                             .single();
-
-    //                         if (patientError) {
-    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-    //                         }
-
-    //                         return patientData.patient_branch;
-    //                     });
-
-    //                     const patientBranches = await Promise.all(patientBranchPromises);
-
-    //                     const userBranch = profileDetails.branch;
-    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
-
-    //                     return { treatment, count };
-    //                 } else {
-    //                     const treatmentsQuery = supabase
-    //                         .from('patient_Treatments')
-    //                         .select('patient_id')
-    //                         .eq('treatment', treatment)
-    //                         .gte('created_at', start.toISOString())
-    //                         .lte('created_at', end.toISOString());
-
-    //                     const { data: treatmentsData, error: treatmentsError } = await treatmentsQuery;
-
-    //                     if (treatmentsError) {
-    //                         throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
-    //                     }
-
-    //                     const patientIds = treatmentsData.map((treatment) => treatment.patient_id);
-
-    //                     const patientBranchPromises = patientIds.map(async (patientId) => {
-    //                         const { data: patientData, error: patientError } = await supabase
-    //                             .from('patient')
-    //                             .select('patient_branch')
-    //                             .eq('patient_id', patientId)
-    //                             .single();
-
-    //                         if (patientError) {
-    //                             throw new Error(`Error fetching patient details for ${patientId}: ${patientError.message}`);
-    //                         }
-
-    //                         return patientData.patient_branch;
-    //                     });
-
-    //                     const patientBranches = await Promise.all(patientBranchPromises);
-
-    //                     const userBranch = profileDetails.branch;
-    //                     const count = patientBranches.filter((branch) => branch === userBranch).length;
-
-    //                     return { treatment, count };
-    //                 }
-    //             });
-
-    //             const counts = await Promise.all(fetchPromises);
-
-    //             const newData = counts.map(({ treatment, count }) => count);
-
-    //             const monthlyTreatmentReportData = {
-    //                 labels: ['Orthodontic Treatment', 'Oral Surgery', 'Prosthodontics', 'Periodontics', 'Restorative Dentistry', 'Others'],
-    //                 datasets: [
-    //                     {
-    //                         label: 'Monthly Treatment Counts',
-    //                         data: newData,
-    //                         backgroundColor: [
-    //                             '#7B43F3',
-    //                             '#FE0000',
-    //                             '#E65C4F',
-    //                             '#FDD037',
-    //                             '#68C66C',
-    //                             '#75E2FF',
-    //                         ],
-    //                         borderWidth: 1,
-    //                     },
-    //                 ],
-    //             };
-
-    //             setMonthlyTreatmentReport(monthlyTreatmentReportData);
-    //             console.log('Monthly Treatment Report:', monthlyTreatmentReportData);
-    //         } catch (error) {
-    //             console.error('Error fetching monthly treatment counts:', error.message);
-    //         }
-    //     };
-
-    //     fetchMonthlyTreatmentCounts();
-    // }, [profileDetails]);
     
+
+    const DailyPatientsModal = ({ show, onHide, patientsByTreatment }) => (
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"
+            aria-labelledby="daily-patients-modal"
+            centered
+        >
+            <Modal.Header closeButton>
+                <Modal.Title className="dmodal-title">Daily Patients</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="dmodal-body">
+            {Object.entries(patientsByTreatment).map(([treatment, patients]) => (
+                <div key={treatment}>
+                    <h4>{treatment}</h4>
+                    <Table bordered className='dailyreport-table'>
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Contact Number</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {patients.map((patient) => (
+                                <tr key={patient.patient_id}>
+                                    <td>{patient.patient_id}</td>
+                                    <td>{patient.patient_fname}</td>
+                                    <td>{patient.patient_lname}</td>
+                                    <td>{patient.patient_contact}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </div>
+            ))}
+        </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onHide}>
+                    Close
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+   
     useEffect(() => {
         const fetchMonthlyTreatmentCounts = async () => {
             try {
@@ -681,46 +541,48 @@ useEffect(() => {
                         throw new Error(`Error fetching patient branches: ${patientError.message}`);
                     }
     
-                    return patientData.map(patient => patient.patient_branch);
+                    return patientData;
                 };
     
                 const fetchPromises = treatments.map(async (treatment) => {
+                    let treatmentData;
                     if (treatment === 'Orthodontic Treatment') {
-                        const { data: orthoData, error: orthoError } = await supabase
+                        const { data, error } = await supabase
                             .from('patient_Orthodontics')
                             .select('patient_id')
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
     
-                        if (orthoError) {
-                            throw new Error(`Error fetching orthodontic treatments: ${orthoError.message}`);
+                        if (error) {
+                            throw new Error(`Error fetching orthodontic treatments: ${error.message}`);
                         }
-    
-                        const patientIds = orthoData.map(ortho => ortho.patient_id);
-                        const patientBranches = await fetchPatientBranches(patientIds);
-                        const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter(branch => branch === userBranch).length;
-    
-                        return { treatment, count };
+                        treatmentData = data;
                     } else {
-                        const { data: treatmentsData, error: treatmentsError } = await supabase
+                        const { data, error } = await supabase
                             .from('patient_Treatments')
                             .select('patient_id')
                             .eq('treatment', treatment)
                             .gte('created_at', start.toISOString())
                             .lte('created_at', end.toISOString());
     
-                        if (treatmentsError) {
-                            throw new Error(`Error fetching treatments for ${treatment}: ${treatmentsError.message}`);
+                        if (error) {
+                            throw new Error(`Error fetching treatments for ${treatment}: ${error.message}`);
                         }
-    
-                        const patientIds = treatmentsData.map(treatment => treatment.patient_id);
-                        const patientBranches = await fetchPatientBranches(patientIds);
-                        const userBranch = profileDetails.branch;
-                        const count = patientBranches.filter(branch => branch === userBranch).length;
-    
-                        return { treatment, count };
+                        treatmentData = data;
                     }
+    
+                    const patientIds = treatmentData.map(item => item.patient_id);
+                    const patientData = await fetchPatientBranches(patientIds);
+                    const userBranch = profileDetails.branch;
+                    const filteredPatients = patientData.filter(patient => patient.patient_branch === userBranch);
+    
+                    const patientDetails = await fetchPatientDetails(filteredPatients.map(p => p.patient_id));
+    
+                    return {
+                        treatment,
+                        count: filteredPatients.length,
+                        patients: patientDetails
+                    };
                 });
     
                 const counts = await Promise.all(fetchPromises);
@@ -747,6 +609,11 @@ useEffect(() => {
                 };
     
                 setMonthlyTreatmentReport(monthlyTreatmentReportData);
+                setMonthlyPatients(counts.reduce((acc, { treatment, patients }) => {
+                    acc[treatment] = patients;
+                    return acc;
+                }, {}));
+    
                 console.log('Monthly Treatment Report:', monthlyTreatmentReportData);
             } catch (error) {
                 console.error('Error fetching monthly treatment counts:', error.message);
@@ -757,6 +624,52 @@ useEffect(() => {
             fetchMonthlyTreatmentCounts();
         }
     }, [profileDetails]);
+
+    const MonthlyPatientsModal = ({ show, onHide, treatmentPatients }) => (
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"
+            aria-labelledby="monthly-patients-modal"
+            centered
+        >
+            <Modal.Header closeButton>
+                <Modal.Title className="dmodal-title">Monthly Patients</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="dmodal-body">
+                {Object.entries(treatmentPatients).map(([treatment, patients]) => (
+                    <div key={treatment}>
+                        <h5>{treatment}</h5>
+                        <Table bordered className='monthlyreport-table'>
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Contact Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {patients.map((patient) => (
+                                    <tr key={patient.patient_id}>
+                                        <td>{patient.patient_id}</td>
+                                        <td>{patient.patient_fname}</td>
+                                        <td>{patient.patient_lname}</td>
+                                        <td>{patient.patient_contact}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </div>
+                ))}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onHide}>
+                    Close
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
     
 {/*ORTHODONTIC CASES */}
 async function fetchFirstPatientIds() {
@@ -778,6 +691,24 @@ async function fetchFirstPatientIds() {
     }
 }
 
+async function fetchPatientDetailsByStatus(status) {
+    try {
+        const { data: patientDetails, error } = await supabase
+            .from('patient')
+            .select('patient_id, patient_fname, patient_lname, patient_contact, ortho_status')
+            .eq('ortho_status', status)
+            .eq('verification_status', 'verified');
+
+        if (error) {
+            throw error;
+        }
+
+        return patientDetails;
+    } catch (error) {
+        console.error(`Error fetching patient details for status ${status}:`, error.message);
+        return [];
+    }
+}
    
 async function fetchPatientBranch(patientId) {
     try {
@@ -815,7 +746,7 @@ async function fetchPatientBranch(patientId) {
             const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
             const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
 
-            //not yet final
+        
             const { data: newCases, error: newCasesError } = await supabase
                 .from('patient_Orthodontics')
                 .select('patient_id', { count: 'exact'})
@@ -861,18 +792,52 @@ async function fetchPatientBranch(patientId) {
         }
     }
 
-   
+    async function fetchOrthodonticProcedures(patientIds) {
+        try {
+            const { data: orthoProcedures, error } = await supabase
+                .from('patient_Orthodontics')
+                .select('patient_id, ortho_procedure')
+                .in('patient_id', patientIds);
+    
+            if (error) {
+                throw error;
+            }
+    
+            return orthoProcedures;
+        } catch (error) {
+            console.error('Error fetching orthodontic procedures:', error.message);
+            return [];
+        }
+    }
     useEffect(() => {
         async function fetchDataAndUpdate() {
             try {
                 const patientIds = await fetchFirstPatientIds();
-
                 const filteredPatientIds = await Promise.all(patientIds.map(async (patientId) => {
                     const patientBranch = await fetchPatientBranch(patientId);
                     return patientBranch === profileDetails.branch ? patientId : null;
                 })).then(ids => ids.filter(id => id !== null));
-
+    
                 const counts = await countOrthodonticCasesForPatients(filteredPatientIds, profileDetails);
+    
+                // Fetch unfinished and finished cases
+                const unfinished = await fetchPatientDetailsByStatus('ON GOING');
+                const finished = await fetchPatientDetailsByStatus('COMPLETED');
+                const orthoProcedures = await fetchOrthodonticProcedures(filteredPatientIds);
+    
+                const mergeProcedures = (patients) => {
+                    return patients.map(patient => {
+                        const procedure = orthoProcedures.find(p => p.patient_id === patient.patient_id);
+                        return {
+                            ...patient,
+                            ortho_procedure: procedure ? procedure.ortho_procedure : 'N/A'
+                        };
+                    });
+                };
+
+                setUnfinishedCases(mergeProcedures(unfinished.filter(patient => filteredPatientIds.includes(patient.patient_id))));
+                setFinishedCases(mergeProcedures(finished.filter(patient => filteredPatientIds.includes(patient.patient_id))));
+
                 setCaseCounts(counts);
             } catch (error) {
                 console.error('Error fetching data:', error.message);
@@ -881,6 +846,77 @@ async function fetchPatientBranch(patientId) {
         fetchDataAndUpdate();
     }, [profileDetails]);
 
+    const CaseDetailsModal = ({ show, onHide, caseCounts }) => (
+        <Modal
+            show={show}
+            onHide={onHide}
+            size="lg"  
+            aria-labelledby="case-details-modal"
+            centered
+        >
+             <Modal.Header closeButton>
+            <Modal.Title className="dmodal-title">Orthodontic Cases Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="dmodal-body">
+
+            <h5>Unfinished Cases</h5>
+            <Table bordered className='orthocases-table'>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Contact Number</th>
+                        <th>Procedure</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {unfinishedCases.map((patient) => (
+                        <tr key={patient.patient_id}>
+                            <td>{patient.patient_id}</td>
+                            <td>{patient.patient_fname}</td>
+                            <td>{patient.patient_lname}</td>
+                            <td>{patient.patient_contact}</td>
+                            <td>{patient.ortho_procedure}</td>
+                            <td>{patient.ortho_status}</td>
+
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+
+            <h5>Finished Cases</h5>
+            <Table bordered className='orthocases-table'>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Contact Number</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {finishedCases.map((patient) => (
+                        <tr key={patient.patient_id}>
+                            <td>{patient.patient_id}</td>
+                            <td>{patient.patient_fname}</td>
+                            <td>{patient.patient_lname}</td>
+                            <td>{patient.patient_contact}</td>
+                            <td>{patient.ortho_status}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+        </Modal.Body>
+        <Modal.Footer>
+            <Button variant="secondary" onClick={onHide}>
+                Close
+            </Button>
+        </Modal.Footer>
+    </Modal>
+    );
 
     {/*PATIENT STATUS */}
     useEffect(() => {
@@ -889,44 +925,46 @@ async function fetchPatientBranch(patientId) {
                 const sixMonthsAgo = new Date();
                 sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-                // Fetch patient IDs with treatments in the last 6 months
                 const { data: treatments, error: treatmentsError } = await supabase
                     .from('patient_Treatments')
                     .select('patient_id')
                     .gte('created_at', sixMonthsAgo.toISOString());
-                   
+                
                 if (treatmentsError) throw treatmentsError;
 
-                // Fetch patient IDs with orthodontics treatments in the last 6 months
+
                 const { data: orthodontics, error: orthodonticsError } = await supabase
                     .from('patient_Orthodontics')
                     .select('patient_id')
                     .gte('created_at', sixMonthsAgo.toISOString());
-                   
-
+                
                 if (orthodonticsError) throw orthodonticsError;
 
-                // Gather active patient IDs (those with either treatments or orthodontics)
+
                 const activePatientIds = new Set([
                     ...treatments.map(record => record.patient_id),
                     ...orthodontics.map(record => record.patient_id),
                 ]);
 
-                // Fetch all patients in the current branch
+
                 const { data: allPatients, error: allPatientsError } = await supabase
                     .from('patient')
-                    .select('patient_id')
+                    .select('patient_id, patient_fname, patient_lname, patient_contact')
                     .eq('patient_branch', profileDetails.branch)
-                    .eq('verification_status', 'verified'); // Filter by verification_status
+                    .eq('verification_status', 'verified'); 
 
                 if (allPatientsError) throw allPatientsError;
 
-                // Separate active and inactive patients
+
                 const activePatients = allPatients.filter(patient => activePatientIds.has(patient.patient_id));
                 const inactivePatients = allPatients.filter(patient => !activePatientIds.has(patient.patient_id));
 
+                setActivePatientsDetails(activePatients);
+                setInactivePatientsDetails(inactivePatients);
+                
                 const activeCount = activePatients.length;
                 const inactiveCount = inactivePatients.length;
+
 
                 // Prepare data for patient status chart
                 const patientStatusData = {
@@ -952,6 +990,74 @@ async function fetchPatientBranch(patientId) {
         fetchPatientStatus();
     }, [profileDetails]);
 
+    const PatientStatusModal = ({ show, onHide, activePatients, inactivePatients }) => (
+        <Modal show={show} onHide={onHide} size="lg" centered className="patient-status-modal">
+        <Modal.Header closeButton>
+            <Modal.Title className="dmodal-title"> Patient Status </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="dmodal-body">
+            <h5>Active Patients</h5>
+            <Table bordered className='patientstatus-table'>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Contact No.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {activePatients.length > 0 ? (
+                        activePatients.map(patient => (
+                            <tr key={patient.patient_id}>
+                                <td>{patient.patient_id}</td>
+                                <td>{patient.patient_fname}</td>
+                                <td>{patient.patient_lname}</td>
+                                <td>{patient.patient_contact}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4">No active patients</td>
+                        </tr>
+                    )}
+                </tbody>
+            </Table>
+
+            <h5>Inactive Patients</h5>
+            <Table bordered className='patientstatus-table'>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Contact No</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {inactivePatients.length > 0 ? (
+                        inactivePatients.map(patient => (
+                            <tr key={patient.patient_id}>
+                                <td>{patient.patient_id}</td>
+                                <td>{patient.patient_fname}</td>
+                                <td>{patient.patient_lname}</td>
+                                <td>{patient.patient_contact}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4">No inactive patients</td>
+                        </tr>
+                    )}
+                </tbody>
+            </Table>
+        </Modal.Body>
+        <Modal.Footer>
+            <Button variant="secondary" onClick={onHide}>Close</Button>
+        </Modal.Footer>
+    </Modal>
+    );
+   
     {/*RECENT PATIENTS */}
     useEffect(() => {
         const fetchRecentData = async () => {
@@ -964,6 +1070,7 @@ async function fetchPatientBranch(patientId) {
                         treatment_type,
                         created_at,
                         patient:patient_id (
+                            patient_id, 
                             patient_fname,
                             patient_lname,
                             patient_branch:patient_branch
@@ -979,6 +1086,7 @@ async function fetchPatientBranch(patientId) {
  
                 const transformedTreatmentData = treatmentData.map(item => ({
                     ...item,
+                    patient_id: item.patient.patient_id,  
                     patient_fname: item.patient.patient_fname,
                     patient_lname: item.patient.patient_lname,
                     patient_branch: item.patient.patient_branch
@@ -991,6 +1099,7 @@ async function fetchPatientBranch(patientId) {
                         ortho_procedure, 
                         created_at,
                         patient:patient_id (
+                            patient_id, 
                             patient_fname,
                             patient_lname,
                             patient_branch:patient_branch
@@ -1007,6 +1116,7 @@ async function fetchPatientBranch(patientId) {
                 const transformedOrthoData = orthoData.map(item => ({
                     ...item,
                     treatment: 'Orthodontic Treatment',  
+                    patient_id: item.patient.patient_id,  
                     treatment_type: item.ortho_procedure,  
                     patient_fname: item.patient.patient_fname,
                     patient_lname: item.patient.patient_lname,
@@ -1040,6 +1150,11 @@ async function fetchPatientBranch(patientId) {
     
         fetchRecentData();
     }, [profileDetails]);
+
+    const handleView = (patient_id) => {
+        navigate(`/patientrecord/${patient_id}`);
+        console.log('View patient with id:', patient_id);
+    };
 
     useEffect(() => {
         console.log('Recent Patients State:', recentPatients);
@@ -1110,14 +1225,15 @@ async function fetchPatientBranch(patientId) {
                 <Row className="treatment-report">
                         <Col>
                             <div className="daily-treatment-report">
+                            <div className="monthly-treatment" onClick={setShowDailyPatientsModal} style={{ cursor: 'pointer' }}>
                                 <h1>DAILY TREATMENT REPORT</h1> 
+                                </div>
                                 <div className="tr-container">
                                         <CDBContainer >
                                             <Doughnut 
                                                 data={dailyTreatmentReport} 
                                                 options={{ 
-
-                                                    maintainAspectRatio: false, 
+                                                    maintainAspectRatio: false,
                                                     plugins: {
                                                         legend: {
                                                             position: 'right',
@@ -1130,27 +1246,49 @@ async function fetchPatientBranch(patientId) {
                                                                     weight: 500, 
                                                                 },
                                                             },
-                                                            
                                                         },
-                                                        
+                                                        datalabels: {
+                                                            color: '#005590',
+                                                            display: true,
+                                                            align: 'start',
+                                                            anchor: 'end',
+                                                            formatter: (value) => {
+                                                                return value !== 0 ? `${value}` : '';
+                                                            },
+                                                            font: {
+                                                                family: 'Poppins',
+                                                                size: 14,
+                                                                weight: 600, 
+                                                            },
+                                                            padding: {
+                                                                bottom: 10,
+                                                            },
+                                                            offset: -23, 
+                                                        },
                                                     },
-                                                    
+                                              
                                                 }} 
                                             />
                                         </CDBContainer> 
                                         </div>
+                                        <DailyPatientsModal 
+                                        show={showDailyPatientsModal} 
+                                        onHide={() => setShowDailyPatientsModal(false)} 
+                                        patientsByTreatment={dailyPatientsByTreatment} 
+                                    />
                             </div>
                         </Col>
                         <Col>
                             <div className="monthly-treatment-report">
+                                <div className="monthly-treatment" onClick={setShowMonthlyPatientsModal} style={{ cursor: 'pointer' }}>
                                 <h1>MONTHLY TREATMENT REPORT</h1>
+                                </div>
                                 <div className="tr-container">
                                         <CDBContainer>
                                             <Doughnut 
                                                 data={monthlyTreatmentReport} 
                                                 options={{ 
-
-                                                    maintainAspectRatio: false, 
+                                                    maintainAspectRatio: false,
                                                     plugins: {
                                                         legend: {
                                                             position: 'right',
@@ -1164,10 +1302,34 @@ async function fetchPatientBranch(patientId) {
                                                                 },
                                                             },
                                                         },
+                                                        datalabels: {
+                                                            color: '#005590',
+                                                            display: true,
+                                                            align: 'start',
+                                                            anchor: 'end',
+                                                            formatter: (value) => {
+                                                                return value !== 0 ? `${value}` : '';
+                                                            },
+                                                            font: {
+                                                                family: 'Poppins',
+                                                                size: 14,
+                                                                weight: 600, 
+                                                            },
+                                                            padding: {
+                                                                bottom: 10,
+                                                            },
+                                                            offset: -23, 
+                                                        },
                                                     },
+                                              
                                                 }} 
                                             />
                                         </CDBContainer> 
+                                        <MonthlyPatientsModal 
+            show={showPatientsModal} 
+            onHide={() => setShowMonthlyPatientsModal(false)} 
+            treatmentPatients={monthlyPatients} 
+        />
                                         </div>
                             </div>
                         </Col>
@@ -1176,7 +1338,9 @@ async function fetchPatientBranch(patientId) {
                 <Row className="cases-status-report">
                         <Col>
                             <div className="ortho-cases">
-                        <h1>ORTHODONTIC CASES</h1>
+                            <div className="orthocases" onClick={handleShowOrthoModal} style={{ cursor: 'pointer' }}>
+                           <h1>ORTHODONTIC CASES</h1> 
+                        </div>
                         <Row className="ortho-cases-counter">
                             <Col>
                                 <h3> NEW CASES: </h3>
@@ -1199,11 +1363,19 @@ async function fetchPatientBranch(patientId) {
                             </Col>
                             
                         </Row>
+
+                        <CaseDetailsModal
+                show={showOrthoModal}
+                onHide={() => setShowOrthoModal(false)}
+                caseCounts={caseCounts}
+            />
                             </div>
                         </Col>
                         <Col>
                             <div className="patient-status">
-                                <h1>PATIENT STATUS</h1>
+                            <div className="patientstatus" onClick={handleShowStatusModal} style={{ cursor: 'pointer' }}>
+                            <h1> PATIENT STATUS</h1>
+                        </div>
                                 <div className="tr-container">
                                         <CDBContainer>
                                             <Doughnut 
@@ -1211,27 +1383,49 @@ async function fetchPatientBranch(patientId) {
                                                 options={{ 
                                                     responsive: true, 
                                                     maintainAspectRatio: false, 
-                                                    plugins: {
-                                                        legend: {
-                                                            position: 'right',
-                                                            labels: {
-                                                                boxWidth: 25,
-                                                                color: '#005590', 
+                                                        plugins: {
+                                                            legend: {
+                                                                position: 'right',
+                                                                labels: {
+                                                                    boxWidth: 25,
+                                                                    color: '#005590', 
+                                                                    font: {
+                                                                        family: 'Poppins',
+                                                                        size: 14,
+                                                                        weight: 500, 
+                                                                    },
+                                                                },
+                                                            },
+                                                            datalabels: {
+                                                                color: '#005590',
+                                                                display: true,
+                                                                align: 'start',
+                                                                anchor: 'end',
+                                                                formatter: (value) => `${value}`, 
                                                                 font: {
                                                                     family: 'Poppins',
                                                                     size: 14,
-                                                                    weight: 500, 
+                                                                    weight: 600, 
                                                                 },
+                                                                padding: {
+                                                                    bottom: 10
+                                                                },
+                                                                offset: -25, 
                                                             },
                                                         },
-                                                    },
-                                                    
+    
                                                 }} 
                                             />
                                             </CDBContainer>
                                             </div>
                             </div>
                         </Col>
+                        <PatientStatusModal 
+                        show={showModal} 
+                        onHide={handleCloseModal} 
+                        activePatients={activePatientsDetails} 
+                        inactivePatients={inactivePatientsDetails} 
+                    />
                     
                 </Row>
                 <Row>
@@ -1251,7 +1445,13 @@ async function fetchPatientBranch(patientId) {
                     <tbody>
                     {recentPatients.map((item, index) => (
                         <tr key={index}>
-                            <td>{item.patient_fname} {item.patient_lname}</td>
+                            <td><span 
+                                    className="clickable-name" 
+                                    onClick={() => handleView(item.patient_id)}
+                                    style={{ cursor: 'pointer', color: '#005590' }}
+                                >
+                                    {item.patient_fname} {item.patient_lname}
+                                </span></td>
                             <td>{item.treatment || '-'}</td>
                             <td>{item.treatment_type || '-'}</td>
                             <td>{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>

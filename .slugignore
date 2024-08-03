@@ -1,0 +1,7 @@
+*.log
+*.sqlite3
+node_modules/
+media/
+staticfiles/
+*.git
+.gitignore

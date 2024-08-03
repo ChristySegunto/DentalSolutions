@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+import django_heroku
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,8 +26,17 @@ SECRET_KEY = 'django-insecure-v8*zjl6vo2k0uj18kzj0g74u)gndmxh=hllk8(!e_eb3yelo7!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'dentalsolutions.ngrok.app',
+    'api-dentalsolutions.ngrok.app'    
+    ]
 
+CSRF_TRUSTED_ORIGIN = [
+    'https://api-dentalsolutions.ngrok.app'
+]
 
 # Application definition
 
@@ -50,10 +60,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:3000", 
+    "https://dentalsolutions.ngrok.app",
+    "https://api-dentalsolutions.ngrok.app"
+
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
@@ -124,7 +140,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATIC_URL = '/static/'
 
 APPEND_SLASH = False
 
@@ -133,3 +151,7 @@ APPEND_SLASH = False
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#activate django-heroku
+django_heroku.settings(locals())
