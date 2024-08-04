@@ -486,7 +486,7 @@ useEffect(() => {
             <Modal.Body className="dmodal-body">
             {Object.entries(patientsByTreatment).map(([treatment, patients]) => (
                 <div key={treatment}>
-                    <h4>{treatment}</h4>
+                    <h5>{treatment}</h5>
                     <Table bordered className='dailyreport-table'>
                         <thead>
                             <tr>
@@ -894,6 +894,7 @@ async function fetchPatientBranch(patientId) {
                         <th>First Name</th>
                         <th>Last Name</th>
                         <th>Contact Number</th>
+                        <th>Procedure</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -904,6 +905,7 @@ async function fetchPatientBranch(patientId) {
                             <td>{patient.patient_fname}</td>
                             <td>{patient.patient_lname}</td>
                             <td>{patient.patient_contact}</td>
+                            <td>{patient.ortho_procedure}</td>
                             <td>{patient.ortho_status}</td>
                         </tr>
                     ))}
@@ -1261,9 +1263,9 @@ async function fetchPatientBranch(patientId) {
                                                                 weight: 600, 
                                                             },
                                                             padding: {
-                                                                bottom: 10,
+                                                                bottom: 13,
                                                             },
-                                                            offset: -23, 
+                                                            offset: -27, 
                                                         },
                                                     },
                                               
@@ -1318,7 +1320,7 @@ async function fetchPatientBranch(patientId) {
                                                             padding: {
                                                                 bottom: 10,
                                                             },
-                                                            offset: -23, 
+                                                            offset: -27, 
                                                         },
                                                     },
                                               
