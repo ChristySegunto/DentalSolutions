@@ -114,8 +114,8 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
                     errorMessage = 'Only numbers are allowed.';
                     return;
                 }
-                if (value.length === 11) {
-                    errorMessage = 'Maximum character limit reached (11).';
+                if (value.length === 12) {
+                    errorMessage = 'Maximum character limit reached (12).';
                 }
                 break;
             default:
