@@ -210,18 +210,18 @@ const Prereg = () => {
     };
 
     const handleUpdatePatientData = (data) => {
-        console.log('Updating patientData with:', data);
+        // console.log('Updating patientData with:', data);
         setPatientData((prevData) => ({ ...prevData, ...data }));
     };
 
     const handleUpdateDentalAndMedData = (data) => {
-        console.log('patient gender: ',patientData.patient_gender);
-        console.log('Updating dentalAndMedData with:', data);
+        // console.log('patient gender: ',patientData.patient_gender);
+        // console.log('Updating dentalAndMedData with:', data);
         setDentalAndMedData((prevData) => ({ ...prevData, ...data }));
     };
 
     const handleUpdateAccountInfoData = (data) => {
-        console.log('Updating accountinfo with:', data);
+        // console.log('Updating accountinfo with:', data);
         setAccountInfoData(data);
     };
     
@@ -267,7 +267,36 @@ const Prereg = () => {
         return null;
     };
 
-    const handleNext = () => {
+    const checkIfPatientExists = async (patient_fname, patient_lname, patient_birthdate) => {
+        console.log("Checking for patient:", patient_fname, patient_lname, patient_birthdate); // Debug log
+    
+        if (!patient_birthdate) {
+            console.error("Invalid birthdate:", patient_birthdate);
+            return false; // Or handle this case as you see fit
+        }
+
+        const formattedBirthdate = new Date(patient_birthdate).toISOString().split('T')[0]; // Format to YYYY-MM-DD
+
+    
+        const { data, error } = await supabase
+            .from('patient')
+            .select('patient_fname, patient_lname, patient_birthdate')
+            .eq('patient_fname', patient_fname)
+            .eq('patient_lname', patient_lname)
+            .eq('patient_birthdate', formattedBirthdate)
+            .single();
+        
+        console.log("Query result:", data, error); // Debug log
+    
+        if (error && error.code !== 'PGRST116') {
+            console.error("Error checking patient existence:", error);
+            throw error;
+        }
+        
+        return !!data;
+    };
+
+    const handleNext = async () => {
         if (currentStep === 1) {
             if (!selectedBranch || !consentChecked) {
                 setModalMessage("Please select a branch and consent to proceed.");
@@ -292,8 +321,30 @@ const Prereg = () => {
                 setModalHeader("Invalid Email");
                 setShowModal(true);
             } else {
-                setCurrentStep((prevStep) => prevStep + 1);
-                setShowModal(false);
+                try {
+                    // Check if patient exists
+                    const patientExists = await checkIfPatientExists(
+                        patientData.patient_fname,
+                        patientData.patient_lname,
+                        patientData.patient_birthdate
+                    );
+
+                    console.log("Patient exists:", patientExists); // Debug log
+
+                    if (patientExists) {
+                        setModalMessage("A patient with the same first name, last name, and birthdate already exists. Please verify your information or contact support.");
+                        setModalHeader("Patient Exists");
+                        setShowModal(true);
+                    } else {
+                        setCurrentStep((prevStep) => prevStep + 1);
+                        setShowModal(false);
+                    }
+                } catch (error) {
+                    console.error("Error checking patient existence:", error);
+                    setModalMessage("An error occurred while checking patient information. Please try again.");
+                    setModalHeader("Error");
+                    setShowModal(true);
+                }
             }
         
         } else if (currentStep === 3) {
@@ -527,6 +578,8 @@ const Prereg = () => {
                 
             }
         }
+
+        
 
 
     return (
