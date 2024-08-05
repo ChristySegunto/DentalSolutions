@@ -109,16 +109,11 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
             errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
         }
         break;
-            case 'patient_contact':
-                if (!/^\d*$/.test(value)) {
-                    errorMessage = 'Only numbers are allowed.';
-                    return;
-                }
-                if (value.length === 12) {
-                    errorMessage = 'Maximum character limit reached (12).';
-                }
-                break;
-            default:
+        case 'patient_contact':
+            updatedValue = value.replace(/\D/g, '').slice(0, 10);
+            break;
+        // ... handle other fields
+        default:
                 break;
         }
 
@@ -343,8 +338,20 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Contact Number<span className="required">*</span></Form.Label>
-                    <Form.Control type="tel" name="patient_contact" pattern="09[09]{9}0
-                    " placeholder="09xxxxxxxxx" value={patientInfo.patient_contact} onChange={handleChange} isInvalid={!!contactError} required />
+                    <div className="input-group">
+                        <div className="input-group-prepend">
+                            <span className="input-group-text">+63</span>
+                        </div>
+                        <Form.Control 
+                            type="text" 
+                            name="patient_contact" 
+                            placeholder="9xxxxxxxxx" 
+                            value={patientInfo.patient_contact} 
+                            onChange={handleChange} 
+                            isInvalid={!!contactError} 
+                            required 
+                        />
+                    </div>
                     <Form.Control.Feedback type="invalid">{contactError}</Form.Control.Feedback>
                 </Form.Group>
             </div>

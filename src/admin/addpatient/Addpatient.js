@@ -260,7 +260,7 @@ const Addpatient = () => {
     
         return true;
     };
-    const isValidPhoneNumber = (phone) => /^09\d{9}$/.test(phone);
+    const isValidPhoneNumber = (phone) => /^9\d{9}$/.test(phone);
 
 const validateStep2 = (data) => {
     if (!isValidName(data.patient_fname) || !isValidName(data.patient_mname) || !isValidName(data.patient_lname)) {
@@ -270,7 +270,7 @@ const validateStep2 = (data) => {
         return "Address cannot be empty.";
     }
     if (!isValidPhoneNumber(data.patient_contact)) {
-        return "Phone number should start with '09' followed by 9 digits.";
+        return "Phone number should start with '9' followed by 9 digits.";
     }
     return null;
 };
