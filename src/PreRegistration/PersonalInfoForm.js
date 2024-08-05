@@ -32,6 +32,18 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
 
     const [showGuardianForm, setShowGuardianForm] = useState(false);
 
+    const [guardianInfo, setGuardianInfo] = useState({
+        guardian_name: '',
+        guardian_relationship: '',
+        guardian_email: '',
+        guardian_contact: ''
+    });
+
+    const [guardianNameError, setGuardianNameError] = useState('');
+    const [guardianRelationshipError, setGuardianRelationshipError] = useState('');
+    const [guardianEmailError, setGuardianEmailError] = useState('');
+    const [guardianContactError, setGuardianContactError] = useState('');
+
     const [showModal, setShowModal] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
 
@@ -181,6 +193,67 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
     }));
 
     setShowGuardianForm(age < 18);
+};
+
+const handleGuardianChange = (e) => {
+    const { name, value } = e.target;
+
+    const nameRegex = /^[A-Za-zÀ-ÿ\s'-]*$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let updatedValue = value;
+    let errorMessage = '';
+
+    switch (name) {
+        case 'guardian_name':
+        case 'guardian_relationship':
+            if (!nameRegex.test(value)) {
+                errorMessage = 'Only letters, spaces, hyphens, and apostrophes are allowed.';
+                return; // Prevent invalid characters from being typed
+            }
+            if (value.length === 200) {
+                errorMessage = 'Maximum character limit reached (200).';
+            }
+            break;
+        case 'guardian_email':
+            if (value.length === 30) {
+                errorMessage = 'Maximum character limit reached (30).';
+            } else if (value && !isValidEmail(value)) {
+                errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
+            }
+            break;
+        case 'guardian_contact':
+            updatedValue = value.replace(/\D/g, '').slice(0, 10);
+            if (updatedValue.length !== 10) {
+                errorMessage = 'Please enter a valid 10-digit phone number.';
+            }
+            break;
+        default:
+            break;
+    }
+
+    setGuardianInfo(prevInfo => ({
+        ...prevInfo,
+        [name]: updatedValue
+    }));
+
+    // Set error messages
+    switch (name) {
+        case 'guardian_name':
+            setGuardianNameError(errorMessage);
+            break;
+        case 'guardian_relationship':
+            setGuardianRelationshipError(errorMessage);
+            break;
+        case 'guardian_email':
+            setGuardianEmailError(errorMessage);
+            break;
+        case 'guardian_contact':
+            setGuardianContactError(errorMessage);
+            break;
+        default:
+            break;
+    }
 };
 
     return (
@@ -334,22 +407,65 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         {/* Render additional form fields for guardian information */}
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                             <Form.Label className="form-label-custom">Parent/Guardian Name<span className="required">*</span></Form.Label>
-                            <Form.Control type="text" name="guardian_name" placeholder="Enter guardian's name" value={patientInfo.guardian_name} onChange={handleChange} required />
+                            <Form.Control 
+                        type="text" 
+                        name="guardian_name"
+                        placeholder="Enter guardian's name" 
+                        value={guardianInfo.guardian_name}
+                        onChange={handleGuardianChange}
+                        isInvalid={!!guardianNameError}
+                        required 
+                        maxLength={200}
+                    />
+                    <Form.Control.Feedback type="invalid">{guardianNameError}</Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicEmail">
                             <Form.Label className="form-label-custom">Relationship with the patient<span className="required">*</span></Form.Label>
-                            <Form.Control type="text" name="guardian_relationship" placeholder="Enter relationship" value={patientInfo.guardian_relationship} onChange={handleChange} required />
+                            <Form.Control 
+                        type="text" 
+                        name="guardian_relationship"
+                        placeholder="Enter relationship" 
+                        value={guardianInfo.guardian_relationship}
+                        onChange={handleGuardianChange}
+                        isInvalid={!!guardianRelationshipError}
+                        required 
+                        maxLength={30}
+                    />
+                    <Form.Control.Feedback type="invalid">{guardianRelationshipError}</Form.Control.Feedback>
                         </Form.Group>
                     </div>
 
                     <div className='guardianContact row mb-4'>
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                             <Form.Label className="form-label-custom">Parent/Guardian Email</Form.Label>
-                            <Form.Control type="email" name="guardian_email" placeholder="Enter guardian's email" value={patientInfo.guardian_email} onChange={handleChange} required />
+                            <Form.Control 
+                        type="email" 
+                        name="guardian_email"
+                        placeholder="Enter guardian's email" 
+                        value={guardianInfo.guardian_email}
+                        onChange={handleGuardianChange}
+                        isInvalid={!!guardianEmailError}
+                        maxLength={30}
+                    />
+                    <Form.Control.Feedback type="invalid">{guardianEmailError}</Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicEmail">
                             <Form.Label className="form-label-custom">Parent/Guardian Contact Number<span className="required">*</span></Form.Label>
-                            <Form.Control type="text" name="guardian_number" placeholder="Enter guardian's contact number" value={patientInfo.guardian_number} onChange={handleChange} required />
+                            <div className="input-group">
+                        <div className="input-group-prepend">
+                            <span className="input-group-text">+63</span>
+                        </div>
+                        <Form.Control 
+                            type="text" 
+                            name="guardian_contact"
+                            placeholder="9xxxxxxxxx" 
+                            value={guardianInfo.guardian_contact}
+                            onChange={handleGuardianChange}
+                            isInvalid={!!guardianContactError}
+                            required 
+                        />
+                    </div>
+                    <Form.Control.Feedback type="invalid">{guardianContactError}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
