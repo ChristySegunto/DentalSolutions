@@ -486,7 +486,7 @@ useEffect(() => {
             <Modal.Body className="dmodal-body">
             {Object.entries(patientsByTreatment).map(([treatment, patients]) => (
                 <div key={treatment}>
-                    <h4>{treatment}</h4>
+                    <h5>{treatment}</h5>
                     <Table bordered className='dailyreport-table'>
                         <thead>
                             <tr>
