@@ -32,6 +32,8 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
 
     const [showGuardianForm, setShowGuardianForm] = useState(false);
 
+    const [dateInputValue, setDateInputValue] = useState('');
+    
     const [guardianInfo, setGuardianInfo] = useState({
         guardian_name: '',
         guardian_relationship: '',
@@ -165,35 +167,71 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         return emailRegex.test(email);
     };
 
-  const handleDateChange = (date) => {
-    if (!date) {
-        // If the date is cleared, reset the birthdate and age fields, and hide the guardian form
+    const handleDateChange = (date) => {
+        if (!date) {
+            setPatientInfo(prevInfo => ({
+                ...prevInfo,
+                patient_birthdate: null,
+                patient_age: ''
+            }));
+            setShowGuardianForm(false);
+            setDateInputValue('');
+            return;
+        }
+    
+        const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const age = calculateAge(utcDate);
+        
         setPatientInfo(prevInfo => ({
             ...prevInfo,
-            patient_birthdate: null,
-            patient_age: ''
+            patient_birthdate: utcDate,
+            patient_age: age
         }));
-        setShowGuardianForm(false);
-        return;
-    }
-
-    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const age = calculateAge(utcDate);
     
-    if (age < 1) {
-        setModalMessage("Patient must be at least 1 year old.");
-        setShowModal(true);
-        return;
-    }
+        setShowGuardianForm(age < 18);
+        setDateInputValue(date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric'
+        }));
+    };
 
-    setPatientInfo(prevInfo => ({
-        ...prevInfo,
-        patient_birthdate: utcDate,
-        patient_age: age
-    }));
-
-    setShowGuardianForm(age < 18);
-};
+    const handleDateInputChange = (e) => {
+        const inputValue = e.target.value.replace(/[^\d/]/g, '');
+        
+        if (inputValue.length <= 10) {
+            setDateInputValue(inputValue);
+    
+            // Only validate when the input is complete (10 characters including slashes)
+            if (inputValue.length === 10) {
+                const [month, day, year] = inputValue.split('/');
+                const date = new Date(year, month - 1, day);
+    
+                if (!isNaN(date.getTime())) {
+                    const age = calculateAge(date);
+                    if (age < 1) {
+                        setModalMessage("Patient must be at least 1 year old.");
+                        setShowModal(true);
+                        setDateInputValue('');
+                        setPatientInfo(prevInfo => ({
+                            ...prevInfo,
+                            patient_birthdate: null,
+                            patient_age: ''
+                        }));
+                    } else {
+                        handleDateChange(date);
+                    }
+                }
+            } else {
+                // Clear the birthdate and age if the input is not complete
+                setPatientInfo(prevInfo => ({
+                    ...prevInfo,
+                    patient_birthdate: null,
+                    patient_age: ''
+                }));
+            }
+        }
+    };
 
 const handleGuardianChange = (e) => {
     const { name, value } = e.target;
@@ -306,29 +344,43 @@ const handleGuardianChange = (e) => {
                 <Form.Group className="col-lg-5 col-md-4 mb-3" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Birthdate<span className="required">*</span></Form.Label>
                     <DatePicker
-                        selected={patientInfo.patient_birthdate}
-                        onChange={handleDateChange}
-                        peekNextMonth
-                        showMonthDropdown
-                        showYearDropdown
-                        dropdownMode="select"
-                        placeholderText="Select birthdate"
-                        className="form-control"
-                        required
-                    />
+    selected={patientInfo.patient_birthdate}
+    onChange={handleDateChange}
+    peekNextMonth
+    showMonthDropdown
+    showYearDropdown
+    dropdownMode="select"
+    placeholderText="MM/DD/YYYY"
+    className="form-control"
+    required
+    customInput={
+        <Form.Control
+        type="text"
+        value={dateInputValue}
+        onChange={handleDateInputChange}
+        onKeyPress={(e) => {
+            if (!/[\d/]/.test(e.key)) {
+                e.preventDefault();
+            }
+        }}
+        placeholder="MM/DD/YYYY"
+        maxLength={10}
+        />
+    }
+/>
                 </Form.Group>
 
-                <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
-                    <Modal.Header closeButton>
+                <Modal show={showModal} onHide={() => setShowModal(false)} centered className="custom-modal">
+                <Modal.Header closeButton>
                     <Modal.Title>Invalid Age</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>{modalMessage}</Modal.Body>
-                    <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
+                </Modal.Header>
+                <Modal.Body>{modalMessage}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
                         Close
                     </Button>
-                    </Modal.Footer>
-                    </Modal>
+                </Modal.Footer>
+            </Modal>
 
                 <Form.Group className="col-lg-2 col-md-6 mb-3" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Age<span className="required">*</span></Form.Label>
