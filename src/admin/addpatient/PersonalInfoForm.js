@@ -114,7 +114,6 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
             break;
         // ... handle other fields
         default:
-            break;
                 break;
         }
 
