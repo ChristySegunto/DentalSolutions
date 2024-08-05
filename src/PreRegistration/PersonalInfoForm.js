@@ -67,76 +67,61 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
         onUpdatePatientData(patientInfo);
     }, [patientInfo, onUpdatePatientData]);
 
-    const [errors, setErrors] = useState({
-        patient_fname: '',
-        patient_mname: '',
-        patient_lname: '',
-        patient_address: '',
-        patient_email: '',
-        patient_contact: ''
-    });
-
-    const maxLengths = {
-        patient_fname: 100,
-        patient_mname: 30,
-        patient_lname: 30,
-        patient_address: 50,
-        patient_email: 30,
-        patient_contact: 11
-    };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
 
         const nameRegex = /^[A-Za-zÀ-ÿ\s'-]*$/;
         const addressRegex = /^[A-Za-z0-9À-ÿ\s.,#'-]*$/;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^09\d{9}$/;
+        const phoneRegex = /^\+63[0-9]*$/;
 
         let updatedValue = value;
         let errorMessage = '';
 
         // Check max length
-        if (value.length > maxLengths[name]) {
-            updatedValue = value.slice(0, maxLengths[name]);
-            errorMessage = `Maximum ${maxLengths[name]} characters allowed.`;
-        } else {
-            switch (name) {
-                case 'patient_fname':
-                case 'patient_mname':
-                case 'patient_lname':
-                    if (!nameRegex.test(value)) {
-                        errorMessage = 'Please enter a valid name.';
-                    }
-                    break;
-                case 'patient_address':
-                    if (!addressRegex.test(value)) {
-                        errorMessage = 'Please enter a valid address.';
-                    }
-                    break;
-                    case 'patient_email':
-                        if (value.length === 30) {
-                            errorMessage = 'Maximum character limit reached (30).';
-                        } else if (value && !isValidEmail(value)) {
-                            errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
-                        }
-                        break;
-                case 'patient_contact':
-                    if (!phoneRegex.test(value)) {
-                        errorMessage = 'Please enter a valid phone number (e.g., 09123456789).';
-                    }
-                    break;
-                default:
-                    break;
-            }
+       
+        switch (name) {
+            case 'patient_fname':
+            case 'patient_mname':
+            case 'patient_lname':
+                if (!nameRegex.test(value)) {
+                    errorMessage = 'Only letters, spaces, hyphens, and apostrophes are allowed.';
+                    return; // Prevent invalid characters from being typed
+                }
+                if (value.length === 100) {
+                    errorMessage = 'Maximum character limit reached (100).';
+                }
+                break;
+            case 'patient_address':
+                if (!addressRegex.test(value)) {
+                    errorMessage = 'Invalid character entered.';
+                    return; // Prevent invalid characters from being typed
+                }
+                if (value.length === 50) {
+                    errorMessage = 'Maximum character limit reached (50).';
+                }
+                break;
+                case 'patient_email':
+        if (value.length === 30) {
+            errorMessage = 'Maximum character limit reached (30).';
+        } else if (value && !isValidEmail(value)) {
+            errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
         }
-
+        break;
+            case 'patient_contact':
+                updatedValue = value.replace(/\D/g, '').slice(0, 10);
+                break;
+            // ... handle other fields
+            default:
+                break;
+        }
 
         setPatientInfo(prevInfo => ({
             ...prevInfo,
             [name]: updatedValue
         }));
 
+        // Error handling logic
         switch (name) {
             case 'patient_fname':
                 setFNameError(errorMessage);
@@ -153,10 +138,14 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
             case 'patient_email':
                 setEmailError(errorMessage);
                 break;
+            case 'patient_contact':
+                setContactError(errorMessage);
+                break;
             default:
                 break;
         }
     };
+    
     const isValidEmail = (email) => {
         // This regex ensures the email follows the standard format
         // and ends with a common domain (.com, .org, .net, etc.)
@@ -206,6 +195,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         isInvalid={!!fnameError} 
                         value={patientInfo.patient_fname} 
                         onChange={handleChange} 
+                        maxLength={100}
                         required 
                     />
                     <Form.Control.Feedback type="invalid">{fnameError}</Form.Control.Feedback>
@@ -218,6 +208,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         placeholder="Enter middle name" 
                         isInvalid={!!mnameError} 
                         value={patientInfo.patient_mname} 
+                        maxLength={30}
                         onChange={handleChange} 
                     />
                     <Form.Control.Feedback type="invalid">{mnameError}</Form.Control.Feedback>
@@ -231,6 +222,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         isInvalid={!!lnameError} 
                         value={patientInfo.patient_lname} 
                         onChange={handleChange} 
+                        maxLength={30}
                         required 
                     />
                     <Form.Control.Feedback type="invalid">{lnameError}</Form.Control.Feedback>
@@ -290,6 +282,7 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                         isInvalid={!!addressError}
                         value={patientInfo.patient_address} 
                         onChange={handleChange} 
+                        maxLength={50}
                         required 
                     />
                     <Form.Control.Feedback type="invalid">{addressError}</Form.Control.Feedback>
@@ -300,21 +293,35 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge }) =>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Email Address</Form.Label>
                     <Form.Control 
-        type="email" 
-        name="patient_email" 
-        placeholder="Enter email" 
-        value={patientInfo.patient_email} 
-        onChange={handleChange} 
-        isInvalid={!!emailError}  
-        required 
-    />
-    <Form.Control.Feedback type="invalid">
-        {emailError}
-    </Form.Control.Feedback>
+                        type="email" 
+                        name="patient_email" 
+                        placeholder="Enter email" 
+                        value={patientInfo.patient_email} 
+                        onChange={handleChange} 
+                        isInvalid={!!emailError}  
+                        maxLength={30}
+                        required 
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        {emailError}
+                    </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group className="col-lg-6 col-md-6 mb-5" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Contact Number<span className="required">*</span></Form.Label>
-                    <Form.Control type="text" name="patient_contact" placeholder="09xxxxxxxxx" value={patientInfo.patient_contact} onChange={handleChange} isInvalid={!!contactError} required />
+                    <div className="input-group">
+                        <div className="input-group-prepend">
+                            <span className="input-group-text">+63</span>
+                        </div>
+                        <Form.Control 
+                            type="text" 
+                            name="patient_contact" 
+                            placeholder="9xxxxxxxxx" 
+                            value={patientInfo.patient_contact} 
+                            onChange={handleChange} 
+                            isInvalid={!!contactError} 
+                            required 
+                        />
+                    </div>
                     <Form.Control.Feedback type="invalid">{contactError}</Form.Control.Feedback>
                 </Form.Group>
             </div>
