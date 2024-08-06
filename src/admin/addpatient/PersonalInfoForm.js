@@ -32,6 +32,20 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
     const [showModal, setShowModal] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
 
+    const [dateInputValue, setDateInputValue] = useState('');
+
+    const [guardianInfo, setGuardianInfo] = useState({
+        guardian_name: '',
+        guardian_relationship: '',
+        guardian_email: '',
+        guardian_contact: ''
+    });
+
+    const [guardianNameError, setGuardianNameError] = useState('');
+    const [guardianRelationshipError, setGuardianRelationshipError] = useState('');
+    const [guardianEmailError, setGuardianEmailError] = useState('');
+    const [guardianContactError, setGuardianContactError] = useState('');
+
     const handleCloseModal = () => setShowModal(false);
 
     useEffect(() => {
@@ -149,25 +163,19 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
 
     const handleDateChange = (date) => {
         if (!date) {
-            // If the date is cleared, reset the birthdate and age fields, and hide the guardian form
             setPatientInfo(prevInfo => ({
                 ...prevInfo,
                 patient_birthdate: null,
                 patient_age: ''
             }));
             setShowGuardianForm(false);
+            setDateInputValue('');
             return;
         }
     
         const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
         const age = calculateAge(utcDate);
         
-        if (age < 1) {
-            setModalMessage("Patient must be at least 1 year old.");
-            setShowModal(true);
-            return;
-        }
-    
         setPatientInfo(prevInfo => ({
             ...prevInfo,
             patient_birthdate: utcDate,
@@ -175,44 +183,109 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
         }));
     
         setShowGuardianForm(age < 18);
+        setDateInputValue(date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric'
+        }));
     };
 
-    const validateForm = () => {
-        let isValid = true;
-        let errorMessages = [];
+    const handleDateInputChange = (e) => {
+        const inputValue = e.target.value.replace(/[^\d/]/g, '');
+        
+        if (inputValue.length <= 10) {
+            setDateInputValue(inputValue);
+    
+            // Only validate when the input is complete (10 characters including slashes)
+            if (inputValue.length === 10) {
+                const [month, day, year] = inputValue.split('/');
+                const date = new Date(year, month - 1, day);
+    
+                if (!isNaN(date.getTime())) {
+                    const age = calculateAge(date);
+                    if (age < 1) {
+                        setModalMessage("Patient must be at least 1 year old.");
+                        setShowModal(true);
+                        setDateInputValue('');
+                        setPatientInfo(prevInfo => ({
+                            ...prevInfo,
+                            patient_birthdate: null,
+                            patient_age: ''
+                        }));
+                    } else {
+                        handleDateChange(date);
+                    }
+                }
+            } else {
+                // Clear the birthdate and age if the input is not complete
+                setPatientInfo(prevInfo => ({
+                    ...prevInfo,
+                    patient_birthdate: null,
+                    patient_age: ''
+                }));
+            }
+        }
+    };
 
-        if (patientInfo.patient_fname.length > 100) {
-            errorMessages.push("First name exceeds 100 characters");
-            isValid = false;
-        }
-        if (patientInfo.patient_mname.length > 30) {
-            errorMessages.push("Middle name exceeds 30 characters");
-            isValid = false;
-        }
-        if (patientInfo.patient_lname.length > 30) {
-            errorMessages.push("Last name exceeds 30 characters");
-            isValid = false;
-        }
-        if (patientInfo.patient_address.length > 50) {
-            errorMessages.push("Address exceeds 50 characters");
-            isValid = false;
-        }
-        if (patientInfo.patient_email.length > 30) {
-            errorMessages.push("Email exceeds 30 characters");
-            isValid = false;
-        }
-        if (patientInfo.patient_email && !isValidEmail(patientInfo.patient_email)) {
-            errorMessages.push("Please enter a valid email address (e.g., user@example.com)");
-            isValid = false;
+    const handleGuardianChange = (e) => {
+        const { name, value } = e.target;
+
+        const nameRegex = /^[A-Za-zÀ-ÿ\s'-]*$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        let updatedValue = value;
+        let errorMessage = '';
+
+        switch (name) {
+            case 'guardian_name':
+            case 'guardian_relationship':
+                if (!nameRegex.test(value)) {
+                    errorMessage = 'Only letters, spaces, hyphens, and apostrophes are allowed.';
+                    return; // Prevent invalid characters from being typed
+                }
+                if (value.length === 200) {
+                    errorMessage = 'Maximum character limit reached (200).';
+                }
+                break;
+            case 'guardian_email':
+                if (value.length === 30) {
+                    errorMessage = 'Maximum character limit reached (30).';
+                } else if (value && !isValidEmail(value)) {
+                    errorMessage = 'Please enter a valid email address (e.g., user@example.com).';
+                }
+                break;
+            case 'guardian_contact':
+                updatedValue = value.replace(/\D/g, '').slice(0, 10);
+                if (updatedValue.length !== 10) {
+                    errorMessage = 'Please enter a valid 10-digit phone number.';
+                }
+                break;
+            default:
+                break;
         }
 
-        if (!isValid) {
-            setModalMessage(errorMessages.join("\n"));
-            setShowModal(true);
-        }
+        setGuardianInfo(prevInfo => ({
+            ...prevInfo,
+            [name]: updatedValue
+        }));
 
-        onValidationResult(isValid, errorMessages.join("\n"));
-        return isValid;
+        // Set error messages
+        switch (name) {
+            case 'guardian_name':
+                setGuardianNameError(errorMessage);
+                break;
+            case 'guardian_relationship':
+                setGuardianRelationshipError(errorMessage);
+                break;
+            case 'guardian_email':
+                setGuardianEmailError(errorMessage);
+                break;
+            case 'guardian_contact':
+                setGuardianContactError(errorMessage);
+                break;
+            default:
+                break;
+        }
     };
 
     return (
@@ -264,29 +337,43 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
                 <Form.Group className="col-lg-5 col-md-4 mb-3" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Birthdate<span className="required">*</span></Form.Label>
                     <DatePicker
-                        selected={patientInfo.patient_birthdate}
-                        onChange={handleDateChange}
-                        peekNextMonth
-                        showMonthDropdown
-                        showYearDropdown
-                        dropdownMode="select"
-                        placeholderText="Select birthdate"
-                        className="form-control"
-                        required
-                    />
+    selected={patientInfo.patient_birthdate}
+    onChange={handleDateChange}
+    peekNextMonth
+    showMonthDropdown
+    showYearDropdown
+    dropdownMode="select"
+    placeholderText="MM/DD/YYYY"
+    className="form-control"
+    required
+    customInput={
+        <Form.Control
+        type="text"
+        value={dateInputValue}
+        onChange={handleDateInputChange}
+        onKeyPress={(e) => {
+            if (!/[\d/]/.test(e.key)) {
+                e.preventDefault();
+            }
+        }}
+        placeholder="MM/DD/YYYY"
+        maxLength={10}
+        />
+    }
+/>
                 </Form.Group>
 
-                <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
-                    <Modal.Header closeButton>
+                <Modal show={showModal} onHide={() => setShowModal(false)} centered className="custom-modal">
+                <Modal.Header closeButton>
                     <Modal.Title>Invalid Age</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>{modalMessage}</Modal.Body>
-                    <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
+                </Modal.Header>
+                <Modal.Body>{modalMessage}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
                         Close
                     </Button>
-                    </Modal.Footer>
-                    </Modal>
+                </Modal.Footer>
+            </Modal>
 
                 <Form.Group className="col-lg-2 col-md-6 mb-3" controlId="formBasicEmail">
                     <Form.Label className="form-label-custom">Age<span className="required">*</span></Form.Label>
@@ -364,22 +451,65 @@ const PersonalInfoForm = ({ patientData, onUpdatePatientData, calculateAge, onVa
                         {/* Render additional form fields for guardian information */}
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                             <Form.Label className="form-label-custom">Parent/Guardian Name<span className="required">*</span></Form.Label>
-                            <Form.Control type="text" placeholder="Enter guardian's name" required />
+                            <Form.Control 
+                        type="text" 
+                        name="guardian_name"
+                        placeholder="Enter guardian's name" 
+                        value={guardianInfo.guardian_name}
+                        onChange={handleGuardianChange}
+                        isInvalid={!!guardianNameError}
+                        required 
+                        maxLength={200}
+                    />
+                    <Form.Control.Feedback type="invalid">{guardianNameError}</Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicEmail">
                             <Form.Label className="form-label-custom">Relationship with the patient<span className="required">*</span></Form.Label>
-                            <Form.Control type="text" placeholder="Enter relationship" required />
+                            <Form.Control 
+                        type="text" 
+                        name="guardian_relationship"
+                        placeholder="Enter relationship" 
+                        value={guardianInfo.guardian_relationship}
+                        onChange={handleGuardianChange}
+                        isInvalid={!!guardianRelationshipError}
+                        required 
+                        maxLength={30}
+                    />
+                    <Form.Control.Feedback type="invalid">{guardianRelationshipError}</Form.Control.Feedback>
                         </Form.Group>
                     </div>
 
                     <div className='guardianContact row mb-4'>
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicName">
                             <Form.Label className="form-label-custom">Parent/Guardian Email</Form.Label>
-                            <Form.Control type="email" placeholder="Enter guardian's email" required />
+                            <Form.Control 
+                        type="email" 
+                        name="guardian_email"
+                        placeholder="Enter guardian's email" 
+                        value={guardianInfo.guardian_email}
+                        onChange={handleGuardianChange}
+                        isInvalid={!!guardianEmailError}
+                        maxLength={30}
+                    />
+                    <Form.Control.Feedback type="invalid">{guardianEmailError}</Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="col-lg-6 col-md-6 mb-3" controlId="formBasicEmail">
                             <Form.Label className="form-label-custom">Parent/Guardian Contact Number<span className="required">*</span></Form.Label>
-                            <Form.Control type="text" placeholder="Enter guardian's contact number" required />
+                            <div className="input-group">
+                        <div className="input-group-prepend">
+                            <span className="input-group-text">+63</span>
+                        </div>
+                        <Form.Control 
+                            type="text" 
+                            name="guardian_contact"
+                            placeholder="9xxxxxxxxx" 
+                            value={guardianInfo.guardian_contact}
+                            onChange={handleGuardianChange}
+                            isInvalid={!!guardianContactError}
+                            required 
+                        />
+                    </div>
+                    <Form.Control.Feedback type="invalid">{guardianContactError}</Form.Control.Feedback>
                         </Form.Group>
                     </div>
                 </>
