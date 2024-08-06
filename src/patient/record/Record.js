@@ -357,7 +357,7 @@ const Record = () => {
                             <p><span className="bold">Birthdate:</span> {patient.patient_birthdate}</p>
                         </div>
                         <div className="numemailadd col-lg-6">
-                            <p><span className="bold">Contact Number:</span> {patient.patient_contact}</p>
+                            <p><span className="bold">Contact Number:</span> +63{patient.patient_contact}</p>
                             <p><span className="bold">Email:</span> {patient.patient_email}</p>
                             <p><span className="bold">Address:</span> {patient.patient_address}</p>
                         </div>

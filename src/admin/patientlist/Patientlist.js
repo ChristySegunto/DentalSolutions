@@ -1064,7 +1064,7 @@ const handleDeclineSuccessShow = async () => {
                                     <td>{patient.patient_fname} {patient.patient_lname}</td>
                                     <td className="text-center">{patient.patient_age}</td>
                                     <td>{patient.patient_gender}</td>
-                                    <td>{patient.patient_contact}</td>
+                                    <td>+63{patient.patient_contact}</td>
                                     <td>{patient.patient_email}</td>
                                     <td className="action-buttons">
                                         <Button onClick={() => handleView(patient.patient_id)} className="allpatients-actionbuttons">
@@ -1180,7 +1180,7 @@ const handleDeclineSuccessShow = async () => {
                             {paginatedTransferees.map(patient => (
                                 <tr key={patient.patient_id}>
                                     <td>{patient.patient_fname} {patient.patient_lname}</td>
-                                    <td>{patient.patient_contact}</td>
+                                    <td>+63{patient.patient_contact}</td>
                                     <td>{patient.patient_email}</td>
                                     <td>{patient.patient_branch}</td>
                                     <td>
@@ -1331,7 +1331,7 @@ const handleDeclineSuccessShow = async () => {
                                 {paginatedPendingPatients.map(patient => (
                                     <tr key={patient.patient_id}>
                                         <td>{patient.patient_fname} {patient.patient_lname}</td>
-                                        <td>{patient.patient_contact}</td>
+                                        <td>+63{patient.patient_contact}</td>
                                         <td>{patient.patient_email}</td>
                                         <td>{patient.patient_branch}</td>
                                         <td>
