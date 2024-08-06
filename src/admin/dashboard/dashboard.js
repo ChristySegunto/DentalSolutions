@@ -1169,14 +1169,14 @@ async function fetchPatientBranch(patientId) {
         navigate(eventKey);
     };
 
-    const branchName = profileDetails.branch; 
+    // const branchName = profileDetails.branch; 
 
      //HANDLE EXPORT
      const handleExportPDF = () => {
         const doc = new jsPDF();
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20); 
-        doc.text(`Dental Solutions - ${branchName}` , 65, 15);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
 
         doc.setFontSize(14);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
@@ -1212,7 +1212,7 @@ async function fetchPatientBranch(patientId) {
         // New page for the monthly report
         doc.addPage();
         doc.setFontSize(20);
-        doc.text(`Dental Solutions - ${branchName}` , 65, 15);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
 
         doc.setFontSize(14);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
@@ -1248,7 +1248,7 @@ async function fetchPatientBranch(patientId) {
         // New page for orthodontic cases
         doc.addPage();
         doc.setFontSize(20);
-        doc.text(`Dental Solutions - ${branchName}` , 65, 15);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
 
         doc.setFontSize(14);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
@@ -1297,7 +1297,7 @@ async function fetchPatientBranch(patientId) {
         // Add a new page for patient status
         doc.addPage();
         doc.setFontSize(20);
-        doc.text(`Dental Solutions - ${branchName}` , 65, 15);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
 
         doc.setFontSize(14);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
@@ -1341,7 +1341,7 @@ async function fetchPatientBranch(patientId) {
         });
 
       
-        doc.save(`Dashboard-${branchName}-Branch.pdf`);
+        doc.save(`Dashboard-${profileDetails.branch}-Branch.pdf`);
      };
     
     return (
