@@ -46,6 +46,30 @@
     
 }
 
+.exportdata {
+    border-radius: 8px;
+    background-color: #D0E8F9 !important;
+    min-width: 150px;
+    max-width: 300px;
+    height: 45px; 
+    color: #025590 !important;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    padding-top: 8px;
+    margin-left: 10px;
+    border: none;
+    position: relative;
+}
+
+
+.exportdata:hover {
+    background-color: #85c5f3 !important;
+    color: #025590 !important;
+}
 
 .currentdate {
     width: 70px;
