@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import './Patientlist.css'
-import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaSort, FaCalendarAlt, FaSortAlphaDown, FaSortAlphaUp } from 'react-icons/fa';
 import { useAuth } from './../../settings/AuthContext';
 import supabase from "../../settings/supabase";
 import { useNavigate } from "react-router-dom";
@@ -79,7 +79,13 @@ const Patientlist = () => {
 
     const [transfereePatients, setTransfereePatients] = useState([]);
 
-    
+    const [sortOption, setSortOption] = useState('');
+    const [originalPatients, setOriginalPatients] = useState([]);
+    const [sortOptionAllPatients, setSortOptionAllPatients] = useState('default');
+const [sortOptionTransferees, setSortOptionTransferees] = useState('default');
+const [sortOptionPending, setSortOptionPending] = useState('default');
+
+
     const handleTabClick = (tab) => {
         setActiveTab(tab);
       };
@@ -330,6 +336,7 @@ useEffect(() => {
 
                 setTransfereePatients(transfereePatientsWithDetails);
                 setFilteredTransfereePatients(transfereePatientsWithDetails);
+                setOriginalPatients(filteredAllPatients);
             }
         }
     }
@@ -964,6 +971,71 @@ const handleDeclineSuccessShow = async () => {
 
               console.log('paginatedTransferees:', paginatedTransferees);
 
+              const handleSort = (eventKey) => {
+                setSortOption(eventKey);
+                let patientsToSort = [];
+                let setFunction;
+            
+                switch (activeTab) {
+                    case 'allPatients':
+                        patientsToSort = [...filteredPatients];
+                        setFunction = setFilteredPatients;
+                        break;
+                    case 'transferees':
+                        patientsToSort = [...filteredTransfereePatients];
+                        setFunction = setFilteredTransfereePatients;
+                        break;
+                    case 'pending':
+                        patientsToSort = [...filteredPendingPatients];
+                        setFunction = setFilteredPendingPatients;
+                        break;
+                    default:
+                        return;
+                }
+            
+                const sortPatients = (patients, criteria) => {
+                    return patients.sort((a, b) => {
+                        switch (criteria) {
+                            case 'a-z':
+                                return `${a.patient_fname} ${a.patient_lname}`.localeCompare(`${b.patient_fname} ${b.patient_lname}`);
+                            case 'z-a':
+                                return `${b.patient_fname} ${b.patient_lname}`.localeCompare(`${a.patient_fname} ${a.patient_lname}`);
+                            case 'latest-oldest':
+                                return new Date(b.created_at) - new Date(a.created_at);
+                            case 'oldest-latest':
+                                return new Date(a.created_at) - new Date(b.created_at);
+                            default:
+                                return 0;
+                        }
+                    });
+                };
+            
+                switch (eventKey) {
+                    case 'default':
+                        // Reset to original order for the current tab
+                        switch (activeTab) {
+                            case 'allPatients':
+                                setFunction(patients);
+                                break;
+                            case 'transferees':
+                                setFunction(transfereePatients);
+                                break;
+                            case 'pending':
+                                setFunction(patientsByVerification);
+                                break;
+                        }
+                        break;
+                    case 'a-z':
+                    case 'z-a':
+                    case 'latest-oldest':
+                    case 'oldest-latest':
+                        const sortedPatients = sortPatients(patientsToSort, eventKey);
+                        setFunction(sortedPatients);
+                        break;
+                    default:
+                        break;
+                }
+            };
 
     return (
     
@@ -1041,6 +1113,28 @@ const handleDeclineSuccessShow = async () => {
                     onChange={handleInputChange} 
                 />
                 <Button type="submit" className="searchbutton">Search</Button>
+
+                <Dropdown onSelect={handleSort}>
+    <Dropdown.Toggle variant="success" id="dropdown-alpha-sort" className="sortbutton">
+        <FaSort />
+    </Dropdown.Toggle>
+    <Dropdown.Menu>
+        <Dropdown.Item eventKey="default">Default</Dropdown.Item>
+        <Dropdown.Item eventKey="a-z"><FaSortAlphaDown /> A - Z</Dropdown.Item>
+        <Dropdown.Item eventKey="z-a"><FaSortAlphaUp /> Z - A</Dropdown.Item>
+    </Dropdown.Menu>
+</Dropdown>
+
+<Dropdown onSelect={handleSort}>
+    <Dropdown.Toggle variant="success" id="dropdown-date-sort" className="sortbutton">
+        <FaCalendarAlt />
+    </Dropdown.Toggle>
+    <Dropdown.Menu>
+        <Dropdown.Item eventKey="default">Default</Dropdown.Item>
+        <Dropdown.Item eventKey="latest-oldest">Latest - Oldest</Dropdown.Item>
+        <Dropdown.Item eventKey="oldest-latest">Oldest - Latest</Dropdown.Item>
+    </Dropdown.Menu>
+</Dropdown>
             </Form>
 
 

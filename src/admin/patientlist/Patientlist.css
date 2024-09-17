@@ -501,3 +501,11 @@
    }
 }
 
+.sortbutton {
+    margin-left: 5px;
+    padding: 6px 10px;
+}
+
+.sortbutton svg {
+    font-size: 1.2em;
+}
