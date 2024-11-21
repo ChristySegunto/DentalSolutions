@@ -236,7 +236,7 @@ def predict_treatment_trends(request):
                     model = ARIMA(df['count'], order=(5, 1, 0))
                     model_fit = model.fit()
                     forecast = model_fit.forecast(steps=1)
-                    forecast_value = round(forecast[0], 1)
+                    forecast_value = round(forecast[0], 0)
                     # Replace negative forecast values with 0
                     forecasts[branch][category] = max(forecast_value, 0)
                 except Exception as e:

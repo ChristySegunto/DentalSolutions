@@ -20,6 +20,9 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import Modal from 'react-bootstrap/Modal';
 
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 
 // Icons
 import { FaBars } from "react-icons/fa";
@@ -1166,6 +1169,181 @@ async function fetchPatientBranch(patientId) {
         navigate(eventKey);
     };
 
+    // const branchName = profileDetails.branch; 
+
+     //HANDLE EXPORT
+     const handleExportPDF = () => {
+        const doc = new jsPDF();
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20); 
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
+
+        doc.setFontSize(14);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
+        doc.setFontSize(16);
+        doc.text('Daily Treatment Report', 105, 30, { align: 'center' });
+
+        let currentY = 40;
+
+        Object.entries(dailyPatientsByTreatment).forEach(([treatment, patients], index) => {
+            if (index > 0) {
+                currentY += 10;
+            }
+
+            doc.setFontSize(14);
+            doc.text(treatment, 15, currentY);
+            currentY += 5;
+
+            doc.autoTable({
+                startY: currentY,
+                head: [['Patient ID', 'First Name', 'Last Name', 'Contact Number']],
+                body: patients.map((patient) => [
+                    patient.patient_id,
+                    patient.patient_fname,
+                    patient.patient_lname,
+                    `+63${patient.patient_contact}`,
+                ]),
+                margin: { top: 10, left: 15, right: 15 },
+            });
+
+            currentY = doc.lastAutoTable.finalY + 10;
+        });
+
+        // New page for the monthly report
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
+
+        doc.setFontSize(14);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
+        doc.setFontSize(16);
+        doc.text('Monthly Treatment Report', 105, 30, { align: 'center' });
+
+        let monthlyY = 40;
+
+        Object.entries(monthlyPatients).forEach(([treatment, patients], index) => {
+            if (index > 0) {
+                monthlyY += 10;
+            }
+
+            doc.setFontSize(14);
+            doc.text(treatment, 15, monthlyY);
+            monthlyY += 5;
+
+            doc.autoTable({
+                startY: monthlyY,
+                head: [['Patient ID', 'First Name', 'Last Name', 'Contact Number']],
+                body: patients.map((patient) => [
+                    patient.patient_id,
+                    patient.patient_fname,
+                    patient.patient_lname,
+                    `+63${patient.patient_contact}`,
+                ]),
+                margin: { top: 10, left: 15, right: 15 },
+            });
+
+            monthlyY = doc.lastAutoTable.finalY + 10;
+        });
+
+        // New page for orthodontic cases
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
+
+        doc.setFontSize(14);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
+        doc.setFontSize(16);
+        doc.text('Orthodontic Cases', 105, 30, { align: 'center' });
+
+        // Unfinished Cases
+        doc.setFontSize(14);
+        doc.text('Unfinished Cases', 15, 40);
+
+        let caseY = 45;
+
+        doc.autoTable({
+            startY: caseY,
+            head: [['Patient ID', 'First Name', 'Last Name', 'Contact Number', 'Procedure', 'Status']],
+            body: unfinishedCases.map((patient) => [
+                patient.patient_id,
+                patient.patient_fname,
+                patient.patient_lname,
+                `+63${patient.patient_contact}`,
+                patient.ortho_procedure,
+                patient.ortho_status,
+            ]),
+            margin: { top: 10, left: 15, right: 15 },
+        });
+
+        caseY = doc.lastAutoTable.finalY + 15;
+
+        // Finished Cases
+        doc.setFontSize(14);
+        doc.text('Finished Cases', 15, caseY);
+
+        doc.autoTable({
+            startY: caseY + 5,
+            head: [['Patient ID', 'First Name', 'Last Name', 'Contact Number', 'Status']],
+            body: finishedCases.map((patient) => [
+                patient.patient_id,
+                patient.patient_fname,
+                patient.patient_lname,
+                `+63${patient.patient_contact}`,
+                patient.ortho_status,
+            ]),
+            margin: { top: 25, left: 15, right: 15 },
+        });
+
+        // Add a new page for patient status
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.text(`Dental Solutions - ${profileDetails.branch}` , 65, 15);
+
+        doc.setFontSize(14);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 105, 20, { align: 'center' });
+        doc.setFontSize(16);
+        doc.text('Patient Status', 105, 30, { align: 'center' });
+
+        // Active Patients
+        doc.setFontSize(14);
+        doc.text('Active Patients', 15, 40);
+
+        let statusY = 45;
+
+        doc.autoTable({
+            startY: statusY,
+            head: [['Patient ID', 'First Name', 'Last Name', 'Contact No.']],
+            body: activePatientsDetails.length > 0 ? activePatientsDetails.map((patient) => [
+                patient.patient_id,
+                patient.patient_fname,
+                patient.patient_lname,
+                `+63${patient.patient_contact}`,
+            ]) : [['No active patients', '', '', '']],
+            margin: { top: 10, left: 15, right: 15 },
+        });
+
+        statusY = doc.lastAutoTable.finalY + 15;
+
+        // Inactive Patients
+        doc.setFontSize(14);
+        doc.text('Inactive Patients', 15, statusY);
+
+        doc.autoTable({
+            startY: statusY + 5,
+            head: [['Patient ID', 'First Name', 'Last Name', 'Contact No.']],
+            body: inactivePatientsDetails.length > 0 ? inactivePatientsDetails.map((patient) => [
+                patient.patient_id,
+                patient.patient_fname,
+                patient.patient_lname,
+                `+63${patient.patient_contact}`,
+            ]) : [['No inactive patients', '', '', '']],
+            margin: { top: 10, left: 15, right: 15 },
+        });
+
+      
+        doc.save(`Dashboard-${profileDetails.branch}-Branch.pdf`);
+     };
+    
     return (
         <div className="dashboard-container container-fluid">
             <div className="dashboard">
@@ -1179,6 +1357,9 @@ async function fetchPatientBranch(patientId) {
                 <Dropdown.Item eventKey="/DashboardAllBranch" className="dropdownbutton-item">ALL BRANCH</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown>
+        <div>
+        <div className="exportdata btn" type="button" onClick={handleExportPDF}> <center>Export Data</center> </div>
+        </div>
         <div className='currentdate '>
             <h3>{currentDate}</h3>
         </div>

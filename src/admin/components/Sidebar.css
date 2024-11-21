@@ -14,22 +14,22 @@
 	width: 300px;
 }
 
+.header-logo h1{
+    margin-bottom: 0;
+}
+
 .custom-header a{
     padding: 10px;
     display: flex;
-	flex-direction: column;
-    justify-content: center;
-    text-align: center;
+
     margin-right: 10px;
     font-size: 35px;
     line-height: 1;
     color: #fff;
     font-weight: 600;
+    margin: 0;
 }
 
-.iconbar-custom{
-    margin-top: 20px;
-}
 
 .sidebar-content{
     font-size: 20px;
